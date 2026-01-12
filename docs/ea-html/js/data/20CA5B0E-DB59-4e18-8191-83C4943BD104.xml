@@ -1,0 +1,3 @@
+tocTab[tocTab.length] = new Array("0.4.2:1", "", "main-ERS API", "EARoot/EA4/EA2/EA277.htm", "175.png", "88", "0", "", "Logical diagram0","{DD93DC93-703B-469d-8F4B-DF1CDEF1316C}");
+tocTab[tocTab.length] = new Array("0.4.2:2", "", "main-ERS-Request", "EARoot/EA4/EA2/EA282.htm", "5.png", "E1359", "0", "", "Class0","{3004674B-4A16-4855-BF13-C5D50E4C5467}");
+tocTab[tocTab.length] = new Array("0.4.2:3", "", "main-ERS-Response", "EARoot/EA4/EA2/EA283.htm", "5.png", "E1361", "0", "", "Class0","{D93FC781-91FA-46b2-BAEB-6224C0C125FC}");

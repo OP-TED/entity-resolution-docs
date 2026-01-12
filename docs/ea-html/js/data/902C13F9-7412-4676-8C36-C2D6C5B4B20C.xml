@@ -1,0 +1,3 @@
+tocTab[tocTab.length] = new Array("0.2.2.1:1", "", "S1 resolve entity mention", "EARoot/EA2/EA2/EA1/EA164.htm", "185.png", "55", "0", "", "Sequence diagram0","{D29A144B-8574-43fb-B7FA-2D827AB36051}");
+tocTab[tocTab.length] = new Array("0.2.2.1:2", "", "already resolved", "EARoot/EA2/EA2/EA1/EA167.htm", "101.png", "E1071", "0", "", "InteractionFragment0","{CE40E116-1A55-445e-9BF2-92ACE771298F}");
+tocTab[tocTab.length] = new Array("0.2.2.1:3", "", "resolve via ERE", "EARoot/EA2/EA2/EA1/EA168.htm", "101.png", "E1102", "0", "", "InteractionFragment0","{65B78E25-23BC-43a9-8748-07F4CB6FC480}");

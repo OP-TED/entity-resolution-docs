@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>ERE-ERS contarct - 1 resolution request</title>
+<link href="../../../css/ea.css" rel="stylesheet" type="text/css" />
+<script language="JavaScript" src="../../../js/displayToc.js" type="text/javascript"></script>
+<script>
+
+  function switchProjectProperties() {
+			if (document.getElementById("proj00").style.display == "none") {
+				document.getElementById("proj00").style.display = "revert";
+				document.getElementById("proj01").style.display = "revert";
+				document.getElementById("proj02").style.display = "revert";
+				document.getElementById("proj03").style.display = "revert";
+				document.getElementById("proj04").style.display = "revert";
+				document.getElementById("proj05").style.display = "revert";
+			} else {
+				document.getElementById("proj00").style.display = "none";
+				document.getElementById("proj01").style.display = "none";
+				document.getElementById("proj02").style.display = "none";
+				document.getElementById("proj03").style.display = "none";
+				document.getElementById("proj04").style.display = "none";
+				document.getElementById("proj05").style.display = "none";
+			}
+}
+
+		function switchAdvancedProperties(){
+
+			if (document.getElementById("adv00").style.display == "none") {;
+				document.getElementById("adv00").style.display = "revert";
+				document.getElementById("adv01").style.display = "revert";
+			} else {
+				document.getElementById("adv00").style.display = "none";
+				document.getElementById("adv01").style.display = "none";
+			}
+		}
+		function initPage()
+        {			
+			var divs = document.getElementsByClassName("ObjectDetailsNotes");
+			for (var j = 0; j < divs.length; j++) {
+				var tmpStr = divs[j].innerHTML;
+				tmpStr = tmpStr.replace(/#gt;/g, "&gt;");
+				tmpStr = tmpStr.replace(/#lt;/g, "&lt;");
+
+				tmpStr = tmpStr.replace(/&gt;/g, ">");
+				tmpStr = tmpStr.replace(/&lt;/g, "<");
+
+				divs[j].innerHTML = tmpStr;
+			}
+
+            if (document.getElementById('TableGroup') != null)
+            {
+                toggleItem(document.getElementById('TableGroup').getElementsByTagName('li')[0].id.replace("Title", ""));
+            }
+
+        }
+		
+		document.addEventListener('DOMContentLoaded', () => {
+			const img = document.querySelector('.diagram_image img');
+			const mapAreas = document.querySelectorAll('area');
+
+			if (img && mapAreas.length > 0) {
+				//Get original and rendered image dimensions
+				const originalWidth = img.naturalWidth;
+				const originalHeight = img.naturalHeight;
+				const renderedWidth = img.clientWidth || originalWidth; 
+				const renderedHeight = img.clientHeight || originalHeight; 
+				
+				//Calculate scaling factors
+				const scaleX = renderedWidth / originalWidth;
+				const scaleY = renderedHeight / originalHeight;
+
+				//Adjust map area coordinates
+				mapAreas.forEach((area) => {
+				  const originalCoords = area.getAttribute('coords').split(',').map(Number);
+				  const scaledCoords = originalCoords.map((coord, index) =>
+					index % 2 === 0 ? coord * scaleX : coord * scaleY
+				  );
+				  area.setAttribute('coords', scaledCoords.join(','));
+				});
+			}
+		});
+</script>
+<style>
+
+</style>
+</head>
+<body onload="initPage();">
+<div class="section group" >
+
+		<div class="col span_2_of_2 header_frame">
+			<h1> ERE-ERS contarct - 1 resolution request </h1>
+			<!-- <img class="header_image" src="../../../images/ea-banner.png" align="right" alt="Header Image" />-->
+			<img class="header_image" src="../../../images/ea-banner.png" align="right" alt="Header Image" />
+		</div>
+		<div class="col span_2_of_2 breadcrumb_frame">
+			<p><a href="../../../index.htm">System Architecture</a> / <a href="../EA250.htm">Data model (L4)</a> / <a href="EA292.htm">3 ERE-ERS contarct</a> / <a href="EA284.htm">ERE-ERS contarct - 1 resolution request</a></p>
+		</div>
+			
+		<table class="contentmaintable">
+			<!-- <tfoot>
+				<tr>
+					<td>foot1</td>
+					<td>foot2</td>
+				</tr>
+			</tfoot> -->
+			<tbody>
+				<tr>
+					<td class="indexcell">
+						<div class="projectBrowserTitle">Project: </div>
+						<ul>
+<li><img src="../../../images/175.png" alt="Diagram"/> <a href="EA284.htm">ERE-ERS contarct - 1 resolution request</a></li>
+<li><img src="../../../images/175.png" alt="Diagram"/> <a href="EA286.htm">ERE-ERS contarct - 2 feed mention records to ERE (1-way sync)</a></li>
+<li><img src="../../../images/175.png" alt="Diagram"/> <a href="EA288.htm">ERE-ERS contarct - 3 feed decisions to ERE (1-way sync)</a></li>
+<li><img src="../../../images/175.png" alt="Diagram"/> <a href="EA290.htm">ERE-ERS contarct - 4 rebuild request</a></li>
+<li><img src="../../../images/5.png" alt="Class"/> <a href="EA296.htm">CanonicalEntityRebuildResponse</a></li>
+<li><img src="../../../images/5.png" alt="Class"/> <a href="EA300.htm">EntityMentionResolutionRequest</a></li>
+<li><img src="../../../images/5.png" alt="Class"/> <a href="EA301.htm">EntityMentionResolutionResponse</a></li>
+<li><img src="../../../images/5.png" alt="Class"/> <a href="EA319.htm">ERE-ERSCommunicationArtefact</a></li>
+<li><img src="../../../images/5.png" alt="Class"/> <a href="EA302.htm">ERE-ERSRequest</a></li>
+<li><img src="../../../images/5.png" alt="Class"/> <a href="EA303.htm">ERE-ERSResponse</a></li>
+<li><img src="../../../images/5.png" alt="Class"/> <a href="EA304.htm">EREError</a></li>
+<li><img src="../../../images/5.png" alt="Class"/> <a href="EA306.htm">FullRebuildRequest</a></li>
+<li><img src="../../../images/5.png" alt="Class"/> <a href="EA307.htm">GetLatestSeenDecisionTimestamp</a></li>
+<li><img src="../../../images/5.png" alt="Class"/> <a href="EA308.htm">GetLatestSeenRecordTimestamp</a></li>
+<li><img src="../../../images/5.png" alt="Class"/> <a href="EA309.htm">LatestSeenCurationTimestampResponse</a></li>
+<li><img src="../../../images/5.png" alt="Class"/> <a href="EA310.htm">LatestSeenMentionRecordTimestamp</a></li>
+<li><img src="../../../images/5.png" alt="Class"/> <a href="EA311.htm">PostCurationDecisions</a></li>
+<li><img src="../../../images/5.png" alt="Class"/> <a href="EA312.htm">PostEntityMentionRecords</a></li>
+</ul>
+
+					</td>
+					<td class="contentcell"><div class="PageBody">
+	<div class="diagram_image"> 
+<img src="EA285.png" usemap="#EA285" width="1114" height="818" border="0" />
+
+<MAP NAME="EA285">
+<area shape="rect" coords="927,125,1073,257" href="EA304.htm" target="_self">
+<area shape="rect" coords="590,441,840,554" href="../EA1/EA261.htm" target="_self">
+<area shape="rect" coords="350,171,525,222" href="EA302.htm" target="_self">
+<area shape="rect" coords="611,155,837,228" href="EA303.htm" target="_self">
+<area shape="rect" coords="611,263,851,342" href="EA301.htm" target="_self">
+<area shape="rect" coords="590,630,840,743" href="../EA1/EA260.htm" target="_self">
+<area shape="rect" coords="299,630,539,782" href="../EA1/EA266.htm" target="_self">
+<area shape="rect" coords="318,263,558,342" href="EA300.htm" target="_self">
+<area shape="rect" coords="299,441,539,554" href="../EA1/EA268.htm" target="_self">
+<area shape="rect" coords="461,47,687,120" href="EA319.htm" target="_self">
+<area shape="rect" coords="273,15,1100,366" href="EA315.htm" target="_self">
+<area shape="rect" coords="273,395,875,803" href="EA297.htm" target="_self">
+</MAP>
+ </div>
+	<div class="ObjectTitle">ERE-ERS contarct - 1 resolution request : Class diagram</div>
+	<table border="0" cellpadding="0" cellspacing="0" class="ObjectDetails">
+		<tr>
+			<td width="15%" class="ObjectDetailsTopic">Created:</td>
+			<td width="85%" class="ObjectDetailsValue">1/9/2026 11:07:59 PM</td>
+		</tr>
+		<tr>
+			<td width="15%" class="ObjectDetailsTopic">Modified:</td>
+			<td width="85%" class="ObjectDetailsValue">1/10/2026 12:02:38 AM</td>
+		</tr>
+		<tr style="padding-top: 10px;">
+			<td width="15%" class="ObjectDetailsTopic"><button onclick="switchProjectProperties()"><img src="../../../images/plus03.gif" align="absmiddle" id="proj" /></button>Project:</td>
+			<td width="85%" class="ObjectDetailsValue"></td>			
+		</tr>
+		<tr id="proj00" style="display: none;">
+			<td width="15%" class="ObjectDetailsTopic" style="padding-left: 18px;">Author:</td>
+			<td width="85%" class="ObjectDetailsValue">lps</td>
+		</tr>
+		<tr id="proj01" style="display: none;">
+			<td width="15%" class="ObjectDetailsTopic" style="padding-left: 18px;">Version:</td>
+			<td width="85%" class="ObjectDetailsValue">1.0</td>
+		</tr>
+		<tr>
+			<td width="15%" class="ObjectDetailsTopic"><button onclick="switchAdvancedProperties()"><img src="../../../images/plus03.gif" align="absmiddle" id="adv" /></button>Advanced:</td>
+			<td width="85%" class="ObjectDetailsValue"></td>			
+		</tr>
+		<tr id="adv00" style="display: none;">
+			<td width="15%" class="ObjectDetailsTopic" style="padding-left: 18px;">ID:</td>
+			<td width="85%" class="ObjectDetailsValue">{3E145507-8BF8-4138-855A-8C594A6D0652}</td>
+		</tr>
+	</table>
+	
+</div>
+
+ </td>
+				</tr>
+			</tbody>
+		</table>
+		
+</div>
+</body>
+</html>
+
