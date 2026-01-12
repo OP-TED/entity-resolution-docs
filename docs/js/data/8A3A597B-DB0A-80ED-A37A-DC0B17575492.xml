@@ -1,0 +1,4 @@
+tocTab[tocTab.length] = new Array("0.4.1", "1", "1 ERS core", "EARoot/EA4/EA1/EA259.htm", "4.png", "", "", "{6F7D05CE-F3B3-47d1-82E0-0A0AC6E3D06F}", "Package");
+tocTab[tocTab.length] = new Array("0.4.2", "1", "2 main-ERS API", "EARoot/EA4/EA2/EA279.htm", "4.png", "", "", "{20CA5B0E-DB59-4e18-8191-83C4943BD104}", "Package");
+tocTab[tocTab.length] = new Array("0.4.3", "1", "3 ERE-ERS contarct", "EARoot/EA4/EA3/EA292.htm", "4.png", "", "", "{D5C0FCCA-D883-4292-A488-5A4E07261396}", "Package");
+tocTab[tocTab.length] = new Array("0.4.4", "1", "4 Link Curation API", "EARoot/EA4/EA4/EA328.htm", "4.png", "", "", "{0167249D-E3D7-4375-B241-1E9B329F1A51}", "Package");
