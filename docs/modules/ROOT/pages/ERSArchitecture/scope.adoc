@@ -1,0 +1,60 @@
+== 2. Architectural scope and boundary conditions
+
+This section defines the authoritative architectural scope of ERSys. It clarifies what is inside the system boundary, which responsibilities are owned by ERSys, and which concerns are deliberately excluded from this baseline. The conceptual meaning of identity, cluster, and mention has already been established in Section 1.6. Here we focus strictly on scope and responsibility. +
+The boundary conditions defined below are normative. All use cases, diagrams, contracts, and decision records must be interpreted consistently with them.
+
+=== 2.1 System of Interest
+
+The system of interest is ERSys as an integrated identity resolution platform composed of:
+
+* the Entity Resolution Service (ERS),
+* one or more Entity Resolution Engines (ERE),
+* persistence components supporting traceability and assignment state,
+* external interfaces for submission and lookup,
+* the Link Curation Web Application supporting human review and re-evaluation.
+ERSys is responsible for assigning and exposing canonical identifiers for submitted entity mentions under the engine-authoritative clustering model defined earlier. Canonical identity is determined by the ERE and exposed by ERS. There is no separate canonical registry and no secondary governance layer outside clustering.  +
+The architectural boundary therefore includes all components required to:
+
+* receive and register mentions,
+* obtain clustering outcomes from the ERE,
+* record the latest resolution decision per mention,
+* expose canonical identifiers and assignment changes through defined interfaces,
+* accept and forward human re-evaluation requests through the curation application.
+Deployment topology, infrastructure placement, or operational ownership do not alter this boundary definition.
+
+=== 2.2 Responsibilities Within the Architectural Boundary
+
+Within this boundary, ERSys has the following mandatory responsibilities. +
+First, bounded canonical identity assignment. For every valid entity mention, ERS must return a canonical identifier within the defined client-facing time budget. The identifier shall be either the clusterId produced by the ERE within the execution window or a provisional singleton clusterId issued by ERS under the deterministic derivation rule. Subsequent authoritative outcomes from the ERE may replace provisional assignments. +
+Second, canonical state exposure. ERSys must make the current mention-to-cluster assignment observable through stable interfaces, including bulk synchronisation mechanisms that reveal assignment changes over time. +
+Third, resolution orchestration. ERSys forwards resolution and recommendation requests to the ERE, correlates asynchronous responses using the mention identifier tuple, applies the defined time-budget model, and updates its stored record of the latest resolution outcome accordingly. +
+Fourth, persistence of authoritative runtime state. ERSys maintains:
+
+* an immutable System of Record for submitted mentions and request metadata,
+* a Decision Store that contains the latest resolution decision per mention, including the current clusterId and the top N alternatives returned by the most recent ERE outcome,
+* a User Action Log that records human curation actions as a read-only log for traceability and potential training use.
+The Decision Store does not redefine identity semantics. It records the most recent authoritative clustering outcome received from the ERE. Historical lineage of canonical assignments is not maintained beyond what is required for operational traceability. +
+Fifth, human-in-the-loop re-evaluation. ERSys accepts user recommendations through the Link Curation Web Application, records the action in the User Action Log, and forwards the recommendation to the ERE for authoritative evaluation. The resulting cluster assignment is determined exclusively by the ERE and, once received, replaces the previously recorded authoritative assignment in the Decision Store. +
+These responsibilities are constrained by the Architecture Decision Records and realised through the White-level Use Cases.
+
+=== 2.3 Concerns Outside the Architectural Boundary
+
+The following concerns are explicitly outside the scope of this architecture. +
+ERSys does not define the internal algorithms, model training processes, indexing strategies, or storage structures of the ERE, provided the engine contract is respected. +
+ERSys does not govern upstream ingestion, transformation, or enrichment pipelines beyond enforcing input contracts. +
+ERSys does not constrain how downstream systems persist, interpret, or propagate canonical identifiers beyond the guarantees stated in its APIs. +
+ERSys does not prescribe authentication or identity-management technologies, except where role-level separation is required by use cases.
+
+=== 2.4 Explicit Non-Goals
+
+The following exclusions are foundational and must not be inferred indirectly. +
+ERSys does not implement master data management patterns. It does not create golden records, merge attributes across mentions, or materialise consolidated entity profiles. +
+ERSys does not clean, normalise, or enrich incoming data beyond minimal structural validation required for processing. +
+ERSys does not reconcile mentions against external authoritative registries as part of its core architectural obligation. +
+ERSys does not manage machine learning lifecycle concerns such as model retraining, experiment tracking, or performance optimisation inside the ERE. +
+ERSys does not position itself as a compliance-grade audit platform. It maintains operational traceability sufficient for system behaviour inspection, not regulatory certification.
+
+=== 2.5 Interpretation and Evolution
+
+The scope defined here constrains all other sections of this document. Any proposal that introduces additional identity semantics, expands ERSys into data consolidation, or shifts clustering authority away from the ERE requires explicit revision of this section and the corresponding ADRs. +
+Architectural evolution must therefore be deliberate and documented. It cannot emerge implicitly through implementation shortcuts or operational drift.

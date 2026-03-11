@@ -1,14 +1,14 @@
 site:
-  title: Mapping Suite SDK Documentation
-  url: https://mapping-suite-sdk.readthedocs.io
-  start_page: mapping-suite-sdk::index.adoc
+  title: Entity Resolution Service Documentation
+  url: https://entity-resolution-service.readthedocs.io
+  start_page: entity-resolution-docs::index.adoc
 
 content:
   sources:
-    - url: https://github.com/meaningfy-ws/mapping-suite-sdk.git
+    - url: https://github.com/meaningfy-ws/entity-resolution-docs.git
       start_path: docs
-      branches: [main]
-      tags: [ ]
+      branches: [develop]
+      tags: []
       edit_url: false
 
 ui:
@@ -22,3 +22,11 @@ asciidoc:
     idprefix: ''
     idseparator: '-'
     page-pagination: ''
+
+antora:
+  extensions:
+    - require: '@sntke/antora-mermaid-extension' # <1>
+      mermaid_library_url: https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs # <2>
+      script_stem: header-scripts # <3>
+      mermaid_initialize_options: # <4>
+        start_on_load: true
