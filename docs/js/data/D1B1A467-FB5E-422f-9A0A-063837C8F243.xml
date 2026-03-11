@@ -1,5 +1,0 @@
-tocTab[tocTab.length] = new Array("0.2.2.2:1", "", "S2 link curation", "EARoot/EA2/EA2/EA2/EA169.htm", "185.png", "60", "0", "", "Sequence diagram0","{83FB6BAC-3E96-4f58-B4B2-E4813FFAA9C3}");
-tocTab[tocTab.length] = new Array("0.2.2.2:2", "", "accept", "EARoot/EA2/EA2/EA2/EA172.htm", "101.png", "E1097", "0", "", "InteractionFragment0","{4B6D3AF6-6544-4da5-9C8F-C560B18B8829}");
-tocTab[tocTab.length] = new Array("0.2.2.2:3", "", "assign", "EARoot/EA2/EA2/EA2/EA173.htm", "101.png", "E1099", "0", "", "InteractionFragment0","{636F5510-8B51-4218-B3D6-0B32A5328A91}");
-tocTab[tocTab.length] = new Array("0.2.2.2:4", "", "reject", "EARoot/EA2/EA2/EA2/EA174.htm", "101.png", "E1098", "0", "", "InteractionFragment0","{430AFF69-80B7-4a0c-A6A3-2917EC2A57C5}");
-tocTab[tocTab.length] = new Array("0.2.2.2:5", "", "reresolve", "EARoot/EA2/EA2/EA2/EA175.htm", "101.png", "E1100", "0", "", "InteractionFragment0","{8A671B03-B1E2-4848-84AF-8CE2CAF63707}");

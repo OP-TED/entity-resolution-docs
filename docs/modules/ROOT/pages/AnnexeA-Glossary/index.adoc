@@ -1,0 +1,17 @@
+= Annexe A: Glossary
+
+This glossary provides the normative definitions of all domain and system terms used throughout ERSys documentation. Definitions herein take precedence over colloquial or external interpretations and are binding on all implementations and discussions.
+
+[cols="2,4"]
+|===
+| Section | Purpose
+
+| xref:ROOT:AnnexeA-Glossary/intro-purpose-scope.adoc[Purpose, Scope, and Conceptual Framing]
+| Explains the normative authority of the glossary and the distinction between real-world entities, information artefacts, identity constructs, and system roles.
+
+| xref:ROOT:AnnexeA-Glossary/glossary-1.adoc[I. Information-Oriented Concepts]
+| Definitions of information concepts: Real-World Entity, Entity Mention, Cluster, Cluster Assignment, Canonical Identifier, Provisional Identifier, and related data-level terms.
+
+| xref:ROOT:AnnexeA-Glossary/glossary-2.adoc[II. System-Oriented Concepts]
+| Definitions of system components, actors, and operations: Originator, Entity Resolution, ERE, ERS, Curator, Downstream Consumer, and interaction patterns.
+|===

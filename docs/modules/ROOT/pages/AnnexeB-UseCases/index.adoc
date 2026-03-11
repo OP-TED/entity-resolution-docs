@@ -1,0 +1,41 @@
+= Annexe B: Use Case Catalogue
+
+This catalogue is the authoritative specification of all externally observable use cases for ERSys, organised at White (business) and Blue (system) levels using the Cockburn format. White-level use cases define business value; Blue-level use cases detail system interactions.
+
+[cols="2,4"]
+|===
+| Section | Purpose
+
+| xref:ROOT:AnnexeB-UseCases/introduction.adoc[Introduction and Reading Guide]
+| Catalogue structure, Cockburn levels, and the engine-authoritative clustering model.
+
+| xref:ROOT:AnnexeB-UseCases/ucw1.adoc[UC-W1: Resolve Entity Mention]
+| White-level: Originator submits an entity mention and receives a canonical identifier within the agreed timeout budget.
+
+| xref:ROOT:AnnexeB-UseCases/ucb11.adoc[UC-B1.1: Resolve via ERS API]
+| Blue-level: step-by-step description of intake, ERE forwarding, and canonical identifier return.
+
+| xref:ROOT:AnnexeB-UseCases/ucb12.adoc[UC-B1.2: Integrate ERE Outcomes]
+| Blue-level: asynchronous ERE outcome consumption and Decision Store updates.
+
+| xref:ROOT:AnnexeB-UseCases/ucb13.adoc[UC-B1.3: Cluster Assignment Lookup]
+| Blue-level: bulk-delta read-only synchronisation for downstream consumers.
+
+| xref:ROOT:AnnexeB-UseCases/ucw2.adoc[UC-W2: Curate Resolution Decisions]
+| White-level: Curator requests re-evaluation of a mention's cluster assignment; engine authority is preserved.
+
+| xref:ROOT:AnnexeB-UseCases/ucb21.adoc[UC-B2.1: Submit Re-evaluation Request]
+| Blue-level: single-mention re-evaluation submission through the Link Curation Application.
+
+| xref:ROOT:AnnexeB-UseCases/ucb22.adoc[UC-B2.2: Submit Bulk Re-evaluation]
+| Blue-level: bulk re-evaluation submission by a Curator.
+
+| xref:ROOT:AnnexeB-UseCases/ucw3.adoc[UC-W3: Integrate ERE Reclustering Results]
+| White-level: ERE publishes large-scale reclustering outcomes; ERS integrates without override semantics.
+
+| xref:ROOT:AnnexeB-UseCases/ucw4.adoc[UC-W4: Consult Resolution Statistics]
+| White-level: Curator retrieves aggregated, read-only statistics to prioritise review workload.
+
+| xref:ROOT:AnnexeB-UseCases/ucw5.adoc[UC-W5: Manage Curator Access]
+| White-level: Administrator controls curator access provisioning and revocation.
+|===
