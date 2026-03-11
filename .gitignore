@@ -3,4 +3,12 @@ node_modules/
 package.json
 package-lock.json
 docs/build/
-.gitnexus
+.claude.local.md
+.vscode/
+.idea/
+.DS_Store
+*.log
+*.tmp
+*.bak
+*.swp
+.pycharm_plugin
