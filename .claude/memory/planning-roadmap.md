@@ -83,19 +83,19 @@ Listed in **dependency order** (implementation sequence):
 ### Epic List and Writing Order
 
 #### Phase 1 — Foundation (Spines A/B prerequisite)
-| Epic ID | Component | Spines | Status |
-|---|---|---|---|
+| Epic ID | Component | Spines | Status             |
+|---|---|---|--------------------|
 | **ERS-EPIC-01** | Request Registry | A, B, C, D | ✅ Written (9.7/10) |
 | **ERS-EPIC-02** | RDF Mention Parser | A | ✅ Written (9.8/10) |
 | **ERS-EPIC-03** | ERE Contract Client | B, D | ✅ Written (9.8/10) |
-| **ERS-EPIC-04** | Resolution Decision Store | B, C, D | ⬜ Pending |
+| **ERS-EPIC-04** | Resolution Decision Store | B, C, D | ✅ Written (9.8/10) |
 
 #### Phase 2 — Core Flows (Spines A + B complete)
 | Epic ID | Component | Spines | Status |
 |---|---|---|---|
 | **ERS-EPIC-05** | ERE Result Integrator | B | ✅ Written (9.2/10) |
-| **ERS-EPIC-06** | Resolution Coordinator | A, B | ⬜ Pending |
-| **ERS-EPIC-07** | ERS REST API (resolve + lookup + refreshBulk) | A, C | ⬜ Pending |
+| **ERS-EPIC-06** | Resolution Coordinator | A, B | ✅ Written (9.8/10) |
+| **ERS-EPIC-07** | ERS REST API (resolve + lookup + refreshBulk) | A, C | ✅ Written (9.8/10) |
 
 **Milestone:** Spine A + B testable end-to-end after EPIC-07.
 
