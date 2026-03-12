@@ -15,6 +15,12 @@
 - Memory: dual approach — auto-memory (this file) + epic/task memory under epics/.
 - Docs: `docs/ai-coding/` contains runbook, setup guide, DoD quality gates, and review.
 
+## Planning Roadmap
+
+- [planning-roadmap.md](planning-roadmap.md) — Master roadmap for writing 10 ERS epic specifications (component-first hybrid, dependency order)
+- 3 phases: Foundation (EPIC-01 to 04), Core Flows (EPIC-05 to 07), Curation (EPIC-08 to 09) + cross-cutting (EPIC-X)
+- Status: Planning Phase Active — next action: write ERS-EPIC-01 (Request Registry)
+
 ## Active Epics
 
 (None yet — update this section as epics are created.)
