@@ -1,6 +1,11 @@
 # Definition of Done & Quality Gates — AI Coding Setup
 
 **Date:** 2026-03-11
+**Status:** Historical snapshot — reflects the state as of the initial setup review.
+Agent configurations have since been updated (superpowers skills added to implementer,
+gitnexus usage added to implementer and code-reviewer, commit-commands workflow added).
+Use this as a baseline reference; run a fresh review when replicating to new repos.
+
 **Purpose:** Quality verification for the AI-assisted coding setup implementation.
 Used both as a one-time review gate and an ongoing DoD when replicating to new repos.
 
@@ -113,6 +118,12 @@ Evaluated against `skill-creator` structural criteria adapted for agents.
 - [x] **IM-11** Respects Cosmic Python layered architecture
 - [x] **IM-12** Mentions importlinter / architectural validation
 - [x] **IM-13** `stream-coding` skill exists as loadable SKILL.md
+- [x] **IM-14** `superpowers:test-driven-development` skill loaded
+- [x] **IM-15** `superpowers:systematic-debugging` skill loaded
+- [x] **IM-16** `superpowers:verification-before-completion` skill loaded
+- [x] **IM-17** Gitnexus impact analysis before editing (step in system prompt)
+- [x] **IM-18** `commit-commands:commit` used on developer approval
+- [x] **IM-19** `Skill` tool included in tools list
 
 #### code-reviewer
 
@@ -128,6 +139,7 @@ Evaluated against `skill-creator` structural criteria adapted for agents.
 - [x] **CR-10** Spec conformance checklist (divergence check, acceptance criteria)
 - [x] **CR-11** Output format: Critical > Warnings > Suggestions with file+line+what+why+how
 - [x] **CR-12** Does NOT modify code, commit, or create PRs
+- [x] **CR-13** Gitnexus blast radius check in "Gather context" step
 
 #### documenter
 
@@ -194,7 +206,7 @@ Evaluated against `skill-creator` structural criteria adapted for agents.
 | **XF-01** | CLAUDE.md agent table matches actual agent files (names, models) | **PASS** |
 | **XF-02** | CLAUDE.md skill table matches actual skill files | **PASS** |
 | **XF-03** | Agent frontmatter `skills:` references resolve to loadable SKILL.md files | **PASS** |
-| **XF-04** | Setup guide agent table matches actual agent frontmatter (tools, model) | **PASS** (fixed in previous review) |
+| **XF-04** | Setup guide agent table matches actual agent frontmatter (tools, model) | **PASS** (updated 2026-03-12 — Skill tool and superpowers skills added to implementer) |
 | **XF-05** | Runbook phase descriptions match agent system prompts | **PASS** |
 | **XF-06** | Memory path conventions consistent across CLAUDE.md, runbook, agents | **PASS** |
 | **XF-07** | Commit/PR rules consistent across CLAUDE.md and runbook | **PASS** |

@@ -164,10 +164,10 @@ You are a [role]. Your responsibility is [what you do].
 | Agent file | Model | Memory | Skills loaded | Tools |
 |------------|-------|--------|---------------|-------|
 | `epic-planner.md` | opus | project | stream-coding, clarity-gate | Read, Grep, Glob, AskUserQuestion |
-| `gherkin-writer.md` | sonnet | project | — | Read, Write, Glob, Grep |
-| `implementer.md` | sonnet | project | stream-coding | Read, Edit, Write, Glob, Grep, Bash |
+| `gherkin-writer.md` | sonnet | project | — | Read, Write, Edit, Glob, Grep, AskUserQuestion |
+| `implementer.md` | sonnet | project | stream-coding, superpowers:test-driven-development, superpowers:systematic-debugging, superpowers:verification-before-completion | Read, Edit, Write, Glob, Grep, Bash, Skill |
 | `code-reviewer.md` | opus | project | — | Read, Grep, Glob, Bash (deny: Write, Edit) |
-| `documenter.md` | haiku | project | clarity-gate | Read, Write, Edit, Glob, Grep |
+| `documenter.md` | haiku | project | clarity-gate | Read, Write, Edit, Glob, Grep, AskUserQuestion |
 
 ### Writing effective agent descriptions
 
@@ -284,21 +284,50 @@ convention is `yyyy-mm-dd-<task-title>.md`.
 
 ---
 
-## 6. MCP Servers
+## 6. MCP Servers and Plugins
 
 MCP (Model Context Protocol) servers provide external tool access to agents.
 They are configured in `.mcp.json` at the repository root or in
 `~/.claude/.mcp.json` for user-level servers.
 
-### Recommended MCP servers
+### Required MCP servers
 
-| Server | Purpose | Scope |
-|--------|---------|-------|
-| GitNexus | Code intelligence, impact analysis | Project |
-| Context7 | Up-to-date library documentation | User |
-| Playwright | Browser automation and testing | Project (if needed) |
+| Server | Purpose | Scope | Install |
+|--------|---------|-------|---------|
+| GitNexus | Code intelligence, impact analysis before edits | Project | `npm install -g gitnexus` then `npx gitnexus analyze` |
+| Context7 | Up-to-date library documentation | User | Via Claude Code MCP settings |
 
-### Configuration example (`.mcp.json`)
+GitNexus is used by the `implementer` (blast radius before editing) and
+`code-reviewer` (changed symbol impact). Both agents have explicit instructions
+to call `gitnexus_impact` before/during their work.
+
+### Required Plugins
+
+Install these in Claude Code via `/plugin install <name>`:
+
+| Plugin | Purpose | Which agents use it | Install command |
+|--------|---------|---------------------|-----------------|
+| `superpowers` | TDD, debugging, and verification skills injected into `implementer` | `implementer` | `/plugin install superpowers@claude-plugins-official` |
+| `commit-commands` | Standardised commit/push/PR workflow | `implementer` (via `Skill` tool) | `/plugin install commit-commands@claude-plugins-official` |
+| `code-review` | PR review command | Main conversation | `/plugin install code-review@claude-plugins-official` |
+
+#### Superpowers skills loaded per agent
+
+The `implementer` agent has these superpowers skills pre-loaded into context:
+
+| Skill | When it activates |
+|-------|-------------------|
+| `superpowers:test-driven-development` | Enforces RED-GREEN-REFACTOR during code generation |
+| `superpowers:systematic-debugging` | When tests fail — 4-phase root cause analysis |
+| `superpowers:verification-before-completion` | Before claiming a task is done |
+
+The `implementer` also has the `Skill` tool available to explicitly invoke
+`commit-commands:commit` when the developer approves changes.
+
+### Configuration (`.mcp.json`)
+
+Place this file at the repository root. Claude Code reads it at session start
+and launches the listed MCP servers automatically.
 
 ```json
 {
@@ -310,6 +339,11 @@ They are configured in `.mcp.json` at the repository root or in
   }
 }
 ```
+
+This file is already present in this repository. Copy it as-is when
+replicating to a new repo (see §7). If the gitnexus MCP server is not
+available during a session, agents will instruct you to restart Claude Code
+to reload it.
 
 ### Making MCP servers available to agents
 
@@ -327,6 +361,7 @@ frontmatter.
    ```bash
    # From this repository, copy:
    cp CLAUDE.md <new-repo>/
+   cp .mcp.json <new-repo>/
    cp -r .claude/agents <new-repo>/.claude/
    cp -r .claude/skills <new-repo>/.claude/
    mkdir -p <new-repo>/.claude/memory/epics

@@ -152,14 +152,21 @@ The gherkin-writer agent:
 The implementer agent:
 
 1. Reads the relevant Task from `EPIC.md` and corresponding Gherkin features.
-2. Follows the stream-coding generate-verify-integrate loop:
-   - **Generate:** produce code from the spec.
-   - **Verify:** run tests immediately.
-   - **Integrate:** commit spec + code together.
-3. When tests fail: **fix the spec, not the code** (the golden rule).
-4. Respects the Cosmic Python layered architecture:
+2. Runs **gitnexus impact analysis** (`gitnexus_impact`) on any symbol it plans to
+   modify before writing code.
+3. Follows the stream-coding generate-verify-integrate loop, guided by
+   pre-loaded skills:
+   - **Generate:** tests first (TDD — `superpowers:test-driven-development`),
+     then production code.
+   - **Verify:** run tests immediately; apply `superpowers:systematic-debugging`
+     when tests fail.
+   - **Integrate:** present changes; wait for developer consent; commit using
+     the `commit-commands:commit` skill.
+4. Applies `superpowers:verification-before-completion` before claiming a task
+   is done.
+5. When tests fail due to a design issue: **fix the spec, not the code** (the golden rule).
+6. Respects the Cosmic Python layered architecture:
    `entrypoints -> services -> models`, `adapters -> models`.
-5. Runs tests in a loop until green.
 
 ### Phase 4 — Review & Delivery
 
@@ -201,39 +208,78 @@ Claude automatically maintains this file with:
 
 ### 3.2 Epic/Task Memory (`.claude/memory/epics/`)
 
-Structured outcome files organised by epic:
+Structured memory files organised by epic:
 
 ```
 .claude/memory/epics/
     <epic-name>/
-        EPIC.md                          # Epic spec + plan + roadmap + status
-        yyyy-mm-dd-<task-title>.md       # Task outcome file
+        EPIC.md                          # Two-part: spec/plan + implementation log
+        yyyy-mm-dd-<task-title>.md       # Two-part: task spec + implementation log
         yyyy-mm-dd-<task-title>.md
 ```
 
-**EPIC.md** contains:
-- Implementation-level spec (from Phase 1)
-- Task breakdown with plan
-- Roadmap with status indicators (updated as tasks complete)
+#### Two-part file structure
 
-**Task outcome files** (`yyyy-mm-dd-<task-title>.md`) contain:
+All memory files — both `EPIC.md` and task files — follow the same two-part structure:
+
+```
+# Part 1 — Specification
+<!-- Written during Phases 1–2 (planning + test-writing). Do not modify during implementation. -->
+
+[Spec content, plan, roadmap, acceptance criteria, Gherkin coverage]
+
+---
+<!-- implementation-log -->
+---
+
+# Part 2 — Implementation Log
+<!-- Written and updated by the implementer throughout Phase 3. -->
+
+[Progress entries, key decisions, deviations, commit links]
+```
+
+The separator `--- <!-- implementation-log --> ---` marks where planning ends
+and execution begins. Agents treat everything above the separator as the
+authoritative specification; everything below as the evolving implementation record.
+
+#### EPIC.md
+
+**Part 1 — Specification** (written by `epic-planner` and `gherkin-writer`):
+- Description, glossary, algorithm/flow, concrete examples
+- Anti-patterns, test case specifications, error handling matrix
+- Task breakdown with layers, dependencies, acceptance criteria
+- Roadmap with status checklist
+
+**Part 2 — Implementation Log** (written by `implementer`, updated per task):
+- Dated progress entries for each task as it completes
+- Key implementation decisions and rationale
+- Deviations from spec and why they were made
+- Links to commits
+
+#### Task files (`yyyy-mm-dd-<task-title>.md`)
+
+**Part 1 — Task Specification** (written by `implementer` before starting the task):
+- Task description (extracted from EPIC.md task breakdown)
+- Acceptance criteria and layers affected
+- Gherkin scenarios that cover this task
+
+**Part 2 — Implementation Log** (filled in as the task progresses):
 - What was accomplished (outcomes, not process)
 - Key decisions made during implementation
-- Any deviations from the original spec and why
-- Links to the resulting commit(s) or PR
+- Deviations from spec and why
+- Links to resulting commit(s)
 
 **Rules:**
-- One task file per story/task (ideally one corresponding PR).
-- Several tasks fulfil one epic.
-- Focus on **outcomes and victories**, not logistics.
-- These files are for both human inspection and agent context.
-- Agents do NOT auto-load all memory files. They read only the relevant
+- One task file per story/task (ideally one corresponding commit or PR).
+- Several tasks fulfil one EPIC.
+- Agents do NOT auto-load all memory files — they read only the relevant
   epic folder when starting work on that epic.
+- Files serve dual purpose: human inspection and agent context.
 
 ### 3.3 When Memory Gets Updated
 
 | Event | What happens |
-|-------|-------------|
+|-------|--------------|
 | Starting work on an epic | Agent reads `EPIC.md` for that epic |
 | Completing a task | Agent writes a task outcome file |
 | End of a significant session | Agent updates `MEMORY.md` with stable patterns |
@@ -248,7 +294,7 @@ Structured outcome files organised by epic:
 | Planning, analysis, complex specs | **Opus** | Strongest reasoning, worth the cost for strategic work |
 | Implementation, BDD tests | **Sonnet** | Strong coding, good balance of speed and quality |
 | Explanations, summaries, docstrings | **Haiku** | Fast and cheap for low-complexity work |
-| Pre-PR code review | **Opus** | Thorough analysis requires strongest model |
+| Pre-PR code review | **Opus** | Thorough analysis requires the strongest model |
 
 **General rule:** Use planning mode (`/plan`) before writing to files — it's cheaper
 and faster for reasoning-heavy work.
@@ -336,7 +382,7 @@ Use the code-reviewer to ...     # Delegate to specific agent
 ```
 
 | What you want to do | Agent to use |
-|---------------------|-------------|
+|---------------------|--------------|
 | Write or refine an EPIC spec | `epic-planner` |
 | Write Gherkin features from a spec | `gherkin-writer` |
 | Implement a task from the EPIC | `implementer` |

@@ -87,8 +87,12 @@ Produced by the `epic-planner` agent (Opus), it contains:
 | Roadmap | Status-tracked checklist of all tasks |
 
 **Quality gate:** The Clarity Gate (13-item checklist, 6-criterion scoring)
-must score >= 9/10 before proceeding. This ensures the agent does not proceed
-with hidden assumptions.
+must score >= 9/10 before proceeding. For EPIC specs, the gate is primarily an
+**epistemic check** — it verifies that every claim is grounded (not aspirational),
+every assumption is made visible, and every requirement is specific enough to
+generate unambiguous code. Vague intent that passes a readability check but
+hides assumptions is the primary failure mode; the Clarity Gate is designed to
+surface it before it reaches the implementer.
 
 ### 2.3 Gherkin Features + Test Data
 
@@ -139,7 +143,8 @@ Each completed task produces a task outcome file documenting what was achieved.
 |-----------|-------|-----|
 | Planning, analysis, complex specs | **Opus** | Strongest reasoning; worth the cost for strategic work |
 | Implementation, BDD features | **Sonnet** | Strong coding; good balance of speed and quality |
-| Explanations, summaries, docstrings | **Haiku** | Fast and cheap for low-complexity work |
+| Investigating, summarising, explaining | **Haiku or Sonnet** | Lightweight tasks; escalate to Sonnet for complex explanations |
+| Docstrings, routine documentation | **Haiku** | Fast and cheap |
 | Pre-PR code review | **Opus** | Thorough analysis requires strongest model |
 
 **General rule:** Use planning mode (`/plan`) before writing to files — it is
@@ -167,25 +172,30 @@ cheaper and faster for reasoning-heavy work.
 
 ### 4.2 Epic/Task Memory Structure
 
+All memory files — `EPIC.md` and task files — follow a **two-part structure**:
+
 ```
-.claude/memory/epics/
-    <epic-name>/
-        EPIC.md                          # Spec + plan + roadmap + status
-        yyyy-mm-dd-<task-title>.md       # Task outcome file
-        yyyy-mm-dd-<task-title>.md
+# Part 1 — Specification
+<!-- Written during Phases 1–2. Authoritative. Do not modify during implementation. -->
+[spec, plan, acceptance criteria]
+
+---
+<!-- implementation-log -->
+---
+
+# Part 2 — Implementation Log
+<!-- Written and updated by the implementer during Phase 3. -->
+[progress, decisions, deviations, commit links]
 ```
 
-**Task outcome files** focus on **outcomes and victories**, not logistics:
-- What was accomplished
-- Key decisions made
-- Deviations from spec and why
-- Links to resulting commits or PR
+- **Part 1** is frozen once planning is complete. It is the contract the
+  implementer works against.
+- **Part 2** is a running log written and updated by the implementer as work
+  progresses. It records decisions, deviations, and outcomes — not logistics.
+- The separator `--- <!-- implementation-log --> ---` is the boundary agents
+  use to distinguish spec from execution record.
 
-**Rules:**
-- One task file per story/task (ideally one corresponding PR).
-- Several tasks fulfil one EPIC.
-- Agents do NOT auto-load all memory files — they read only the relevant epic.
-- Files serve dual purpose: human inspection and agent context.
+For the detailed file format and rules, see [AI Coding Runbook §3.2](ai-coding-runbook.md).
 
 ### 4.3 Memory Update Triggers
 
@@ -244,14 +254,10 @@ Skills provide domain knowledge to agents. They live at
 
 ### 5.4 Commits and PRs
 
-| Concern | Convention |
-|---------|------------|
-| Commit size | Medium-sized, conceptually atomic chunks |
-| Commit messages | Strict, succinct; describe the final outcome, not the process |
-| Unrelated changes | Signal to developer when detected; never mix |
-| PR trigger | Upon completing an EPIC implementation |
-| Large EPICs | May have intermediate PRs grouping stories that deliver business value |
-| Consent | Agent always waits for explicit developer approval |
+Commits are medium-sized, conceptually atomic, and require explicit developer
+consent. The implementer uses the `commit-commands:commit` skill for the actual
+commit. PR is opened on EPIC completion. Full conventions are in the
+[AI Coding Runbook §5](ai-coding-runbook.md).
 
 ### 5.5 Recommended Tooling
 
@@ -269,71 +275,9 @@ Skills provide domain knowledge to agents. They live at
 
 ## 6. Development Lifecycle
 
-```mermaid
-graph TD
-    subgraph "Inputs"
-        A["Business Requirement<br/>(Confluence Work Shape)"]
-        B["Architecture Docs<br/>(docs repo)"]
-        C["Sample / Test Data"]
-    end
-
-    subgraph "Phase 1 — EPIC Planning  (epic-planner · Opus)"
-        D["Read inputs:<br/>Work Shape + Arch Docs + Data"]
-        E["Ask clarifying questions<br/>(no assumptions)"]
-        F["Write EPIC.md<br/>(spec + plan + roadmap)"]
-        G{"Clarity Gate<br/>Score >= 9/10?"}
-    end
-
-    subgraph "Phase 2 — BDD Specification  (gherkin-writer · Sonnet)"
-        H["Write Gherkin features<br/>from EPIC.md"]
-        I["Fabricate sample / test data"]
-    end
-
-    subgraph "Phase 3 — Task Implementation  (implementer · Sonnet)"
-        J["Break EPIC into Tasks"]
-        K["For each Task:"]
-        L["Generate code from spec<br/>(stream-coding Phase 3-4)"]
-        M{"Tests pass?"}
-    end
-
-    subgraph "Phase 4 — Review & Delivery  (code-reviewer · Opus)"
-        N["Pre-PR review + run tests"]
-        O{"Review OK?"}
-        P["Commit + write Task memory"]
-        Q{"All Tasks done?"}
-        R["Open PR<br/>Epic complete"]
-        S["Update MEMORY.md"]
-    end
-
-    A --> D
-    B --> D
-    C --> D
-    D --> E --> F --> G
-
-    G -- "No: revise spec" --> F
-    G -- "Yes" --> H
-
-    H --> I --> J
-    J --> K --> L --> M
-
-    M -- "No: fix spec, not code" --> L
-    M -- "Yes" --> N --> O
-
-    O -- "Issues found" --> L
-    O -- "Approved" --> P --> Q
-
-    Q -- "Next task" --> K
-    Q -- "All done" --> R --> S
-```
-
-### Developer vs Agent Responsibilities
-
-| Phase | Developer | Agent |
-|-------|-----------|-------|
-| **Phase 1 — Planning** | Provides work shape, answers questions, approves spec | Reads inputs, asks questions, writes EPIC.md, runs Clarity Gate |
-| **Phase 2 — Specification** | Reviews features for business accuracy | Writes Gherkin features, fabricates test data |
-| **Phase 3 — Implementation** | Approves each commit, intervenes on spec issues | Implements code, runs tests, writes task memory |
-| **Phase 4 — Review** | Decides which issues to fix, triggers PR | Reviews code, runs tests, reports issues by priority |
+The lifecycle diagram, phase-by-phase descriptions, and developer vs. agent
+responsibilities are in the [AI Coding Runbook](ai-coding-runbook.md). That
+document is the operational reference; this file describes the design rationale.
 
 ---
 
@@ -370,12 +314,7 @@ Some things still benefit from manual developer intervention:
 
 ### 7.3 Model Selection in Practice
 
-| Task | Recommended Model |
-|------|-------------------|
-| Getting explanations, investigating, summarisation | Haiku or Sonnet |
-| Writing documentation, docstrings | Haiku |
-| Programming (main implementation + test writing) | Sonnet or Opus |
-| Complex analysis, architecture, code review | Opus |
+See §3.2 Model Selection Rationale for the complete model selection guide.
 
 ---
 

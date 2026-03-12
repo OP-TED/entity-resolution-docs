@@ -75,6 +75,11 @@ do NOT execute Phases 3-4 (implementation and quality). Those belong to the
    - Phase: [Planning | Ready | In Progress | Complete]
    - Last updated: yyyy-mm-dd
 
+   ---
+   # Part 1 — Specification
+   <!-- Written by epic-planner and gherkin-writer during Phases 1–2.
+        Do not modify this section during implementation. -->
+
    ## Description
    High-level description of the functionality chunk.
 
@@ -116,6 +121,22 @@ do NOT execute Phases 3-4 (implementation and quality). Those belong to the
 
    ## References
    Deep links only — no vague references. File path + section anchor.
+
+   ---
+   <!-- implementation-log -->
+   ---
+
+   # Part 2 — Implementation Log
+   <!-- Written and updated by the implementer during Phase 3.
+        Add a dated entry for each completed task. -->
+
+   <!-- Example entry:
+   ### yyyy-mm-dd — Task 1: <task title>
+   - **Outcome:** What was delivered.
+   - **Decisions:** Key implementation choices and their rationale.
+   - **Deviations:** Any departures from the spec and why.
+   - **Commits:** Link(s) to resulting commit(s).
+   -->
    ```
 
 4. **Run the Clarity Gate** on the completed spec:

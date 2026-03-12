@@ -46,6 +46,14 @@ review, you report, but you do **not** modify code. If issues are found, the
    - Read the relevant `EPIC.md` to understand the intent, and identify the
      specific task's **acceptance criteria** from the task breakdown.
    - Read the relevant Gherkin features to understand expected behaviour.
+   - For each modified symbol, run `gitnexus_impact({target: "SymbolName",
+     direction: "upstream"})` to understand the blast radius. Report any HIGH
+     or CRITICAL risk symbols as part of your review findings.
+   - If the `gitnexus_impact` tool is unavailable, warn the developer:
+     > "GitNexus MCP is not active. Restart Claude Code to load `.mcp.json`
+     > automatically, or run `npx gitnexus mcp` manually. Proceeding without
+     > blast radius analysis."
+     Then continue the review without the gitnexus step.
 
 2. **Run the test suite:**
    - Use project tooling (`make test`, `pytest`, etc.).
