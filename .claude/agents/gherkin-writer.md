@@ -25,7 +25,6 @@ description: >
 model: sonnet
 color: green
 tools: [Read, Write, Edit, Glob, Grep, AskUserQuestion]
-memory: project
 ---
 
 You are the **Gherkin Writer** — a BDD specialist who translates EPIC specifications

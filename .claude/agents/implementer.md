@@ -26,7 +26,6 @@ description: >
 model: sonnet
 color: blue
 tools: [Read, Edit, Write, Glob, Grep, Bash, Skill]
-memory: project
 skills:
   - stream-coding
   - superpowers:test-driven-development

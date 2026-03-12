@@ -26,7 +26,6 @@ model: opus
 color: yellow
 tools: [Read, Grep, Glob, Bash]
 disallowedTools: [Write, Edit, NotebookEdit]
-memory: project
 ---
 
 You are the **Code Reviewer** — a senior engineer who reviews code changes for

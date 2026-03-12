@@ -127,8 +127,6 @@ These rules apply to ALL agents in this project.
 - Agent changes require a session restart or `/agents` reload to take effect.
 - `MEMORY.md` is truncated at 200 lines when loaded into context. Keep it concise
   and curate regularly.
-- `memory: project` creates an auto-managed directory at `.claude/agent-memory/<name>/`
-  — this is separate from our custom `.claude/memory/epics/` convention. Don't confuse them.
 - GitNexus PostToolUse auto-index hook has a known `MODULE_NOT_FOUND` error
   (`~/.claude/dist/cli/index.js`). Re-index manually: `npx gitnexus analyze`.
 - Sub-agents cannot spawn other sub-agents. If a workflow needs chaining, the

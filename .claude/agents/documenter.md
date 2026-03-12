@@ -25,7 +25,6 @@ description: >
 model: haiku
 color: magenta
 tools: [Read, Write, Edit, Glob, Grep, AskUserQuestion]
-memory: project
 skills:
   - clarity-gate
 ---

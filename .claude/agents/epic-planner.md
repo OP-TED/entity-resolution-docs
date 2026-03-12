@@ -35,7 +35,6 @@ description: >
 model: opus
 color: cyan
 tools: [Read, Write, Grep, Glob, AskUserQuestion]
-memory: project
 skills:
   - stream-coding
   - clarity-gate

@@ -155,19 +155,18 @@ You are a [role]. Your responsibility is [what you do].
 | `model` | No | `opus`, `sonnet`, `haiku`, or `inherit` (default) |
 | `tools` | No | Allowlist of tools; inherits all if omitted |
 | `disallowedTools` | No | Tools to deny |
-| `memory` | No | `project` (shared via git), `user` (personal), `local` (gitignored) |
 | `skills` | No | Skills injected into context at startup |
 | `maxTurns` | No | Limit agentic turns before stopping |
 
 ### Our five agents
 
-| Agent file | Model | Memory | Skills loaded | Tools |
-|------------|-------|--------|---------------|-------|
-| `epic-planner.md` | opus | project | stream-coding, clarity-gate | Read, Grep, Glob, AskUserQuestion |
-| `gherkin-writer.md` | sonnet | project | — | Read, Write, Edit, Glob, Grep, AskUserQuestion |
-| `implementer.md` | sonnet | project | stream-coding, superpowers:test-driven-development, superpowers:systematic-debugging, superpowers:verification-before-completion | Read, Edit, Write, Glob, Grep, Bash, Skill |
-| `code-reviewer.md` | opus | project | — | Read, Grep, Glob, Bash (deny: Write, Edit) |
-| `documenter.md` | haiku | project | clarity-gate | Read, Write, Edit, Glob, Grep, AskUserQuestion |
+| Agent file | Model | Skills loaded | Tools |
+|------------|-------|---------------|-------|
+| `epic-planner.md` | opus | stream-coding, clarity-gate | Read, Grep, Glob, AskUserQuestion |
+| `gherkin-writer.md` | sonnet | — | Read, Write, Edit, Glob, Grep, AskUserQuestion |
+| `implementer.md` | sonnet | stream-coding, superpowers:test-driven-development, superpowers:systematic-debugging, superpowers:verification-before-completion | Read, Edit, Write, Glob, Grep, Bash, Skill |
+| `code-reviewer.md` | opus | — | Read, Grep, Glob, Bash (deny: Write, Edit) |
+| `documenter.md` | haiku | clarity-gate | Read, Write, Edit, Glob, Grep, AskUserQuestion |
 
 ### Writing effective agent descriptions
 
@@ -250,22 +249,7 @@ Claude's built-in auto-memory writes to `.claude/memory/MEMORY.md`. This file:
 - Unverified conclusions from reading a single file
 - Anything that duplicates CLAUDE.md instructions
 
-### 5.2 Agent persistent memory
-
-Each agent with `memory: project` gets a directory at
-`.claude/agent-memory/<agent-name>/`. Claude manages this automatically.
-
-This is **separate** from the epic/task memory:
-
-| | Agent persistent memory | Epic/Task memory |
-|---|---|---|
-| **Location** | `.claude/agent-memory/<agent-name>/` | `.claude/memory/epics/<epic>/` |
-| **Managed by** | Claude (automatic) | Agent + developer (explicit) |
-| **Purpose** | Agent's own learning (patterns, conventions) | Project progress tracking (specs, outcomes) |
-| **Shared via git** | Yes (if `memory: project`) | Yes |
-| **When updated** | Automatically as agent learns | On task/epic completion |
-
-### 5.3 Epic/Task memory
+### 5.2 Epic/Task memory
 
 This is our custom convention (not a Claude built-in). It lives at
 `.claude/memory/epics/` and is managed by explicit instructions in CLAUDE.md
