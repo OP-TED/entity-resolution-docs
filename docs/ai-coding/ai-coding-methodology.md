@@ -377,7 +377,7 @@ graph LR
     M["ai-coding-methodology.md<br/>(this file — WHY & WHAT)"]
     R["ai-coding-runbook.md<br/>(HOW — day-to-day workflow)"]
     S["ai-coding-setup-guide.md<br/>(HOW — setup & configuration)"]
-    D["dod-quality-gates.md<br/>(verification criteria)"]
+    D["(verification criteria)"]
     C["CLAUDE.md<br/>(master agent instructions)"]
 
     M --> R
