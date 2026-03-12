@@ -12,3 +12,4 @@ docs/build/
 *.bak
 *.swp
 .pycharm_plugin
+AGENTS.md
