@@ -112,36 +112,14 @@ docs/
 
 ## Deployment
 
-### GitHub Pages (Automatic)
-
-Commits to `develop` branch trigger a GitHub Actions workflow that:
-
-1. Builds the documentation with Antora
-2. Publishes the output to GitHub Pages
-
-The live site updates automatically: https://meaningfy-ws.github.io/entity-resolution-docs/
-
-**Trigger:** Push to `develop` or merge a pull request.
-
-### Read the Docs (Alternative)
-
-This repository includes `.readthedocs.yaml` for Read the Docs integration:
-
-```yaml
-version: 2
-build:
-  os: ubuntu-22.04
-  tools:
-    nodejs: "22"
-  jobs:
-    build:
-      html:
-        - antora --fetch docs/antora-playbook.yml
-```
-
-If integrated with Read the Docs, the site builds automatically on every push.
-
 ### Manual deployment
+
+To preview locally teh docs.
+
+```bash
+make preview-docs
+# Upload docs/build/site/ to your host
+```
 
 Build the site and upload `docs/build/site/` to any static hosting:
 
@@ -149,6 +127,7 @@ Build the site and upload `docs/build/site/` to any static hosting:
 make build-docs
 # Upload docs/build/site/ to your host
 ```
+
 
 ---
 
