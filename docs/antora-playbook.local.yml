@@ -1,6 +1,6 @@
 site:
   title: Entity Resolution Service Documentation
-  url: https://entity-resolution-service.readthedocs.io
+#  url: https://entity-resolution-service.readthedocs.io
   start_page: entity-resolution-docs::index.adoc
 
 content:
@@ -16,6 +16,7 @@ ui:
   bundle:
     url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
     snapshot: true
+  supplemental_files: ./supplemental-ui
 
 asciidoc:
   attributes:
@@ -31,3 +32,5 @@ antora:
       script_stem: header-scripts # <3>
       mermaid_initialize_options: # <4>
         start_on_load: true
+    - require: '@antora/lunr-extension'
+      snippet_length: 250
