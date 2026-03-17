@@ -50,6 +50,7 @@ install-antora: check-node
 	@echo -e "$(BUILD_PRINT)$(ICON_PROGRESS) Installing Antora locally...$(END_BUILD_PRINT)"
 	npm install antora --save-dev
 	npm i -D @sntke/antora-mermaid-extension
+	npm install @antora/lunr-extension
 	@echo -e "$(BUILD_PRINT)$(ICON_DONE) Antora installed successfully!$(END_BUILD_PRINT)"
 
 
