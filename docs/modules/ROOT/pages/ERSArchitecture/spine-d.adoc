@@ -1,0 +1,105 @@
+=== 8.5 Spine D: Manual curation recommendations and engine re-evaluation
+
+Spine D defines the curator-driven interaction by which a human user submits a *recommendation* about the placement of an Entity Mention, and the system routes that recommendation to the ERE for authoritative re-evaluation. This spine is the practical bridge between human judgement and engine authority: the curator can say “place here” or “do not place there”, but the engine remains the component that produces the binding clustering outcome.
+
+The spine therefore makes two responsibilities explicit:
+
+* ERS provides the *curation-facing API*, validates that the recommendation is well-formed and refers to a known mention, and records the action for traceability.
+* ERE performs the *authoritative reassessment* and publishes the resulting clustering outcome, which ERS then records as the latest decision per mention.
+*Simplified sequence diagram (Spine D)*
+
+[mermaid]
+----
+---
+config:
+  look: neo
+  theme: redux-color
+  mirrorActors: false
+  sequence:
+    bottomMarginAdj: 0.1
+---
+sequenceDiagram
+%% Maps to EA diagram: UML Sequence (Spine D)
+%% Purpose: curator submits a user action (acceptTop, acceptAlt, rejectAll) that is logged and forwarded to ERE
+%% Focus: user action log, async re-resolve, later UI refresh when results arrive
+%% Excludes: decision browsing, detailed store choreography, scoring internals
+
+actor Curator as "Curator"
+
+box "Entity Resolution System (ERSys)"
+    participant LinkCurationSvc as "Link Curation Service"
+    participant ERS as "Entity Resolution Service (ERS)"
+    participant UserActionLog as "User Action Log"
+end
+
+participant MessagingMiddleware as "Messaging Middleware"
+
+box "Entity Resolution Engine (ERE)"
+    participant ERE as "Entity Resolution Engine (ERE)"
+end
+
+Curator ->> LinkCurationSvc: Submit user action<br/>(sourceId, requestId, entityType,<br/>acceptTop or acceptAlt or rejectAll,<br/>targetClusterId?)
+LinkCurationSvc ->> ERS: Validate triad and action
+
+alt Request rejected
+    ERS -->> LinkCurationSvc: Reject<br/>(validation, unknown triad, conflict)
+    LinkCurationSvc -->> Curator: 4xx
+else Request accepted
+    ERS ->> UserActionLog: Append user action record
+    ERS ->> MessagingMiddleware: Publish re-resolve request (async)<br/>(sourceId, requestId, entityType,<br/>optional rejectionConstraints,<br/>optional preferredPlacement)
+    LinkCurationSvc -->> Curator: 202 Accepted<br/>(action recorded)
+
+    MessagingMiddleware ->> ERE: Deliver re-resolve request (async)
+    ERE ->> MessagingMiddleware: Publish resolution result (async)<br/>(sourceId, requestId, entityType,<br/>canonical clusterId, top alternative clusterIds)
+    MessagingMiddleware ->> ERS: Deliver resolution result (async)
+    ERS ->> ERS: Process resolution result<br/>(persist Resolution Decision and update lookup projection)
+end
+
+%% note right of LinkCurationSvc: The UI may refresh by polling decision preview or bulk refresh<br/>until it observes the updated cluster assignment
+
+----
+
+*Narrative aligned to the simplified diagram*
+
+*Submit user action.* A curator submits a user action for a mention identified by the correlation triad _(sourceId, requestId, entityType)_. In a compact UI vocabulary this may be expressed as actions such as acceptTop, acceptAlt, or rejectAll. Architecturally, these map to recommendation fields that the engine can evaluate:
+
+* *recommendedPlacement* (a preferred target clusterId), and/or
+* *recommendedExclusions* (a set of clusterIds that must not be used).
+Field names and allowed combinations are normative and defined in the ERS–ERE Technical Contract; any UI action vocabulary (acceptTop/acceptAlt/rejectAll) is non-normative and must map to these contract fields. +
+
+*Validate and accept or reject.* The Link Curation Service forwards the action to ERS, which validates:
+
+* the triad is known (the mention exists),
+* the action shape is valid,
+* any referenced targetClusterId values are syntactically valid and permitted,
+* concurrency constraints (for example optimistic conflict detection) are respected.
+If validation fails, the action is rejected with an explicit error. +
+
+*Record the action for traceability.* If accepted, ERS appends a record to the *User Action Log*. This log is read-only from the perspective of identity semantics: it exists for training, audit-style traceability, and operator review, not as an authority source for clustering. +
+*Trigger re-evaluation via the async contract.* ERS publishes a re-resolve request to the ERE through the messaging middleware, using the same asynchronous contract pattern as any other resolution request, but now enriched with recommendedPlacement and/or recommendedExclusions. +
+
+*Integrate the authoritative outcome.* The ERE publishes a resolution result asynchronously (primary clusterId plus alternatives as provided by the contract). ERS correlates by triad, processes idempotently (at-least-once delivery is assumed), and updates the *latest decision record per mention*. +
+
+*How the curator observes the change.* The initial response to the curator confirms that the recommendation was recorded and forwarded (typically 202 Accepted). The curator then observes the eventual updated placement through read-only views, for example by polling the decision preview or by using refreshBulk, depending on the UI design. +
+
+*Key behavioural commitments shown*
+
+* Curator actions are *recommendations*, not authoritative overrides.
+* ERS validates and records the action, but the *ERE remains binding* for the resulting cluster assignment.
+* The action is traceable (User Action Log) and does not bypass the standard ERS ↔ ERE contract boundary.
+* Outcome integration is idempotent and tolerant to late or duplicate deliveries.
+* The canonical identity exposed by ERS is the *latest authoritative cluster assignment recorded*, which may change after the curator action is submitted.
+
+*Authoritative state touched*
+
+* *User Action Log* (append-only): stores the curator action record (who, what, when, against which triad, and optional target clusterId).
+* *Decision Store* (latest decision per mention): updated when an authoritative engine outcome is received; stores current clusterId, top N alternatives when provided, contextId, and timestamps.
+No Canonical Entity Registry exists in ERS, and no lock semantics are introduced at this layer. Any stability or constraint behaviour must be expressed through the engine’s outcomes and the explicitly supported recommendation fields. +
+
+*Traceability*
+
+* *White Use Case(s):* UC-W2.
+* *Blue Use Case(s):* UC-B-2.1, UC-B-2.2.
+* *ADRs:* ADR-A1N, ADR-C1N, ADR-C2N (engine authority, recommendation semantics, asynchronous integration and idempotency).
+* *Contracts:* ERS Curation API (owner: ERS, REST, normative); ERS–ERE Technical Contract (asynchronous, normative).
+* *Detailed diagram artefact:* spine-D-curation.mmd (associated Mermaid artefact).

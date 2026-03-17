@@ -1,3 +1,0 @@
-tocTab[tocTab.length] = new Array("0.2.2.1", "1", "S1 resolve entity mention", "EARoot/EA2/EA2/EA1/EA166.htm", "4.png", "", "", "{902C13F9-7412-4676-8C36-C2D6C5B4B20C}", "Package");
-tocTab[tocTab.length] = new Array("0.2.2.2", "1", "S2 link curation", "EARoot/EA2/EA2/EA2/EA171.htm", "4.png", "", "", "{D1B1A467-FB5E-422f-9A0A-063837C8F243}", "Package");
-tocTab[tocTab.length] = new Array("0.2.2.3", "1", "S3 entity lookup", "EARoot/EA2/EA2/EA3/EA178.htm", "4.png", "", "", "{A082C43D-7A05-464b-AB64-9BA3E327D822}", "Package");

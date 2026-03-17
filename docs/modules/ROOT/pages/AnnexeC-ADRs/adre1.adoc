@@ -1,0 +1,58 @@
+== ADR-E1N — Recluster and Re-resolution Requests
+
+=== Context and Problem Statement
+
+Clustering quality may improve over time due to updated resolution logic, new data, or user recommendations. +
+Because ERE is authoritative for clustering, any corrective processing must operate through ERE and must not introduce a secondary governance layer in ERS. +
+The architecture requires explicit, side-effectful operations for corrective processing, clearly separated from read-only lookup, and aligned with the unified messaging model.
+
+=== Decision
+
+. *Explicit Corrective Operations*
+.. Re-resolution and reclustering are explicit operations in ERE.
+.. ERS client lookup operations are strictly read-only and shall not trigger re-processing or state mutation.
+. *Re-resolution Requests*
+.. Re-resolution is an explicit user-triggered operation. It occurs when a user requests a new clustering exercise because none of the recommended clusters are suitable.
+.. Re-resolution is performed by sending a resolution request to ERE using the unified message envelope defined in ADR-C2N. Re-resolution may include:
+... recommendedPlacement (clusterId)
+... recommendedExclusions (list of clusterIds)
+.. These are recommendations only. ERE evaluates the request and returns a new clustering outcome.
+.. ERS must persist and expose on lookup the latest cluster assignment returned by ERE.
+. *Reclustering (Full Rebuild) Operations*
+.. Reclustering represents a full rebuild of clusters performed discretely by ERE.
+.. Reclustering is triggered and executed by ERE discretely following its internal logic.
+.. ERS does not initiate reclustering.
+.. During reclustering, ERE emits updated clustering outcomes incrementally.
+.. ERS receives these updates and integrates them using the same idempotent projection update rules as any other ERE response.
+. *No Lock or Governance Preservation Layer in ERS*
+.. ERS does not enforce positive or negative locks during corrective processing.
+.. User-submitted exclusions and placements are forwarded as recommendations only.
+.. ERE remains the sole authority for accepting, ignoring, or superseding such recommendations.
+. *Uniform Integration Model*
+.. Outcomes from resolve, resolveConsideringRecommendation, reResolveWithExclusions, and recluster are integrated using the same projection update mechanism.
+.. The latest ERE outcome replaces any prior projection for the same mention.
+
+=== Scope and Applicability
+
+This decision applies to all corrective and administrative resolution workflows within ERS. +
+It governs the semantics of re-resolution, exclusions, and reclustering. +
+It does not prescribe engine algorithms, scheduling strategies, or infrastructure-level execution models.
+
+=== Considered Options
+
+* Implicit re-processing triggered by lookup or internal events.
+* Governance-preserving rebuild with immutable curator locks enforced by ERS.
+* Explicit corrective requests with recommendation-only semantics and ERE authoritative. _(Selected)_
+
+=== Rationale
+
+Explicit corrective operations prevent hidden side effects and allow operators and clients to reason about when clustering may change. +
+Treating exclusions and placements as recommendations preserves a single source of authority in ERE and avoids dual-governance complexity. +
+Using the same integration path for all clustering outcomes simplifies reasoning and reduces the risk of inconsistent state transitions.
+
+=== Consequences
+
+* Corrective processing may change previously observed canonical identifiers.
+* No user action or prior outcome guarantees immutability of assignment.
+* Lookup remains safe and free of side effects.
+* Any reintroduction of lock semantics or ERS-enforced constraint projection would require a new architectural decision.

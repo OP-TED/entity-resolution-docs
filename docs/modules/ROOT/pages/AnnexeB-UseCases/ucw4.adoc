@@ -1,0 +1,51 @@
+== UC-W4  Consult Resolution Statistics
+
+*Use Case Level:* White (Summary) +
+*Primary Actor:* Curator (human user) +
+*Scope:* Link Curation Application and ERS +
+*Stakeholders and Interests*
+
+* Curators require a concise and reliable overview of current clustering activity in order to prioritise review efforts and understand operational workload.
+*Brief Description* +
+This use case describes how a Curator consults aggregated, read-only statistics about the current state of entity resolution. +
+The statistics provide high-level indicators derived from the current operational state of the system. They are intended for situational awareness and workload prioritisation, not for auditing or governance control. +
+Statistics may include, per entity type and optionally per time window:
+
+* total number of Entity Mentions,
+* total number of canonical clusters (cluster identifiers) in the decissions store,
+* number of recent resolution requests (e.g last day),
+All statistics are aggregated counts. No individual Entity Mention, cluster, or decision details are exposed through this use case. +
+The operation is strictly read-only. It does not trigger resolution, re-evaluation, reclustering, or any modification of system state. +
+*Goal / Value* +
+Provide an aggregated and non-intrusive view of clustering and re-evaluation activity so that Curators can assess workload and operational dynamics without inspecting individual records. +
+*Scope (System-of-Interest)* +
+The Link Curation Application and ERSys, limited to retrieval and presentation of aggregated statistics derived from the Decision Store and related operational metadata. +
+*Out of Scope*
+
+* Inspection or modification of individual Entity Mentions or Cluster Assignments.
+* Operational performance monitoring and specific metrics.
+* Historical trend analysis beyond simple timeframe filtering.
+* Administrative or corrective actions.
+*Trigger* +
+A Curator works with the Link Curation app which always shows resolution statistics. +
+*Preconditions*
+
+* The Curator is authenticated and authorised to access statistical views.
+* The statistics interface is available.
+*Success Guarantees (Postconditions)*
+
+* Aggregated statistics are presented to the Curator, optionally scoped by entity type and timeframe.
+* Statistics reflect the observable state of the system at the time of retrieval.
+* No system state is modified.
+*Minimal Guarantees (On Failure)*
+
+* No system state is modified.
+* The Curator is informed that statistics are temporarily unavailable.
+*Notes / Business Rules*
+
+* Statistics are derived from existing operational stores .
+* Counts are indicative and may change as resolution, re-evaluation, and reclustering activities continue.
+* Statistics may temporarily reflect transitional states during high-volume reclustering operations.
+* Statistics are intended for operational awareness and must not be interpreted as audit or compliance artefacts.
+*Frequency of Occurrence* +
+Low; typically consulted during curation an review.

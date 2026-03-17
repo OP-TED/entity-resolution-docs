@@ -1,3 +1,0 @@
-tocTab[tocTab.length] = new Array("0.2.2.3:1", "", "S3 entity lookup", "EARoot/EA2/EA2/EA3/EA176.htm", "185.png", "61", "0", "", "Sequence diagram0","{71263CAD-3CE3-4606-9093-6CC015446E15}");
-tocTab[tocTab.length] = new Array("0.2.2.3:2", "", "found", "EARoot/EA2/EA2/EA3/EA179.htm", "101.png", "E1105", "0", "", "InteractionFragment0","{2C6BD873-67EB-4985-9A91-E718C73E35E3}");
-tocTab[tocTab.length] = new Array("0.2.2.3:3", "", "not found", "EARoot/EA2/EA2/EA3/EA180.htm", "101.png", "E1104", "0", "", "InteractionFragment0","{6FD7654A-8C6D-416a-8258-340375CA7F2D}");

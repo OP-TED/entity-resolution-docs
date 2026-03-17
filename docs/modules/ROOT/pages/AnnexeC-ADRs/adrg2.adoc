@@ -1,0 +1,64 @@
+== ADR-G2N — Authentication and Authorisation Model
+
+=== Context and Problem Statement
+
+ERS exposes administrative and curation capabilities that affect clustering workflows, re-resolution requests, and user action logging. +
+These operations require authenticated human access and controlled authorisation. +
+At the same time, authentication infrastructure (credential management, password storage, multi-factor policies, token issuance) is a cross-cutting enterprise concern and should not be reimplemented within ERS. +
+A clear separation is required between:
+
+* Authentication (who the user is).
+* Authorisation (what the user is allowed to do within ERS).
+This separation must not introduce ambiguity about clustering authority or allow identity governance to be influenced by authentication infrastructure.
+
+=== Decision
+
+. *External Authentication Authority*
+.. Authentication of human users accessing ERS administrative or curation interfaces shall be delegated to an external SSO system where available.
+.. The SSO system is the sole authority for:
+... Credential management
+... Authentication flows
+... Token issuance
+.. ERS shall not manage user credentials, passwords, or authentication mechanisms.
+. *Local Authorisation in ERS*
+.. ERS retains authority for authorisation decisions within its functional scope.
+.. ERS maintains role assignments such as Admin and Curator.
+.. Authorisation governs access to:
+... Re-resolution requests
+... Administrative operations
+. *No Governance Coupling*
+.. Authentication and authorisation mechanisms shall not redefine clustering authority.
+.. Even authorised users do not override ERE clustering outcomes directly; user actions are forwarded as recommendations under ADR-B2N and ADR-E1N.
+. *Revocation Semantics*
+.. Access revocation shall be effective subject to the guarantees of the SSO system and token/session semantics.
+ERS shall validate authenticated identity and associated roles for each protected operation.
+
+=== Scope and Applicability
+
+This decision applies to authentication of human users interacting with ERS administrative and curation capabilities. +
+It governs the separation of authentication and authorisation responsibilities. +
+It does not apply to:
+
+* Machine-to-machine authentication between ERS and ERE.
+* Identity governance policies within the SSO system.
+* User provisioning workflows or credential lifecycle management.
+=== Considered Options
+
+* *Local Authentication and Authorisation in ERS. *Implement credential storage and authentication flows within ERS.
+* *External Authentication with Local Authorisation. *Delegate authentication to an SSO system while retaining authorisation control within ERS. _(Selected)_
+* *Full External Identity Management. *Delegate both authentication and fine-grained authorisation to an external identity provider.
+
+=== Rationale
+
+Delegating authentication reduces security risk and avoids duplication of mature identity infrastructure. +
+Retaining authorisation within ERS preserves governance control over operational capabilities without coupling clustering semantics to external identity systems. +
+Explicitly preventing governance override through authentication roles maintains consistency with the authoritative ERE model.
+
+=== Consequences
+
+* ERS depends on external SSO availability for human authentication.
+* Role management remains an ERS responsibility.
+* Authorised users cannot directly override clustering outcomes; their actions remain recommendations processed by ERE.
+* Changes to authentication infrastructure do not affect canonical identity semantics.
+* Introducing machine-level or fine-grained external authorisation for clustering control would require a new architectural decision.
+

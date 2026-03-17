@@ -1,0 +1,63 @@
+== ADR-F1N — Representation and Payload Boundaries
+
+=== Context and Problem Statement
+
+Clustering authority resides in ERE, while ERS is responsible for forwarding domain data, projecting outcomes, and exposing canonical identifiers. +
+In such a split-responsibility architecture, confusion may arise in three areas:
+
+* Whether the payload exchanged between ERS and ERE is allowed to be engine-specific or reduced.
+* Whether canonical identity implies the existence of a canonical entity representation.
+* Whether UI preview data or candidate pruning rules influence identity semantics.
+If these concerns are not clearly separated, representation shape may silently influence clustering semantics, UI logic may leak into governance, or candidate filtering may redefine what “canonical” means. +
+This ADR clarifies what the payload contract is responsible for — and equally important, what it is not responsible for.
+
+=== Decision
+
+. *Single Domain-Driven Payload at the ERS–ERE Boundary*
+ERS forwards a complete, domain-driven representation of the mention to ERE.
+The ERS–ERE contract is engine-agnostic and does not contain engine-specific variants or degraded payload forms.
+The payload defines data only. It does not encode clustering heuristics, threshold semantics, or scoring policy.
+. *Identity Is Not a Representation*
+clusterId is the sole canonical identity anchor.
+ERS does not construct or expose a canonical entity representation as part of identity semantics.
+Any representation associated with a cluster is treated as data and does not redefine canonical identity.
+. *UI Preview Is Presentation-Only*
+Preview extraction for UI purposes is configuration-driven and best-effort.
+Preview data has no authority over clustering, projection state, or canonical identity.
+Failure to extract preview data shall not block resolution, re-resolution, or reclustering.
+. *Candidate Handling and Top-N Pruning*
+ERE returns candidate clusters and scores without boundary-level threshold enforcement.
+ERS may prune candidates internally to a configured top-N set for storage and UI usage.
+Thresholds used for automated decisions or filtering are internal ERS policies and do not redefine identity semantics.
+Only the final cluster assignment returned by ERE defines the canonical identifier.
+
+=== Scope and Applicability
+
+This decision applies to:
+
+* ERS–ERE request and response payload structure.
+* Candidate ingestion and pruning behaviour.
+* UI preview extraction.
+It does not govern clustering algorithms, scoring models, or internal feature engineering in ERE.
+
+=== Considered Options
+
+* Define separate payload variants per ERE implementation, allowing engine-optimised schemas and threshold semantics at the integration boundary.
+* Materialise and expose a canonical entity representation in ERS, with clustering and payload semantics tightly coupled.
+* Allow ERE to apply similarity/confidence thresholds before returning candidates, thereby shaping identity outcomes at the integration boundary.
+* Maintain one shared, engine-agnostic domain representation; treat clusterId as the only identity anchor; keep preview and pruning concerns internal to ERS. _(Selected)_
+
+=== Rationale
+
+A single domain-driven payload prevents hidden semantic coupling between engines and architectural contracts. +
+Decoupling identity from representation keeps clusterId as the only identity anchor and avoids long-term commitment to a canonical entity schema. +
+Isolating preview and pruning concerns prevents UI and operational policies from influencing clustering authority. +
+This separation keeps the architecture clean: ERE decides clusters, ERS mirrors outcomes, and representation concerns do not redefine identity.
+
+=== Consequences
+
+* Payload evolution must be coordinated at the domain model level, not per engine.
+* Clients must not assume the existence of a canonical entity representation beyond clusterId.
+* Candidate pruning policies can evolve without affecting identity semantics.
+* UI preview changes cannot alter clustering or canonical identity.
+* Introducing canonical payload semantics or boundary-level filtering rules would require a new architectural decision.

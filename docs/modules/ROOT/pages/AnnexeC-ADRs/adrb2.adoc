@@ -1,0 +1,67 @@
+== ADR-B2N — Decision Projection and User Action Log
+
+=== Context and Problem Statement
+
+ERS must expose, for each submitted mention, a clear and inspectable representation of the latest clustering outcome returned by ERE. +
+At the same time, the system must record user interactions for traceability and training purposes, without introducing a second source of authority over clustering semantics. +
+Under the authoritative ERE model, clustering decisions are not governed or overridden within ERS. ERS maintains projections and logs, not independent governance state. +
+A simplified decision model is therefore required that:
+
+* Reflects the latest ERE outcome per mention.
+* Avoids lifecycle state machines that imply governance authority in ERS.
+* Separates canonical projection state from user interaction history.
+
+=== Decision
+
+. *Single Latest Decision Projection per Mention*
+.. For each mention identified by (sourceId, requestId, entityType), ERS maintains exactly one decision projection.
+The decision projection contains:
+.. The current clusterId (canonical identifier) as returned by the latest processed ERE response.
+.. The top-N alternative cluster candidates returned in that same ERE response.
+.. A contextId used for client-facing correlation and traceability (stored in the System of Record and not transmitted to ERE).
+.. This projection is overwritten whenever a new clustering outcome is received from ERE.
+. *No Governance Lifecycle in ERS*
+.. ERS does not implement a decision lifecycle such as proposed, accepted, rejected, or confirmed.
+.. ERS registers proposals (including provisional placements and user recommendations) and forwards them to ERE for authoritative governance.
+.. ERE evaluates proposals and returns the authoritative clustering outcome.
+.. ERS persists and exposes the latest clustering outcome returned by ERE.
+. *User Actions as Recommendations*
+.. User actions (such as move or exclusion requests) are not authoritative decisions.
+.. ERS records user actions and forwards them to ERE as resolution requests with recommendations.
+.. ERE evaluates these recommendations and returns a new clustering outcome.
+.. ERS must persist and expose the clustering outcome returned by ERE, even if it differs from the user recommendation.
+. *User Action Log*
+.. ERS maintains a separate user action log.
+The user action log records:
+... What clustering outcome was visible to the user at the time of interaction.
+... What recommendation or exclusion was submitted.
+.. The user action log does not modify canonical state and is not consulted when determining the current cluster assignment.
+. *No Lock Semantics*
+.. ERS does not implement positive or negative locks.
+.. No curator action is immutable with respect to subsequent ERE clustering outcomes.
+.. Stability of clustering assignments is determined solely by ERE behaviour and identifier non-reuse rules.
+
+=== Scope and Applicability
+
+This decision applies to all resolution, re-resolution, recommendation, and user interaction workflows within ERS. +
+It governs how ERS stores and exposes clustering outcomes and how user interactions are recorded. +
+Engine scoring models, clustering algorithms, and internal optimisation strategies remain out of scope.
+
+=== Considered Options
+
+* Full governance lifecycle in ERS with curator-dominant lock semantics.
+* Shared lifecycle authority between user actions (in ERS) and ERE resolution outcomes.
+* Latest-outcome projection model with recommendation-only user actions and ERE as the single source of truth. _(Selected)_
+
+=== Rationale
+
+Under the authoritative ERE model, introducing governance lifecycles or lock semantics in ERS would create a second layer of authority and risk divergence from cluster state. +
+A latest-outcome projection model keeps ERS simple: it mirrors ERE outcomes and records interactions without redefining clustering semantics. +
+Separating user action logging from canonical projection preserves auditability and training data without compromising identity authority boundaries.
+
+=== Consequences
+
+* Clustering assignments may change over time even after user interaction.
+* No user action guarantees immutability of a cluster assignment.
+* Cluster identifiers exist within the same deterministic identifier space, but their canonical assignment to a given mention may vary over time.
+* Any introduction of governance locks or lifecycle states would require a new architectural decision.

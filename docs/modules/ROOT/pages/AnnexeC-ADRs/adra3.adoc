@@ -1,0 +1,51 @@
+== ADR-A3N — Identifier Stability and Assignment Mutability
+
+=== Context and Problem Statement
+
+ClusterIds are exposed as canonical identifiers and may be referenced by clients and downstream systems over long periods of time. +
+At the same time, cluster assignment for a mention may change due to improved resolution logic, user recommendations, or reclustering. +
+The architecture must protect identifier integrity and long-lived references while allowing assignment to evolve under ERE authority. +
+A clear distinction is therefore required between:
+
+* Stability of identifier existence.
+* Mutability of mention-to-cluster assignment.
+
+=== Decision
+
+. *Identifier Non-Revocation*
+.. A clusterId, once created, shall not be revoked, deleted, or reassigned to represent a different logical cluster.
+.. ClusterId is never recycled i.e. identifier nont reused for another cluster.
+.. ClusterId remains reserved even if the cluster becomes empty.
+. *Assignment Mutability*
+.. The assignment of a mention to a clusterId may change over time as determined by ERE.
+.. A canonical identifier previously returned for a mention may therefore be replaced by a different clusterId in subsequent projections or delta responses.
+. *Stability Definition*
+.. Identity stability is defined at the level of identifier existence and non-reuse, not at the level of mention-to-cluster binding.
+.. Stability does not imply immutability of assignment.
+. *No Versioned Canonical Identifiers*
+.. The system does not introduce versioned canonical identifiers, lineage chains, or revocation markers.
+.. The current canonical identity of a mention is always the latest cluster assignment returned by ERE.
+=== Scope and Applicability
+
+This decision applies to all clusterIds exposed through ERS APIs and referenced by clients or downstream systems. +
+It governs resolution, re-resolution, reclustering, and user-driven reassignment scenarios. +
+Internal optimisation, storage compaction, or clustering strategy changes are out of scope as long as identifier non-reuse is preserved.
+
+=== Considered Options
+
+* Allow unstable identifiers with free revocation or invalidation of clusterIds.
+* Introduce versioned or lineage-based canonical identifiers.
+* Preserve identifier existence while allowing assignment mutability. _(Selected)_
+
+=== Rationale
+
+Preserving identifier existence protects long-lived references and avoids cascading invalidation across dependent systems. +
+Allowing assignment mutability enables continuous improvement of clustering quality without requiring identifier migration or revocation semantics. +
+Avoiding versioned or lineage-based identifiers keeps the external contract simple and prevents scope expansion into historical modelling.
+
+=== Consequences
+
+* ClusterIds may exist that are no longer assigned to a given mention.
+* Clients must treat canonical identifiers as stable references, not as immutable indicators of cluster membership for a specific mention.
+* Resolution improvements affect assignment, not identifier existence.
+* Introducing revocation, reassignment of identifier values, or lineage exposure would require a new architectural decision.

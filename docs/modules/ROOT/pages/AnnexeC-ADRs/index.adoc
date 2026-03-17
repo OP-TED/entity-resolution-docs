@@ -1,0 +1,50 @@
+= Annexe C: Architecture Decision Records
+
+This annex records the key architectural decisions that shape ERSys, organised by theme (A–G). Each ADR documents the context, the decision made, and its consequences. All ADRs share a common conceptual frame: ERSys governs identity through system constructs, not through direct manipulation of real-world entities.
+
+[cols="2,4"]
+|===
+| Section | Purpose
+
+| xref:ROOT:AnnexeC-ADRs/introduction.adoc[Introduction and Index]
+| Purpose of the ADR annex, shared conceptual frame, and grouping of decision themes.
+
+| xref:ROOT:AnnexeC-ADRs/adra1.adoc[ADR-A1: Identifier Space and Cluster-as-Canonical Model]
+| Cluster identifiers and canonical identifiers are the same, derived deterministically from a shared space with no secondary governance layer.
+
+| xref:ROOT:AnnexeC-ADRs/adra2.adoc[ADR-A2: Provisional Identifier and Timeout Budget Model]
+| When ERE does not respond within the internal window, ERS issues a provisional singleton identifier, ensuring bounded client response.
+
+| xref:ROOT:AnnexeC-ADRs/adra3.adoc[ADR-A3: Identifier Stability and Assignment Mutability]
+| Cluster identifiers are stable; mention-to-cluster assignment is mutable under ERE authority and tracked via delta.
+
+| xref:ROOT:AnnexeC-ADRs/adrb1.adoc[ADR-B1: Authority Boundary: ERS Facade, ERE Authoritative]
+| ERE is the sole authority for clustering outcomes; ERS is responsible for interface stability, bounded behaviour, and correlation.
+
+| xref:ROOT:AnnexeC-ADRs/adrb2.adoc[ADR-B2: Decision Projection and User Action Log]
+| ERS maintains a Decision Store (latest outcome per mention) and a separate User Action Log for traceability, with no secondary governance in ERS.
+
+| xref:ROOT:AnnexeC-ADRs/adrc1.adoc[ADR-C1: Client Resolution Semantics]
+| Synchronous, bounded client-facing interaction: always returns a canonical identifier within the client timeout, engine-resolved or provisional.
+
+| xref:ROOT:AnnexeC-ADRs/adrc2.adoc[ADR-C2: ERS–ERE Message Types and Delivery Semantics]
+| At-least-once, idempotent asynchronous messaging tolerates duplicates and out-of-order delivery without hidden timing coupling.
+
+| xref:ROOT:AnnexeC-ADRs/adrd1.adoc[ADR-D1: Authoritative Stores and State Separation]
+| Explicit authority boundaries: ERE owns the cluster store; ERS owns request registry, decision store, and user action log.
+
+| xref:ROOT:AnnexeC-ADRs/adrd2.adoc[ADR-D2: refreshBulk Delta Tracking and Client Synchronisation]
+| ERS tracks lastNotificationDate per originId and returns deterministic, bounded assignment change sets for client resynchronisation.
+
+| xref:ROOT:AnnexeC-ADRs/adre1.adoc[ADR-E1: Recluster and Re-resolution Requests]
+| Corrective re-processing operates through ERE via unified messaging; no secondary governance path inside ERS.
+
+| xref:ROOT:AnnexeC-ADRs/adrf1.adoc[ADR-F1: Representation and Payload Boundaries]
+| ERS forwards full original payload to ERE; canonical identity does not imply canonical entity representation; UI preview data does not influence identity semantics.
+
+| xref:ROOT:AnnexeC-ADRs/adrg1.adoc[ADR-G1: Observability and Telemetry]
+| Observability strategy for distributed async environment: traces provisional issuance, assignment changes, and delta exposure.
+
+| xref:ROOT:AnnexeC-ADRs/adrg2.adoc[ADR-G2: Authentication and Authorisation Model]
+| Authentication delegated to external identity provider; authorisation implemented via role-based access control in ERS.
+|===

@@ -1,0 +1,18 @@
+== Introduction and reading guide
+
+This Use Case Catalogue defines the behavioural contract of the Entity Resolution System (ERSys): what the system guarantees to its actors, under which conditions, and with which explicit limitations. It follows the principles of Alistair Cockburn’s Writing Effective Use Cases, separating value-oriented system behaviour from internal behavioural refinement, while deliberately avoiding implementation detail. +
+The catalogue is authoritative on externally observable behaviour, including canonical identity exposure, idempotent request handling, bounded originator interaction, user-initiated re-evaluation, integration of authoritative engine outcomes, and synchronisation semantics. +
+ERSys follows an engine-authoritative clustering model. Cluster identifiers managed by the Entity Resolution Engine (ERE) constitute canonical identity. ERSys exposes and tracks the latest Cluster Assignment per Entity Mention but does not independently govern identity semantics. +
+This document is not an API specification, data schema, or implementation guide; those concerns are addressed in dedicated contract and architecture artefacts.
+
+=== White and Blue use cases
+
+Two use case levels are used consistently:
+
+* White use cases (Summary level) describe the value ERSys provides to an actor and the guarantees that always hold, including under degraded conditions. They define stable behavioural expectations and system boundaries and are the primary reference for reviewers and stakeholders.
+* Blue use cases (User-goal level) refine a White use case into how the system fulfils that value through interactions between ERS responsibilities and supporting components. They remain technology-agnostic but make responsibility boundaries, idempotency rules, and failure paths explicit for implementers.
+White use cases define the contract; Blue use cases explain its realisation.
+
+=== How to read this document
+
+Readers interested in guarantees and scope should start with the White use cases. Readers responsible for implementation, integration, or review should then consult the corresponding Blue use cases together with the relevant Architecture Decision Records. Terminology is used consistently according to the Business Glossary. Any apparent conflict must be resolved by aligning with the authoritative artefact hierarchy defined for the ERSys documentation set.

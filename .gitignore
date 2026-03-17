@@ -1,0 +1,9 @@
+.gitnexus
+node_modules/
+package.json
+package-lock.json
+docs/build/
+.gitnexus
+.vcs
+.pycharm_plugin
+.idea

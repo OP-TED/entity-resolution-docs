@@ -1,3 +1,0 @@
-tocTab[tocTab.length] = new Array("0.2.1", "1", "L2 process", "EARoot/EA2/EA1/EA94.htm", "4.png", "", "", "{18A720A4-ED29-4a45-90D4-AC3FB60D00F0}", "Package");
-tocTab[tocTab.length] = new Array("0.2.2", "1", "L2 sequences", "EARoot/EA2/EA2/EA160.htm", "4.png", "", "", "{7A87841F-AD30-4b1d-ACDF-E364EADECA25}", "Package");
-tocTab[tocTab.length] = new Array("0.2.3", "1", "proto-L4 sequence (outdated)", "EARoot/EA2/EA3/EA181.htm", "4.png", "", "", "{66A77210-1BBC-4615-B5D5-7587829538D5}", "Package");
