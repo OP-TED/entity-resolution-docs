@@ -3,15 +3,18 @@
 *Use Case Level:* Blue (User-goal) +
 *Primary Actor:* Originator (e.g. TED-SWS, Link Curation Backend, or any submitting system) +
 *Scope:* Entity Resolution System (ERSys)  Public Lookup Interface +
+
 *Supporting Actors*
 
 . Decision Store (latest Cluster Assignment per mention)
 . Delta Tracking Mechanism (lastNotificationDate per originId)
+
 *Stakeholders and Interests*
 
 * The Originator requires a deterministic, read-only mechanism to retrieve all Cluster Assignment changes since the last synchronisation point recorded for that originId.
 * ERS operators require bounded execution, stable delta semantics, and independence from synchronous ERE interaction.
 * Downstream consumers depend on a reliable reconciliation mechanism to observe canonical identity changes caused by resolution, draft identifier replacement, user recommendation flows, or internal ERE reclustering.
+
 *Brief Description* +
 This use case describes the bulk retrieval of Cluster Assignment updates for a given originId. +
 The Originator invokes the refreshBulk operation for its originId. +
@@ -22,18 +25,22 @@ Where:
 
 * lastUpdateDate is updated whenever the Decision Store records a new Cluster Assignment for a mention,
 * lastNotificationDate represents the timestamp of the last successfully completed refreshBulk response for that originId.
+
 Cluster Assignment changes may originate from:
 
 . Direct resolution responses from ERE.
 . Replacement of a Draft Identifier by an authoritative ERE outcome.
 . User recommendation or exclusion flows resulting in a new authoritative ERE outcome.
 . Internal ERE reclustering.
+
 *Trigger* +
 The Originator invokes refreshBulk for its originId. +
+
 *Preconditions*
 
 * The originId exists and has previously submitted resolution requests.
 * ERS maintains delta tracking state for the originId.
+
 *Success Guarantee (Postconditions)* +
 For a successful refreshBulk invocation:
 
@@ -45,11 +52,13 @@ For a successful refreshBulk invocation:
 .. contextId (if present)
 . After successful response emission, ERS updates lastNotificationDate for the originId.
 . No state other than delta tracking metadata is modified.
+
 *Minimal Guarantees (On Failure)*
 
 * If the originId is unknown, ERS returns a NOT_FOUND outcome.
 * If an internal inconsistency prevents retrieval of Decision Store records, ERS returns an explicit service error and does not update lastNotificationDate.
 * refreshBulk does not depend on synchronous ERE interaction and shall not block on engine availability.
+
 *Main Success Scenario*
 
 . The Originator invokes refreshBulk.
@@ -60,13 +69,16 @@ For a successful refreshBulk invocation:
 *Extensions* +
 1a. No updates available  ERS returns an empty collection and updates lastNotificationDate. +
 2a. Partial data inconsistency detected  ERS returns a service error and does not update lastNotificationDate. +
+
 *Special Requirements*
 
 * Read-only semantics: refreshBulk does not create, update, or trigger any clustering activity.
 * Delta accuracy: all Cluster Assignment changes must update lastUpdateDate at write time.
 * Cluster identifiers returned reflect the latest authoritative outcome from ERE.
 * refreshBulk is independent of client timeout budgets defined for resolve operations.
+
 *Technology and Data Variations* +
 The lookup interface may be exposed through different transport mechanisms depending on deployment. Pagination may be applied if the update set is large, without altering delta semantics. +
+
 *Frequency of Occurrence* +
 Medium to high; expected to be invoked periodically by Originators performing reconciliation and downstream publication updates.

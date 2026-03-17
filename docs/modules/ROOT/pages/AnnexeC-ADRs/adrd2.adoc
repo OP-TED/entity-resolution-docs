@@ -7,6 +7,7 @@ Under the authoritative ERE model, cluster assignments for a mention may change 
 * provisional replacement
 * user recommendation processing
 * reclustering
+
 Because canonical identifiers are equivalent to clusterIds and assignment is mutable, clients require a deterministic mechanism to detect changes after an initial resolution call has completed. +
 Without an explicit delta exposure contract, clients cannot reliably maintain consistency with evolving cluster state.
 

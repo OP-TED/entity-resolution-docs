@@ -11,6 +11,7 @@ Two use case levels are used consistently:
 
 * White use cases (Summary level) describe the value ERSys provides to an actor and the guarantees that always hold, including under degraded conditions. They define stable behavioural expectations and system boundaries and are the primary reference for reviewers and stakeholders.
 * Blue use cases (User-goal level) refine a White use case into how the system fulfils that value through interactions between ERS responsibilities and supporting components. They remain technology-agnostic but make responsibility boundaries, idempotency rules, and failure paths explicit for implementers.
+
 White use cases define the contract; Blue use cases explain its realisation.
 
 === How to read this document

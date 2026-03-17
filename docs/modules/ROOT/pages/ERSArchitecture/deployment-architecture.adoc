@@ -8,6 +8,7 @@ The primary purpose of this section is to make explicit:
 * which interfaces are externally exposed versus internally consumed,
 * where (authoritative) data is persisted,
 * and which infrastructure services are assumed by the reference setup.
+
 This section intentionally does not specify a production-grade cloud-native deployment, orchestration platform, or operational hardening profile. Concerns such as Kubernetes-based deployments, horizontal auto-scaling strategies, multi-region redundancy, managed cloud services, infrastructure-as-code pipelines, and platform-specific security controls are considered out of scope for this architecture document. Future deployment variants, including cloud-native or managed-service configurations, are expected to evolve as the system matures and may be addressed in dedicated deployment, operations, or cloud architecture documents, without altering the core architectural responsibilities, interfaces, or governance model defined here.
 
 === 11.1 Runtime topology and container grouping
@@ -73,4 +74,5 @@ Such evolution must preserve the architectural invariants defined in earlier sec
 * ERS remains projection-centric and exposure-disciplined;
 * EntityMention remains immutable and triad-identified;
 * asynchronous messaging remains the sole integration boundary.
+
 Infrastructure may evolve. Authority boundaries may not.
