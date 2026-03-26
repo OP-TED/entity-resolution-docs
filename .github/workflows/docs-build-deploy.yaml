@@ -2,7 +2,7 @@ name: Docs Build & Deploy
 
 on:
   push:
-    branches: [develop, feature/ERS1-158/ci-flow]  # TODO: remove feature branch after testing
+    branches: [develop]
     paths-ignore:
       - "*.md"
       - "LICENSE"
@@ -10,7 +10,7 @@ on:
       - ".mcp.json"
       - ".readthedocs.yaml"
   pull_request:
-    branches: [develop, feature/ERS1-158/ci-flow]  # TODO: remove feature branch after testing
+    branches: [develop]
     paths-ignore:
       - "*.md"
       - "LICENSE"
