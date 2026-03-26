@@ -1,5 +1,8 @@
 # Entity Resolution Service — Architecture and Specification Documentation
 
+[![Docs Build & Deploy](https://github.com/meaningfy-ws/entity-resolution-docs/actions/workflows/docs-build-deploy.yaml/badge.svg?branch=develop)](https://github.com/meaningfy-ws/entity-resolution-docs/actions/workflows/docs-build-deploy.yaml)
+[![License](https://img.shields.io/badge/license-Apache%202.0-green)](./LICENSE)
+
 This repository contains the **official baseline architecture, technical specifications, and use-case catalogue** for the Entity Resolution System (ERSys) ecosystem.
 
 The documentation establishes the architectural foundation, integration contracts, and decision records that govern all ERSys implementations.
@@ -112,22 +115,22 @@ docs/
 
 ## Deployment
 
+### CI/CD (GitHub Actions)
+
+Documentation is automatically built and deployed via GitHub Actions:
+
+- **On pull requests** to `develop` — the Antora build runs to verify the docs compile without errors.
+- **On push/merge** to `develop` — the docs are built and deployed to [GitHub Pages](https://meaningfy-ws.github.io/entity-resolution-docs/).
+
+The workflow is defined in `.github/workflows/docs-build-deploy.yaml`.
+
 ### Manual deployment
 
-To preview locally teh docs.
-
-```bash
-make preview-docs
-# Upload docs/build/site/ to your host
-```
-
-Build the site and upload `docs/build/site/` to any static hosting:
+Build the site locally and upload `docs/build/site/` to any static host:
 
 ```bash
 make build-docs
-# Upload docs/build/site/ to your host
 ```
-
 
 ---
 
@@ -156,7 +159,7 @@ make build-docs
 
 5. **Open a Pull Request** against `develop`.
 
-6. **Merge** after approval. GitHub Actions will automatically build and deploy.
+6. **Merge** after approval — GitHub Actions will automatically build and deploy to GitHub Pages.
 
 ---
 
