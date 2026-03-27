@@ -1,0 +1,69 @@
+== ADR-B1N — Authority and Responsibilities: ERS Façade, ERE Authoritative
+
+=== Context and Problem Statement
+
+The system integrates a single ERE that may vary in implementation and be replaced over time. +
+Canonical identity is expressed through clusters, and cluster identifiers are the canonical identifiers exposed to clients. +
+In a distributed setting with asynchronous processing, the architecture must avoid conflicting sources of truth for cluster assignment, because even small ambiguity about “who decides” immediately produces divergent states, brittle integration contracts, and non-reproducible identity outcomes. +
+A single component must therefore be authoritative for clustering outcomes and cluster assignment, while the other component must focus on interface stability, bounded client-facing behaviour, correlation, persistence of the latest assignment, and observability.
+
+=== Decision
+
+The ERE is the sole authority for clustering outcomes. +
+The ERS acts as a façade and coordinator and is not an authority over clustering semantics. +
+The following rules are binding:
+
+. *Canonical identity source of truth*
+.. Canonical identity is equivalent to an ERE-managed cluster.
+.. Cluster identifiers are canonical identifiers.
+.. The ERE cluster store is the single source of truth for clustering state and cluster assignment semantics.
+. *Binding nature of ERE outcomes*
+.. Any cluster assignment returned by ERE for a mention is binding.
+.. ERS shall accept, persist, and expose the latest cluster assignment returned by ERE.
+.. This applies equally to outcomes following initial resolution, provisional placement feedback, user placement recommendations, exclusion-based re-resolution, and reclustering.
+. *No ERS veto or governance override*
+.. ERS has no veto power over ERE outcomes.
+.. ERS shall not apply governance rules that override, freeze, or reinterpret ERE cluster assignments.
+.. ERS shall not implement stability guards beyond preventing improper identifier reuse.
+. *Provisional placements and user actions are recommendations*
+.. When ERS issues a provisional singleton placement due to its own execution window, that placement is a temporary recommendation communicated to ERE.
+.. When a user submits a placement recommendation or exclusions, ERS forwards them to ERE as recommendations.
+.. ERE may confirm or replace any such recommendation.
+.. ERS must reflect the latest ERE outcome, even if that changes a previously exposed canonical identifier.
+. *ERS responsibilities*
+.. Expose public APIs and provide a stable client-facing façade.
+.. Enforce request correlation and idempotency at the API boundary.
+.. Implement client-facing timeout handling, including issuance of provisional singleton placements when required.
+.. Forward resolution and recommendation requests to ERE using the agreed message contract.
+.. Persist the latest known placement per mention (clusterId) as an access-optimised projection.
+.. Persist the top-N alternatives returned by ERE as a bounded snapshot of the latest outcome.
+.. Maintain delta tracking for refreshBulk.
+.. Maintain a user action log for traceability and training purposes.
+. *ERE responsibilities*
+.. Perform clustering and assignment computation.
+.. Maintain clusters and cluster identifiers in its authoritative store.
+.. Evaluate recommendations (provisional placements, user placements, exclusions) and return a new clustering outcome.
+.. Ensure cluster identifier management prevents improper reuse.
+=== Scope and Applicability
+
+This decision applies to all ERS–ERE interactions and contracts, including resolution requests, recommendation requests, reclustering, and any asynchronous update mechanism through which ERE returns clustering outcomes. +
+This decision governs authority boundaries and ownership of identity semantics. It does not prescribe engine algorithms, scoring models, storage technology, or internal optimisation strategies.
+
+=== Considered Options
+
+* ERS authoritative for identity and governance, ERE advisory.
+* Shared authority with coordinated governance semantics.
+* ERE authoritative for clustering and canonical identity; ERS façade and coordinator. _(Selected)_
+=== Rationale
+
+Making the ERE authoritative for clustering establishes a single semantic source of truth for identity, which removes the need for cross-component reconciliation and prevents silent divergence between “computed clusters” and “served canonical identifiers”. +
+Constraining ERS to a façade role keeps external contracts stable and implementable: ERS can focus on bounded client-facing behaviour, correlation, persistence of the latest assignment, and operational traceability, without encoding engine-dependent governance semantics. +
+Treating both provisional placements and user actions as recommendations preserves a uniform interaction pattern while ensuring that the authoritative clustering model remains consistent and engine-controlled.
+
+=== Consequences
+
+* Canonical identifiers exposed by ERS may change for a given mention over time, as the ERE returns updated clustering outcomes.
+* ERS must persist and serve the latest placement projection, not an independently governed canonical state.
+* Any notion of curator dominance, immutable locks, or governance confidence that overrides engine outcomes is incompatible with this authority model.
+* Engine replaceability remains possible, but changing the ERE implementation may change clustering outcomes; ERS cannot compensate for this through governance overrides.
+* Identifier stability is limited to the invariant that identifiers are not reused improperly; stability does not mean immutability of mention-to-cluster assignment.

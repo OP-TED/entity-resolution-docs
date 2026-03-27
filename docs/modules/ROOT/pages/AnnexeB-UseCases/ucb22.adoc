@@ -1,0 +1,68 @@
+=== UC-B2.2  Submit Bulk Curator Re-evaluation Requests
+
+*Use Case Level:* Blue (User-goal) +
+*Primary Actor:* Curator (human user) +
+*Scope:* Link Curation Application and ERS Curator Interaction Interface (bulk mode) +
+*Supporting Actors*
+
+* Entity Resolution System (ERS)
+* Entity Resolution Engine (ERE)
+* Decision Store (latest Cluster Assignment per mention)
+*Goal* +
+Allow a Curator to request re-evaluation of multiple Entity Mentions in a single bulk operation by applying a uniform recommendation pattern, without directly modifying canonical identity. +
+*Trigger* +
+The Curator selects multiple Entity Mentions in the Link Curation application and initiates a bulk re-evaluation action. +
+*Preconditions*
+
+* Each selected Entity Mention exists in the Decision Store and has a current Cluster Assignment.
+* The system can retrieve the clustering context for each selected mention.
+* The Curator is authenticated and authorised to submit bulk re-evaluation requests.
+*Brief Description* +
+This use case describes the processing of a Curator-initiated bulk re-evaluation request under the engine-authoritative clustering model. +
+Canonical identity is defined as a cluster managed by the Entity Resolution Engine (ERE). Cluster identifiers are canonical identifiers. ERE is authoritative for clustering outcomes and its decisions are binding. +
+Bulk mode allows the Curator to apply a uniform recommendation to multiple mentions. Supported bulk actions include:
+
+. Submit a common Placement Recommendation for each selected mention.
+. Submit a common Exclusion Recommendation for each selected mention.
+Bulk processing is defined as a set of independent single-mention re-evaluation requests. No shared clustering semantics are introduced across mentions. +
+Upon submission:
+
+* ERS validates the bulk request.
+* For each selected mention, ERS forwards the corresponding recommendation to ERE using the appropriate interaction type.
+* ERS does not modify any Cluster Assignment at submission time.
+ERE evaluates each mention independently and returns authoritative clustering outcomes asynchronously. +
+ERS updates the Decision Store per mention only after receiving authoritative outcomes from ERE. +
+*Success Guarantee (Postconditions)* +
+For each valid mention in the bulk submission:
+
+. The re-evaluation request is forwarded to ERE.
+. No immediate change to the stored Cluster Assignment occurs until ERE responds.
+. Upon receiving an authoritative outcome, ERS updates the Decision Store to reflect the resulting Cluster Assignment.
+. Any change in Cluster Assignment updates delta tracking for refresh operations.
+Bulk submission supports partial success. Each mention is processed independently. +
+*Minimal Guarantees (On Failure)*
+
+* If one or more selected mentions are invalid or no longer eligible, those mentions are rejected individually while others may proceed.
+* If ERS cannot forward a request for a particular mention to ERE, that mention’s Cluster Assignment remains unchanged and no intermediate state is created.
+* Curator bulk actions do not directly modify canonical identity without an authoritative outcome from ERE.
+*Main Success Scenario*
+
+. The Curator selects multiple mentions and chooses a bulk re-evaluation action.
+. ERS validates each selected mention.
+. ERS forwards individual recommendations for each mention to ERE.
+. ERE evaluates each mention independently and returns authoritative clustering outcomes.
+. ERS updates the Decision Store per mention to reflect the resulting Cluster Assignments.
+*Extensions* +
+1a. Partial validation failure:  Invalid mentions are rejected individually; valid mentions proceed. +
+2a. Concurrent modification detected:  If a mention has already been updated by a separate operation, ERS applies correlation rules and forwards the request; the authoritative outcome from ERE prevails. +
+3a. No change in outcome: ERE confirms existing Cluster Assignment; no delta update occurs. +
+*Special Requirements* +
+Bulk re-evaluation introduces no governance override semantics. +
+ERE decisions are binding. +
+Each mention is processed atomically and independently. +
+ERS stores only the latest Cluster Assignment per mention and does not maintain canonical lineage. +
+All resulting Cluster Assignment changes must update delta tracking. +
+*Technology and Data Variations* +
+The bulk interaction mechanism may vary by deployment. Message formats and interaction types are defined in the ERS–ERE contract. +
+*Frequency of Occurrence* +
+Low to medium; used for operational efficiency when reviewing multiple related mentions.

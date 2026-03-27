@@ -1,0 +1,76 @@
+== 6. System context and cooperation
+
+This section presents the structural context of ERSys and the service-based cooperation between ERSys and surrounding systems. It defines the system boundary, externally exposed application services, internal application components, and the contracts through which integration is realised. +
+The views in this section are structural. They describe components, services, interfaces, and their relationships. They do not define execution order, timing semantics, or behavioural rules. Behavioural sequencing and guarantees are specified in the use cases and interaction diagrams in subsequent sections. +
+All diagrams are expressed using ArchiMate notation. These views correspond to context and application cooperation perspectives and shall be interpreted exclusively according to ArchiMate semantics.
+
+=== 6.1 System context and boundary (Business L1)
+
+At the business layer, ERSys is represented as a coherent system exposing a small and stable set of externally visible services to clearly defined roles. These services define the contractual boundary of ERSys and constitute the only supported interaction modes with external actors and systems. +
+ERSys provides the following business services:
+
+* entity resolution intake service, serving the Originator role for submission of entity mentions and return of canonical identifiers, whether engine-produced or provisional under the configured time budget;
+* canonical lookup service, serving the Downstream Consumer role for retrieval of current canonical identifiers and mention-to-cluster assignments, including bulk refresh and delta-based synchronisation of assignment changes;
+* link curation service, serving the Curator role for submission of recommendation requests concerning clustering outcomes via the link curation web application.
+External systems interact with ERSys exclusively through these services. A single external system may assume multiple roles concurrently. For example, a processing pipeline may act both as Originator when submitting mentions and as Downstream Consumer when synchronising canonical assignments. Such examples illustrate role assumption patterns and do not constrain the architecture to a specific integration scenario. +
+The business L1 view clarifies responsibility boundaries. ERSys is responsible for exposing authoritative cluster assignments as canonical identity references and for maintaining the latest recorded resolution decision per mention for exposure and synchronisation purposes. External systems remain responsible for their own data semantics, data lifecycle, and downstream usage of identifiers.
+
+image::L1.png[]
+
+This diagram presents the business-level system context of ERSys, showing the interaction roles and the externally visible services that form its contractual boundary. Business roles represent interaction authority. Application services represent externally exposed capabilities. The ERSys boundary denotes architectural responsibility rather than deployment topology or organisational ownership. +
+The view is strictly a boundary and responsibility map. It does not express execution order, timing semantics, or internal processing logic.
+
+=== 6.2 Application cooperation and responsibility allocation (Application L2)
+
+At the application layer, ERSys is realised as a set of separately deployable yet interconnected application components with clearly separated responsibilities and explicit authority boundaries. The Link Curation Application, the Entity Resolution Service (ERS), and the Entity Resolution Engine (ERE) are all part of ERSys from an architectural perspective, even though they are deployed as distinct components. The view focuses on allocation of responsibility, ownership of state, and contractual cooperation between components. +
+
+image::L2 - Application Cooperation Overview.png[]
+
+*Entity Resolution Service (ERS)* +
+The ERS is the central orchestration and exposure component within ERSys. It:
+
+* exposes all external application interfaces corresponding to the business services;
+* enforces client-facing time budgets and integration discipline;
+* forwards resolution and recommendation requests to the entity resolution engine through the defined asynchronous contract;
+* records the latest authoritative clustering outcome per mention;
+* manages authoritative persistence of its exposure state.
+ERS does not determine clustering logic or canonical identity semantics independently. It exposes canonical identifiers that originate from clustering outcomes produced by the engine, or issues provisional identifiers under the configured time budget model. +
+*Link Curation Application* +
+The Link Curation Web Application is a user-facing component of ERSys that supports curator interaction. Although deployed separately from ERS and ERE, it remains within the architectural boundary of ERSys. It accesses other ERSys components exclusively through the Link Curation REST API exposed by ERS. It has no direct access to the resolution engine or to internal persistence components. +
+*Entity Resolution Engine (ERE)* +
+The ERE is a computational application component responsible for clustering logic and similarity assessment. It:
+
+* receives resolution and re-resolution requests from ERS through the ERS–ERE asynchronous interface;
+* executes clustering algorithms and scoring logic;
+* produces clustering outcomes including cluster identifiers and associated assessment signals.
+Clustering authority resides in the ERE. The cluster identifier generated by the engine constitutes the canonical identifier exposed by ERS. +
+*Asynchronous contract between ERS and ERE* +
+Cooperation between ERS and ERE is realised through an explicit asynchronous application interface. This contract defines the structure of resolution requests and clustering outcomes and isolates engine-internal logic from external identity exposure. +
+ERS depends on this interface for authoritative clustering outcomes. ERE realises the contract and does not access ERS persistence directly. +
+*Persistence within ERS* +
+Persistence within ERSys that is owned and managed by ERS consists of:
+
+* the request registry, acting as the system of record for submitted entity mentions and correlation metadata;
+* the resolution decision store, containing the latest authoritative cluster assignment per mention together with the top N alternatives returned by the most recent engine outcome;
+* the user action log, maintaining a read-only trace of curator recommendations and related interaction metadata.
+ERS persistence reflects the latest recorded clustering outcome received from the ERE and the corresponding exposure state. It does not maintain canonical lineage graphs or an independent canonical entity registry. +
+No external application component, including the link curation web application and the ERE, has direct access to these stores. +
+This diagram presents the application-level cooperation structure within and around ERSys using ArchiMate application layer elements. Application components represent logical deployable units. Application interfaces represent explicit contracts. The view is structural and does not express runtime sequencing or behavioural guarantees, which are defined in the use cases and interaction diagrams.
+
+=== 6.3 Interfaces and contracts
+
+All cooperation between components within ERSys, and between ERSys and external actors, is mediated through explicit and versioned contracts. These contracts define structural responsibilities, message semantics, and authority boundaries. They do not prescribe transport technology or deployment topology. +
+Three contract families are architecturally relevant. +
+*ERS public REST APIs* +
+ERS owns and exposes the public REST APIs that realise the business services defined at L1. These APIs cover entity resolution intake, canonical lookup including bulk refresh and delta synchronisation, and link curation operations. They constitute the sole supported synchronous interaction boundary for external systems. +
+*Link Curation REST API* +
+The Link Curation Web Application interacts with ERS exclusively through a dedicated REST interface owned by ERS. This contract isolates user-facing interaction from internal state and from the resolution engine. No other direct integration path is permitted. +
+*ERS–ERE asynchronous technical contract* +
+Cooperation between ERS and ERE is governed by a message-based asynchronous contract that defines request and response structures, correlation identifiers, idempotent processing semantics, and canonical identifier derivation rules. This contract is normative and is specified in the ERS–ERE System Technical Contract document. +
+ERS and ERE each realise this contract and are independently replaceable provided they conform to it. The contract governs what messages are exchanged and under which semantics, but it does not mandate a specific messaging middleware or infrastructure. +
+Detailed syntactic specifications, including but not limited to OpenAPI definitions, JSON schemas, or LinkML models, may be maintained in separate contract artefacts for implementation convenience. These artefacts are technical realisations of the contracts and may evolve independently, provided that the normative contract semantics are preserved. This section defines architectural contract ownership and responsibility boundaries only; it does not bind ERSys to any specific modelling language, schema technology, or implementation format.
+
+=== 6.4 Interpretation
+
+The views defined in this section establish the structural foundation for the behavioural descriptions that follow. They define which actors and application components may interact with ERSys, through which services and contracts, and where authority resides with respect to clustering, exposure, and persistence. +
+Subsequent sections describe observable system behaviour through use cases and interaction diagrams. Those behavioural descriptions shall not redefine, extend, or contradict the structural boundaries, authority allocations, or contract ownership established here.

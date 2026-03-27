@@ -1,0 +1,55 @@
+== ADR-A1N — Identifier Space and Cluster-as-Canonical Model
+
+=== Context and Problem Statement
+
+ERSys must expose canonical identifiers that remain stable, reproducible, and interoperable across repeated submissions and long-lived data flows. +
+Under the authoritative ERE model, canonical identity is equivalent to cluster identity. There is no secondary governance layer in ERS that confers canonical status independently of ERE clustering outcomes. +
+Ambiguity around identifier value space, derivation rules, and the relationship between cluster identifiers and canonical identifiers would create semantic drift between ERS projections and ERE cluster state. +
+The architecture therefore requires a single, deterministic identifier space shared across ERS and ERE, where cluster identifiers and canonical identifiers are the same identifiers.
+
+=== Decision
+
+. *Cluster-as-Canonical Principle*
+.. A clusterId produced and managed by ERE is a canonical identifier.
+.. There is no distinction in value space between cluster identifiers and canonical identifiers.
+.. Canonical identity is equivalent to cluster membership in ERE.
+. *Identifier Value Space*
+.. ClusterIds exist within a deterministic identifier space derived from the mention-level identifier tuple:
+... (sourceId, requestId, entityType)
+... The normative derivation rule for singleton cluster identifiers is:
+SHA256(concat(sourceId, requestId, entityType))
+... This rule defines the deterministic value for initial singleton clusters.
+. *Deterministic Singleton Derivation*
+.. When a mention is first resolved into a singleton cluster (including provisional placement), the clusterId shall be deterministically derived from the mention-level tuple using the specified rule.
+.. Both ERS and ERE shall implement the same derivation rule.
+.. No centralised runtime allocation service shall be introduced for singleton identifiers.
+. *Shared Identifier Space*
+.. All clusterIds, whether singleton or multi-member clusters, must reside within the same global identifier space.
+.. Once a clusterId has been used to represent a cluster, it shall not be reassigned to a different logical cluster.
+. *Assignment Mutability*
+.. While clusterIds are stable values, the assignment of a mention to a clusterId may change over time as determined by ERE.
+.. Canonical identity for a mention therefore reflects the latest cluster assignment, not an immutable binding established at first exposure.
+=== Scope and Applicability
+
+This decision applies to all usages of clusterIds and canonical identifiers across ERS APIs, ERS–ERE interaction, persistence projections, and documentation. +
+It governs identifier value semantics and their relationship to clustering state. +
+It does not prescribe internal clustering algorithms, scoring models, or merge/split strategies in ERE.
+
+=== Considered Options
+
+* Centralised runtime minting of canonical identifiers in ERS.
+* Engine-specific identifier generation with translation at the ERS boundary.
+* Deterministic shared identifier space with cluster-as-canonical semantics. _(Selected)_
+=== Rationale
+
+Using a shared deterministic identifier space eliminates translation between "cluster identifiers" and "canonical identifiers" and removes ambiguity about which component confers identity. +
+Deterministic derivation for singleton clusters guarantees reproducibility and stability without requiring coordination or central allocation. +
+Separating identifier value stability from assignment stability allows cluster membership to evolve while preserving identifier integrity and non-reuse guarantees.
+
+=== Consequences
+
+* Canonical identifiers are equal to clusterIds produced and managed by ERE.
+* A canonical identifier previously returned for a mention may change if ERE reassigns that mention to a different clusterId.
+* Identifier values remain stable once created, but mention-to-cluster assignment is mutable.
+* Any change to the derivation rule or identifier value space constitutes a foundational architectural change.
+* Introducing a separate canonical registry or identifier translation layer would require a new architectural decision.

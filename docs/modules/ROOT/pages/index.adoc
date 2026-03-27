@@ -1,0 +1,25 @@
+= Entity Resolution System Documentation
+
+This documentation describes the Entity Resolution System (ERS), a set of baseline architecture, technical contracts, and supporting materials for managing canonical entity identifiers across distributed systems.
+
+Use this guide to understand the system scope, integration points, and architectural decisions. Start with the table below to navigate to your area of interest.
+
+[cols="2,4"]
+|===
+| Section | Purpose
+
+| xref:ERSArchitecture/index.adoc[ERS Architecture]
+| Describes system scope, actors, capabilities, behaviour spines, conceptual models, and deployment architecture.
+
+| xref:ERS-ERE-Contarct/index.adoc[ERS-ERE Technical Contract]
+| Specifies the message-based interfaces, idempotent processing rules, and canonical identifier semantics for ERS–ERE communication.
+
+| xref:AnnexeA-Glossary/index.adoc[Annexe A: Glossary]
+| Definitions of domain terms, abbreviations, and concepts used throughout the documentation.
+
+| xref:AnnexeB-UseCases/index.adoc[Annexe B: Use Cases]
+| Catalogue of business use cases covering worker and back-office workflows.
+
+| xref:AnnexeC-ADRs/index.adoc[Annexe C: Architecture Decision Records]
+| Records of key architectural decisions (ADR-A through ADR-G) and their rationale.
+|===

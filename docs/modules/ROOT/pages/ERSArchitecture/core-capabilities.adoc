@@ -1,0 +1,256 @@
+== 7. Core system capabilities (White Use Cases)
+
+This section summarises the core behavioural capabilities of ERSys through a small set of White Use Cases. +
+White Use Cases are normative: they define what ERSys guarantees to its actors and what can be observed at the system boundary, independently of internal algorithms, storage technology, or deployment choices. At the same time, we avoid duplicating long-form use case narratives in the main architecture text, because that is where drift likes to hide. +
+*Authoritative specification location.* The full, normative White and Blue Use Case texts are maintained in *Annexe B (Use Case Catalogue)*. This section provides an architectural digest and traceability anchors:
+
+* which capability exists and why it matters,
+* which actor triggers it,
+* which guarantees are externally observable,
+* which contracts and spines realise it.
+The scope here is deliberately limited to the *resolution lifecycle under the engine-authoritative clustering model*:
+
+* submission of entity mentions and bounded identifier issuance,
+* curator recommendations that trigger re-evaluation, without turning curation into an “override” layer,
+* client synchronisation via delta exposure (refreshBulk), because assignments can change after the initial response,
+* read-only consultation of aggregated statistics.
+Operational concerns such as user management, authentication technology, monitoring, and deployment automation are intentionally excluded from this section and addressed in dedicated security and operations artefacts. +
+*Important boundary note.* Reprocessing and rebuild are *ERE-internal* concerns. ERSys does not expose a “rebuild service” as a first-class administrative capability. When the engine reprocesses and produces updated clustering outcomes, those outcomes flow through the standard asynchronous responses channel and become observable to clients through the same delta mechanisms as any other assignment change.
+|===
+|*White UC ID*|*Title*|*Primary actor*|*Core capability*|*Architectural significance*
+
+|UC-W1|Resolve Entity Mention|API Client (Originator)|Return a clusterId (canonical identifier) for a submitted mention within the client time budget, using a provisional singleton when the ERS–ERE execution window expires|Establishes the main client-facing contract: dual time budgets, idempotent correlation by triad, provisional lifecycle, and “latest assignment wins” semantics
+|UC-W2|Recommend Resolution Update (Curation)|Curator|Submit recommendations (preferred placement and/or exclusions) for an existing mention; ERS forwards them to ERE for authoritative re-evaluation|Makes human input explicit and traceable, while preserving engine authority; ensures recommendations follow the same contract pattern as provisional placement
+|UC-W3|Synchronise Resolution Updates (refreshBulk)|API Client (Downstream Consumer / Originator)|Retrieve the set of mentions whose cluster placement changed since the last successful bulk refresh for a given originId|Encodes the system’s reconciliation mechanism under mutable assignment: delta rule (lastNotificationDate < lastUpdateDate), at-least-once tolerance, no push assumptions
+|UC-W4|Consult Resolution Statistics|Curator|Retrieve aggregated, read-only indicators of resolution and curation activity|Supports governance oversight and prioritisation without exposing sensitive record content or mutating authoritative state
+|===
+Each subsection that follows provides a compact digest for the corresponding White Use Case and points to the authoritative text in xref::AnnexeB-UseCases/index.adoc[Annexe B], the relevant xref:AnnexeC-ADRs/index.adoc[ADRs in Annexe C], and the behavioural spine(s) where the guarantees are realised.
+
+=== 7.1 Resolve Entity Mention (UC-W1)
+
+*Purpose and value:* UC-W1 defines the primary capability that makes ERSys useful for interoperability: an originator submits an *Entity Mention* (a description artefact) and receives a *clusterId (canonical identifier)* that can be used immediately as a stable reference in downstream pipelines. The tricky bit, of course, is that entity resolution is computationally variable and sometimes slow, while client integrations are usually impatient and have strict timeouts. UC-W1 therefore expresses a bounded, client-facing contract that keeps the API predictable, while still respecting the engine-authoritative clustering model. +
+
+*Primary actor:* API Client (Originator). +
+*Trigger:* The Originator calls the ERS resolve operation for one Entity Mention. +
+
+*Entry point and contracts*
+
+* *Interface*: ERS public REST API (Resolve).
+* *Engine boundary*: ERS–ERE asynchronous technical contract for resolution requests and outcomes.
+* *Correlation key (triad)*: _(sourceId, requestId, entityType)_.
+*Success outcomes (externally observable)* +
+On success, the Originator observes that:
+
+* ERS returns a *clusterId (canonical identifier)* within the *client↔ERS timeout budget*.
+* The returned identifier is within the *single identifier value space* used by ERSys (no “secondary” canonical registry identifiers).
+* If the ERE responds within the *ERS↔ERE execution window*, ERS returns the *clusterId produced by the ERE*.
+* If the ERE does not respond within the ERS↔ERE execution window, ERS returns a *provisional singleton clusterId* (still a valid canonical identifier at the moment of response) and submits the corresponding *recommended placement* to ERE for authoritative evaluation.
+*Failure outcomes (externally observable)* +
+If the request cannot be accepted or processed, the Originator observes that:
+
+* ERS returns an explicit error response (validation and contract errors are first-class).
+* ERS does not claim that identity was established when it was not, meaning no “silent success” or ambiguous outcomes.
+
+*Rules and invariants that constrain UC-W1*
+
+* *Engine authority*: the ERE is authoritative for clustering outcomes and canonical identity materialisation; ERS does not decide equivalence, it records and exposes outcomes.
+* *Dual time budgets*: client↔ERS budget is enforced at the REST boundary; ERS↔ERE execution window is shorter and drives provisional issuance.
+* *Provisional lifecycle is normal*: a canonical identifier may change after the initial response if the ERE later replaces the provisional assignment; this is expected and is reconciled via refreshBulk and subsequent lookups.
+* *Idempotency and correlation*: processing is correlated by the triad and must tolerate retries and at-least-once delivery patterns without creating inconsistent “double state”.
+* *Latest outcome wins (projection semantics)*: ERS exposes the latest authoritative cluster assignment it has recorded for the mention.
+
+*State touched (ERS-owned)*
+
+* *Request Registry*: records acceptance of the mention and the correlation metadata required for idempotency and traceability.
+* *Decision Store*: updates the *latest decision record per mention*, including the current clusterId, top N alternatives (when provided by ERE), contextId, and relevant timestamps.
+* *Delta tracking*: updates the “lastUpdateDate” used by refreshBulk whenever the recorded placement changes.
+
+*Behavioural spine mapping*
+
+* Realised primarily by *Spine A* (bounded intake and identifier issuance) and *Spine B* (asynchronous engine outcomes, including late outcomes and provisional replacement).
+
+*Authoritative detailed specification*
+
+* Full normative text and extensions: *Annexe B, UC-W1 (and related Blue UCs)*.
+* Contract realisations: ERS OpenAPI (Resolve) and the ERS–ERE Technical Contract.
+
+=== 7.2 Recommend Resolution Update (UC-W2)
+
+*Purpose and value* +
+UC-W2 captures the human-in-the-loop capability of ERSys, but under the engine-authoritative clustering model. A curator does not “override” canonical identity directly. Instead, the curator provides *recommendations* that act like additional evidence: preferred placement, negative constraints, or both. ERS records these actions for traceability and forwards them to the ERE using the same asynchronous contract pattern as any other resolution interaction. The value is practical: we let humans correct or refine difficult cases, while keeping the system semantics clean and interoperable, meaning the ERE remains the single authority for the resulting clustering outcome. +
+*Primary actor:* Curator (human user), acting via the Link Curation Web Application. +
+*Trigger:* The curator selects an existing mention (or a set of mentions) and submits a recommendation to re-evaluate its current cluster placement. +
+
+*Entry point and contracts*
+
+* *Interface*: Link Curation REST API exposed by ERS (curation operations).
+* *Engine boundary*: ERS–ERE asynchronous technical contract.
+* *Correlation key (triad)*: _(sourceId, requestId, entityType)_.
+
+*Success outcomes (externally observable)* +
+On success, the curator observes that:
+
+* ERS accepts a recommendation that is explicitly tied to a known mention (by triad) and acknowledges it.
+* The recommendation is expressed using the unified request vocabulary, typically:
+** *recommendedPlacement* (preferred clusterId), and/or
+** *recommendedExclusions* (list of excluded clusterIds).
+* ERS forwards the recommendation to the ERE as a standard resolution request variant, preserving correlation and idempotency semantics.
+* Once the ERE produces a new clustering outcome, ERS records the *latest cluster assignment per mention* and exposes it through lookup and refreshBulk.
+* The curator can later observe the updated placement (or lack of change) through the same read-only mechanisms as any other client.
+
+*Failure outcomes (externally observable)* +
+If the recommendation cannot be accepted or processed, the curator observes that:
+
+* ERS returns an explicit error (unknown mention, invalid clusterId references, or malformed request).
+* No partial state is exposed as if it were authoritative; recommendations are not “half applied”.
+
+*Rules and invariants that constrain UC-W2*
+
+* *Recommendations are not authority*: curator actions do not directly modify canonical identity. They are inputs to ERE evaluation.
+* *Engine authority remains binding*: the ERE may accept or revert the recommendation; the resulting cluster assignment is authoritative.
+* *Same pattern as provisional placement*: recommendations are transmitted as resolution requests, not as a special governance backdoor.
+* *At-least-once tolerance and idempotency*: duplicate deliveries or retries must not create inconsistent recorded outcomes.
+* *Latest outcome wins (projection semantics)*: ERS exposes the latest authoritative outcome it has recorded for the mention.
+
+*State touched (ERS-owned)*
+
+* *User Action Log*: records the curator’s recommendation as a read-only trace (training and accountability oriented).
+* *Decision Store*: updates the latest decision record per mention when an authoritative engine outcome is received (current clusterId, top N alternatives when provided, contextId, timestamps).
+* *Delta tracking*: if the recorded placement changes, the change becomes eligible for refreshBulk delta exposure.
+
+*Behavioural spine mapping*
+
+* Realised primarily by *Spine D* (curation as a recommendation submission) and *Spine B* (engine re-evaluation outcomes and their integration).
+
+*Authoritative detailed specification*
+
+* Full normative text and detailed flows: *Annexe B, UC-W2 (and related Blue UCs)*.
+* Contract realisations: ERS OpenAPI (Link Curation endpoints) and the ERS–ERE Technical Contract.
+
+=== 7.3 Reflection of Engine Reclustering Outcomes (UC-W3)
+
+*Purpose and value* +
+UC-W3 defines the practical reconciliation mechanism that makes the engine-authoritative model workable for real integrations. If clustering outcomes can arrive late, and if a mention-to-cluster assignment may change over time, then a client needs a predictable way to ask: _what changed since I last checked?_ refreshBulk is that mechanism. It is deliberately pull-based and delta-oriented, because push notifications tend to create hidden coupling and brittle delivery guarantees. The result is a simple integration story: clients keep using clusterId as the canonical identifier, and periodically synchronise changes using refreshBulk. +
+
+*Primary actor: *API Client acting as Downstream Consumer (and in some cases also the Originator). +
+
+*Trigger:* The client calls the ERS refreshBulk operation for a given originId to retrieve placement changes not previously exposed to that originId. +
+
+*Entry point and contracts*
+
+* *Interface*: ERS public REST API (refreshBulk).
+* *Correlation*: results are expressed in terms of Entity Mention identifiers (triad) and their current clusterId.
+* *No engine contract dependency at call time*: refreshBulk is served from ERS state; it does not synchronously depend on ERE availability.
+
+*Success outcomes (externally observable)* +
+On success, the client observes that:
+
+* ERS returns a list of mentions whose recorded placement *changed* since the last successful notification point for that originId.
+* Each returned item includes the key correlation and resolution fields needed for downstream reconciliation, typically:
+** request_identifier (triad and/or requestId as defined by the API contract),
+** *stable_identifier (clusterId)*,
+** contextId (for correlation with engine outcomes),
+** timestamps relevant to delta semantics.
+* The delta rule is timestamp-based and stable: *lastNotificationDate < lastUpdateDate*.
+* Changes may originate from multiple sources, and refreshBulk treats them uniformly:
+** initial resolve outcomes,
+** engine-initiated reclustering (unsolicited outcomes),
+** curator recommendations leading to re-evaluation,
+** replacement of provisional placement by a later engine outcome.
+
+*Failure outcomes (externally observable)* +
+If refreshBulk cannot be served, the client observes that:
+
+* ERS returns an explicit error (authorisation failure, invalid originId, temporary unavailability).
+* No state is partially advanced. In particular, ERS must not move the notification watermark forward unless a response is successfully produced according to the API contract.
+
+*Rules and invariants that constrain UC-W3*
+
+* *Delta semantics are about placement, not about engine events*: refreshBulk is driven by changes in the recorded mention-to-cluster assignment.
+* *Latest outcome wins*: the current clusterId exposed for a mention is the latest authoritative assignment recorded by ERS.
+* *No push guarantee is implied*: refreshBulk is the supported synchronisation mechanism; clients should not assume callbacks or notifications.
+* *At-least-once tolerance upstream*: engine outcomes may arrive late or duplicated, but refreshBulk exposes a clean, deduplicated view based on recorded state.
+* *Scope is per originId*: exposure history is tracked per client originId; different consumers can observe deltas independently.
+
+
+*State touched (ERS-owned)*
+
+* *Decision Store*: provides the current recorded placement per mention and the timestamps used for delta computation.
+* *Delta tracking state*: maintains, per originId, the last successful notification watermark (lastNotificationDate) and updates it only on successful refreshBulk completion.
+* *Request Registry*: may be used to validate mention identifiers and preserve traceability, but refreshBulk does not change request records.
+
+*Behavioural spine mapping*
+
+* This UC is realised by a dedicated behavioural spine for bulk synchronisation (to be aligned with Section 8), and depends indirectly on *Spine B* because any recorded placement change originates from engine outcomes.
+
+*Authoritative detailed specification*
+
+* Full normative text and edge cases (including large responses and continuation strategy):*Annexe B, UC-W3 (and related Blue UCs)*.
+* Contract realisation: ERS OpenAPI (refreshBulk) and the conceptual Decision Record Model used for timestamps and correlation fields.
+
+=== 7.4 Consult Resolution Statistics (UC-W4)
+
+*Purpose and value* +
+UC-W4 provides lightweight situational awareness for human operators. When you run an entity resolution capability in real life, you quickly need answers to simple questions: _How much is pending? Are we accumulating unresolved cases? Is the system active, quiet, or in churn?_ UC-W4 covers this without turning ERSys into an analytics platform. The statistics are intentionally limited to aggregated counts and simple indicators that help prioritise curation and spot operational anomalies, while keeping record-level content and identity assignments protected. +
+
+*Primary actor:* Curator (human user), acting via the Link Curation Web Application. +
+
+*Trigger:* The curator requests a read-only statistics view, typically scoped by entityType and optionally by a time window. +
+
+*Entry point and contracts*
+
+* *Interface*: Link Curation REST API exposed by ERS (statistics endpoint).
+* *Data source*: derived from ERS-owned stores (Decision Store and User Action Log), not from engine internals.
+* *No engine contract dependency at call time*: statistics are served from ERS state; ERE availability is not a synchronous dependency.
+
+*Success outcomes (externally observable)* +
+On success, the curator observes that:
+
+* ERS returns an aggregated, read-only summary of the current observable state of resolution and curation activity.
+* The result can be scoped by entityType and may include simple indicators such as:
+** volume of mentions processed,
+** volume of placement changes observed recently,
+** counts of items requiring attention (for example, those with low confidence or marked for review, if such a categorisation is part of the contract),
+** counts of curator actions recorded over a period.
+* The response does not expose individual mentions, individual clusterIds, candidate lists, or any record-level payload content.
+
+*Failure outcomes (externally observable)* +
+If statistics cannot be retrieved, the curator observes that:
+
+* ERS returns an explicit error indicating temporary unavailability or authorisation failure.
+* No authoritative state is changed; the operation remains strictly read-only.
+
+*Rules and invariants that constrain UC-W4*
+
+* *Read-only by construction*: the UC must not mutate decision state, placements, or delta tracking.
+* *No canonical registry semantics*: statistics are not based on a separate canonical registry, and they do not imply an independent lifecycle of canonical entities inside ERS.
+* *Indicative, not compliance-grade*: these indicators support operational oversight; they are not audit evidence and not a regulatory trace.
+* *Eventual consistency is acceptable*: during high churn (for example, when the ERE publishes reclustering outcomes), aggregated counts may lag slightly behind the newest recorded decision updates.
+
+*State touched (ERS-owned)*
+
+* *Decision Store (read)*: provides counts and simple aggregations over the latest decision records per mention.
+* *User Action Log (read)*: provides aggregate measures of curator activity and recommendation volume.
+* *No writes*: UC-W4 does not write to any store.
+
+*Behavioural spine mapping*
+
+* Realised through the Link Curation read-only interaction pattern, and depends indirectly on all other spines because they create the underlying state that is being summarised.
+
+*Authoritative detailed specification*
+
+* Full normative text, metric catalogue, and scoping rules: *Annexe B, UC-W4 (and related Blue UCs)*.
+* Contract realisation: ERS OpenAPI (statistics endpoint) and the conceptual information model for Decision Records and User Action Logs.
+
+=== 7.5 Relationship to detailed behaviour and architectural decisions
+
+The White Use Cases referenced in this section constitute the normative behavioural contract of ERSys: they define the externally observable capabilities and guarantees that the system must uphold at its boundary, independently of implementation choices. +
+This section provides an architectural digest for readability and traceability. The *authoritative* use case specifications, including both White and Blue levels, are maintained in *Annexe B (Use Cases)*. +
+Detailed behaviour and architectural constraints are refined through the following artefacts, each with a distinct role:
+
+* *Blue Use Cases (Annexe B)* refine White Use Cases into implementable behaviour, while remaining within the same external guarantees.
+* *Architecture Decision Records (Annexe C)* define binding architectural decisions and invariants that constrain what designs and implementations are allowed.
+* *Behavioural spine diagrams (Section 8)* illustrate architecturally significant interaction patterns and responsibility transfers. They operationalise the use cases and invariants, but they *do not introduce additional guarantees* beyond what is stated in the Use Cases and the ADRs.
+* *ERS public API specifications and the ERS–ERE Technical Contract* define the concrete interoperability boundary. They must remain consistent with the use cases and ADRs and must not silently redefine system semantics.
+
+In case of ambiguity between behavioural descriptions, precedence is governed by the document’s authority and precedence by concern rules defined in the introduction. As a practical rule: Use Cases define externally observable guarantees, ADRs constrain architectural choices, and this architecture document (including spines) must remain a coherent consolidation that does not weaken or contradict them.

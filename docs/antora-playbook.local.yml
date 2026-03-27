@@ -1,0 +1,36 @@
+site:
+  title: Entity Resolution Service Documentation
+#  url: https://entity-resolution-service.readthedocs.io
+  start_page: entity-resolution-docs::index.adoc
+
+content:
+  sources:
+    - url: ./..
+      start_path: docs
+      branches: [HEAD]
+      worktrees: true
+      tags: []
+      edit_url: false
+
+ui:
+  bundle:
+    url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
+    snapshot: true
+  supplemental_files: ./supplemental-ui
+
+asciidoc:
+  attributes:
+    experimental: ''
+    idprefix: ''
+    idseparator: '-'
+    page-pagination: ''
+
+antora:
+  extensions:
+    - require: '@sntke/antora-mermaid-extension' # <1>
+      mermaid_library_url: https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs # <2>
+      script_stem: header-scripts # <3>
+      mermaid_initialize_options: # <4>
+        start_on_load: true
+    - require: '@antora/lunr-extension'
+      snippet_length: 250
