@@ -46,14 +46,17 @@ Keyboard shortcuts are available on the *Decisions* page only.
 |===
 | Key | Action
 
+| kbd:[↑] / kbd:[↓]
+| Navigate up or down through the decision queue list.
+
+| kbd:[Enter]
+| Select the highlighted decision for review, displaying the comparison panel.
+
 | kbd:[A]
-| Accept the currently selected decision.
+| Accept the currently displayed decision.
 
 | kbd:[R]
-| Reject the currently selected decision.
-
-| kbd:[↑] / kbd:[↓]
-| Navigate up or down through the decision queue.
+| Reject the currently displayed decision.
 |===
 
 NOTE: Shortcuts are disabled when keyboard focus is inside a text input or text area (e.g., the Search box).
