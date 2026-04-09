@@ -11,6 +11,8 @@ image::curation/full-decisions-page.png[Full Decisions page]
 The filter bar lets you narrow the decision list by score range, full-text search, and sort order.
 All filters are combinable and apply in real time.
 
+image::curation/filter-bar.png[Filter bar with Confidence and Similarity dropdowns]
+
 [cols="1,3"]
 |===
 | Filter | Description
@@ -32,7 +34,6 @@ Options: _Created At (Newest/Oldest)_, _Updated At (Newest/Oldest)_, _Confidence
 | Full-text search across entity mention field data (name, identifiers, and other parsed attributes).
 |===
 
-image::curation/filter-bar.png[Filter bar with Confidence and Similarity dropdowns]
 
 == Decision List
 
