@@ -1,7 +1,7 @@
 = Curation Web Application — User Guide
 :description: User guide for the Entity Resolution curation web application.
 
-The Curation Web Application is the front-end tool curators use to review entity resolution decisions produced by the Entity Resolution Engine (ERE) and record their feedback.
+The Curation Web Application offers a graphical user interface which curators use to review entity resolution decisions produced by the Entity Resolution Engine (ERE) and record their feedback.
 
 == Purpose
 
