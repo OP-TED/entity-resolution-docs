@@ -27,3 +27,6 @@
 ** xref:UserGuide/curation-guide-history.adoc[Action History]
 ** xref:UserGuide/curation-guide-admin.adoc[User Management]
 
+* API Reference
+** xref:api-docs/ers/index.adoc[ERS REST API]
+** xref:api-docs/curation/index.adoc[Curation REST API]
