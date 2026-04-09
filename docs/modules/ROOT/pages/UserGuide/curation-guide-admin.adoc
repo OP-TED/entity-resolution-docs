@@ -1,0 +1,93 @@
+= User Management
+:description: How to create and manage user accounts in the Curation Web Application admin panel.
+
+The *Admin* page is accessible to superusers only.
+It provides a central view of all registered accounts and lets you control who can access the curation application and with what level of privilege.
+
+image::curation/admin-user-list.png[User management page showing the user table]
+
+== The User Table
+
+Each row in the table represents one user account and shows:
+
+[cols="1,3"]
+|===
+| Column | Meaning
+
+| *Email*
+| The user's login address.
+
+| *Active*
+| Whether the account is enabled.
+Inactive users cannot sign in.
+
+| *Superuser*
+| Whether the user has administrator privileges, including access to this admin panel.
+
+| *Verified*
+| Whether the user is allowed to access the Curation application.
+Unverified users can sign in but are blocked from browsing decisions or history.
+
+| *Created*
+| Date the account was registered.
+|===
+
+The list is paginated. Use the pagination controls at the bottom to move between pages and adjust how many rows are shown.
+
+== Searching Users
+
+Type in the *Search by email* field to filter the list to accounts whose email address matches the text you enter.
+The list updates in real time as you type.
+Clear the field to return to the full list.
+
+== Adding a User
+
+. Click *Add User* in the top-right corner.
+. Fill in the form that appears:
+  * *Email* — the user's unique email address (required).
+  * *Password* — a password of at least 8 characters (required).
+  * *Active* — whether the account is immediately enabled (on by default).
+  * *Superuser* — whether the user has admin privileges (off by default).
+  * *Verified* — whether the user can access the curation application (on by default).
+. Click *OK* to create the account.
+
+If an account with the same email already exists, the form will show an error and no account will be created.
+
+image::curation/admin-add-user.png[Add User modal with email, password, and toggle fields]
+
+== Editing a User
+
+Click the *edit* icon on any row to open the edit form for that user.
+You can adjust the three status toggles:
+
+[cols="1,3"]
+|===
+| Toggle | Effect when changed
+
+| *Active*
+| Turning this off deactivates the account — the user will not be able to sign in until it is turned back on.
+Turning it on reactivates a previously deactivated account.
+
+| *Superuser*
+| Grants or revokes administrator privileges and access to this admin panel.
+
+| *Verified*
+| Grants or revokes access to the Curation application.
+Use this to onboard a new user or to temporarily suspend their curation access without fully deactivating the account.
+|===
+
+Click *OK* to save your changes.
+
+image::curation/admin-edit-user.png[Edit User modal showing the Active, Superuser, and Verified toggles]
+
+NOTE: The system prevents removing the last active administrator. If you attempt to deactivate or remove superuser status from the only remaining active superuser, the action will be rejected with an error.
+
+== Deactivating a User
+
+Click the *deactivate* (delete) icon on any active user row.
+A confirmation dialog will ask you to confirm before proceeding.
+
+image::curation/admin-deactivate-confirm.png[Deactivation confirmation dialog]
+
+Deactivation sets the account to inactive — the user is immediately blocked from signing in.
+The account and all its history are preserved and can be reactivated at any time via the edit form.

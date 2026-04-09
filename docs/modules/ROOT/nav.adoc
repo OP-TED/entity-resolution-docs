@@ -25,4 +25,5 @@
 * xref:UserGuide/curation-guide-overview.adoc[Curation User Guide]
 ** xref:UserGuide/curation-guide-decisions.adoc[Decisions Review]
 ** xref:UserGuide/curation-guide-history.adoc[Action History]
+** xref:UserGuide/curation-guide-admin.adoc[User Management]
 

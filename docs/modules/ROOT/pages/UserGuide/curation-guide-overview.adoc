@@ -22,6 +22,11 @@ Recorded feedback is used by the engine when re-evaluating decisions.
 | xref:UserGuide/curation-guide-history.adoc[Action History]
 | Browse the log of all past curatorial actions.
 Filter by action type and actor; inspect the clusters and candidates at the time of each action.
+
+| xref:UserGuide/curation-guide-admin.adoc[User Management]
+| Create and manage user accounts.
+Control who can access the application, verify users to grant curation access, and assign superuser privileges.
+Available to superusers only.
 |===
 
 == Authentication
