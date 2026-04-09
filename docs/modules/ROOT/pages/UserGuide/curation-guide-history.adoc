@@ -1,0 +1,88 @@
+= Action History
+:description: How to browse and inspect past curatorial actions in the Curation Web Application.
+
+The *History* page provides a read-only audit trail of all curatorial actions taken by all users.
+Use it to verify past feedback, investigate discrepancies, or review a colleague's work.
+
+[NOTE]
+====
+Screenshot placeholder: full History page.
+====
+
+== Filtering and Ordering Actions
+
+[cols="1,3"]
+|===
+| Filter | Description
+
+| *Action*
+| Filter by action type: _All Actions_, _Accept Top_, _Accept Alternative_, _Reject All_.
+
+| *User*
+| Filter by the curator who performed the action.
+
+| *Sort by*
+| Order by _Created At (Newest)_ or _Created At (Oldest)_.
+|===
+
+[NOTE]
+====
+Screenshot placeholder: filter bar with Action type and User dropdowns open.
+====
+
+== Action List
+
+The left panel lists all actions matching the active filters.
+Each item shows the action type (colour-coded badge), the entity name, and when the action was recorded.
+
+[cols="1,1"]
+|===
+| Action type | Badge colour
+
+| Accept Top
+| 🟢 Green
+
+| Accept Alternative
+| 🔵 Blue
+
+| Reject All
+| 🔴 Red
+|===
+
+Select any item to load its detail in the right panel.
+
+[NOTE]
+====
+Screenshot placeholder: action list with several items and type badges.
+====
+
+== Action Detail
+
+Selecting an action shows its full context.
+
+The header displays the entity name, action type badge, the curator's email, and the timestamp.
+
+=== Entity and Selected Cluster
+
+Two cards are shown side by side:
+
+* *Left* — the entity mention that was curated.
+* *Right* — the cluster the curator selected.
+  For *Accept Top* and *Accept Alternative* actions, this shows the chosen cluster with its entities and scores.
+  For *Reject All* actions, this area shows that no cluster was selected.
+
+[NOTE]
+====
+Screenshot placeholder: action detail for an Accept Alternative action, showing entity card and selected cluster.
+====
+
+=== Candidates
+
+Below the cards, all candidate clusters that were presented to the curator at the time of the action are listed.
+Expand any candidate to inspect its entities and scores.
+The cluster that was selected is visually distinguished from the others.
+
+[NOTE]
+====
+Screenshot placeholder: candidates section with the selected cluster highlighted.
+====

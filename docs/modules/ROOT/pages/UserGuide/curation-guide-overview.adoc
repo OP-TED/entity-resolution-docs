@@ -1,0 +1,56 @@
+= Curation Web Application — User Guide
+:description: User guide for the Entity Resolution curation web application.
+
+The Curation Web Application is the front-end tool curators use to review entity resolution decisions produced by the Entity Resolution Engine (ERE) and record their feedback.
+
+== Purpose
+
+When the resolution engine proposes a cluster match for an entity mention, it attaches a **confidence score** that reflects how certain the engine is.
+Decisions whose confidence falls below a configurable threshold are surfaced in this application for manual review.
+The curator examines the proposed match and records their feedback — accepting the top candidate, selecting an alternative cluster, or rejecting all candidates.
+Recorded feedback is used by the engine when re-evaluating decisions.
+
+== Application Pages
+
+[cols="1,3"]
+|===
+| Page | Purpose
+
+| xref:UserGuide/curation-guide-decisions.adoc[Decisions Queue]
+| Browse decisions pending review and record curator feedback.
+
+| xref:UserGuide/curation-guide-history.adoc[Action History]
+| Browse the log of all past curatorial actions.
+Filter by action type and actor; inspect the clusters and candidates at the time of each action.
+|===
+
+== Authentication
+
+Access requires a verified account provisioned by an administrator.
+
+. Navigate to the application URL.
+. Enter your *email* and *password* and click *Sign In*.
+. On success you are redirected to the Decisions Queue.
+. If the page redirects back to login, contact your administrator — your account may not be verified yet.
+
+NOTE: User registration and account management features are currently in progress and will be documented when available.
+
+== Keyboard Shortcuts
+
+Keyboard shortcuts are available on the *Decisions* page only.
+
+[cols="1,3"]
+|===
+| Key | Action
+
+| kbd:[A]
+| Accept the currently selected decision.
+
+| kbd:[R]
+| Reject the currently selected decision.
+
+| kbd:[↑] / kbd:[↓]
+| Navigate up or down through the decision queue.
+|===
+
+NOTE: Shortcuts are disabled when keyboard focus is inside a text input or text area (e.g., the Search box).

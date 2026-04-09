@@ -1,0 +1,126 @@
+= Decisions Queue
+:description: How to review, accept, reject, and select alternative clusters for resolution decisions in the Curation Web Application.
+
+The *Decisions* page is the primary workspace.
+It lists resolution decisions that require manual review and lets you record your feedback on each proposed match.
+
+[NOTE]
+====
+Screenshot placeholder: full Decisions page.
+====
+
+== Filtering and Ordering Decisions
+
+The filter bar lets you narrow the decision list by score range, full-text search, and sort order.
+All filters are combinable and apply in real time.
+
+[cols="1,3"]
+|===
+| Filter | Description
+
+| *Confidence*
+| Restrict by confidence score range.
+Select a predefined band (Low / Medium / High) or set custom min/max values.
+By default the list shows decisions below the system's curation confidence threshold.
+
+| *Similarity*
+| Restrict by similarity score range.
+Select a predefined band or set custom min/max values.
+
+| *Sort by*
+| Order the decision list.
+Options: _Created At (Newest/Oldest)_, _Updated At (Newest/Oldest)_, _Confidence (Low to High / High to Low)_.
+
+| *Search*
+| Full-text search across entity mention field data (name, identifiers, and other parsed attributes).
+|===
+
+[NOTE]
+====
+Screenshot placeholder: filter bar with Confidence and Similarity dropdowns open.
+====
+
+== Decision List
+
+The left panel lists all decisions matching the active filters.
+Each item shows the entity name, its confidence and similarity scores (colour-coded), and when the decision was created.
+
+Select any item to load its detail in the right panel.
+
+[NOTE]
+====
+Screenshot placeholder: decision list with several items and score badges.
+====
+
+Score colour coding:
+
+[cols="1,1"]
+|===
+| Range | Colour
+
+| 0.00 – 0.39 (Low)
+| 🔴 Red
+
+| 0.40 – 0.69 (Medium)
+| 🟡 Orange/yellow
+
+| 0.70 – 1.00 (High)
+| 🟢 Green
+|===
+
+== Reviewing a Decision
+
+Selecting a decision opens the comparison view on the right.
+It shows two cards side by side:
+
+* *Left* — the entity mention being resolved, with its field values.
+* *Right* — the top entity in the proposed cluster, with fields that differ from the current entity highlighted.
+
+Use the *Previous* / *Next* controls on the right card to browse other entities within the proposed cluster.
+The confidence (*C:*) and similarity (*S:*) scores for this decision are shown in the header area.
+
+[NOTE]
+====
+Screenshot placeholder: comparison panel showing entity cards with diff highlighting.
+====
+
+== Accepting a Decision
+
+Accepting records your agreement that the proposed cluster is the correct match for this entity mention.
+
+. Select the decision in the list.
+. Click the green *✓* button, **or** press kbd:[A].
+. Confirm the action in the dialog that appears.
+. The decision is removed from the queue and your feedback is recorded in the action history.
+
+== Rejecting a Decision
+
+Rejecting records that none of the proposed candidates is an acceptable match.
+
+. Select the decision in the list.
+. Click the red *✗* button, **or** press kbd:[R].
+. Confirm the action in the dialog that appears.
+. The decision is removed from the queue and your feedback is recorded in the action history.
+
+== Alternative Clusters
+
+Below the comparison cards, the page lists the other candidate clusters that the engine considered — ranked from best to worst after the top proposal.
+
+Expand any cluster to compare its entities against the current entity mention, the same way as the proposed match.
+
+[NOTE]
+====
+Screenshot placeholder: alternative clusters section with one panel expanded.
+====
+
+=== Selecting an Alternative Cluster
+
+If one of the alternatives is a better match than the top proposal:
+
+. Expand the cluster and inspect its entities.
+. Click *Use this cluster instead*.
+. Confirm the action in the dialog that appears.
+. The decision is removed from the queue and your feedback is recorded in the action history.
+
+Click *Load More* to fetch additional alternative clusters beyond those initially shown.
+
