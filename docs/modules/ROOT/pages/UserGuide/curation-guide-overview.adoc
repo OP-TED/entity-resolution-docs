@@ -33,8 +33,6 @@ Access requires a verified account provisioned by an administrator.
 . On success you are redirected to the Decisions Queue.
 . If the page redirects back to login, contact your administrator — your account may not be verified yet.
 
-NOTE: User registration and account management features are currently in progress and will be documented when available.
-
 == Keyboard Shortcuts
 
 Keyboard shortcuts are available on the *Decisions* page only.

@@ -4,10 +4,7 @@
 The *History* page provides a read-only audit trail of all curatorial actions taken by all users.
 Use it to verify past feedback, investigate discrepancies, or review a colleague's work.
 
-[NOTE]
-====
-Screenshot placeholder: full History page.
-====
+image::curation/history-page.png[Full History page]
 
 == Filtering and Ordering Actions
 
@@ -25,10 +22,7 @@ Screenshot placeholder: full History page.
 | Order by _Created At (Newest)_ or _Created At (Oldest)_.
 |===
 
-[NOTE]
-====
-Screenshot placeholder: filter bar with Action type and User dropdowns open.
-====
+image::curation/history-filter-bar.png[History filter bar with Action type and User dropdowns]
 
 == Action List
 
@@ -51,10 +45,7 @@ Each item shows the action type (colour-coded badge), the entity name, and when 
 
 Select any item to load its detail in the right panel.
 
-[NOTE]
-====
-Screenshot placeholder: action list with several items and type badges.
-====
+image::curation/action-list.png[Action list with type badges]
 
 == Action Detail
 
@@ -71,10 +62,7 @@ Two cards are shown side by side:
   For *Accept Top* and *Accept Alternative* actions, this shows the chosen cluster with its entities and scores.
   For *Reject All* actions, this area shows that no cluster was selected.
 
-[NOTE]
-====
-Screenshot placeholder: action detail for an Accept Alternative action, showing entity card and selected cluster.
-====
+image::curation/selected-cluster.png[Action detail showing entity card and selected cluster]
 
 === Candidates
 
@@ -82,7 +70,4 @@ Below the cards, all candidate clusters that were presented to the curator at th
 Expand any candidate to inspect its entities and scores.
 The cluster that was selected is visually distinguished from the others.
 
-[NOTE]
-====
-Screenshot placeholder: candidates section with the selected cluster highlighted.
-====
+image::curation/candidates-section.png[Candidates section with selected cluster highlighted]

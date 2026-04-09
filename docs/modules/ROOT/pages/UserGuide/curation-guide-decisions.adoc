@@ -4,10 +4,7 @@
 The *Decisions* page is the primary workspace.
 It lists resolution decisions that require manual review and lets you record your feedback on each proposed match.
 
-[NOTE]
-====
-Screenshot placeholder: full Decisions page.
-====
+image::curation/full-decisions-page.png[Full Decisions page]
 
 == Filtering and Ordering Decisions
 
@@ -35,10 +32,7 @@ Options: _Created At (Newest/Oldest)_, _Updated At (Newest/Oldest)_, _Confidence
 | Full-text search across entity mention field data (name, identifiers, and other parsed attributes).
 |===
 
-[NOTE]
-====
-Screenshot placeholder: filter bar with Confidence and Similarity dropdowns open.
-====
+image::curation/filter-bar.png[Filter bar with Confidence and Similarity dropdowns]
 
 == Decision List
 
@@ -47,10 +41,7 @@ Each item shows the entity name, its confidence and similarity scores (colour-co
 
 Select any item to load its detail in the right panel.
 
-[NOTE]
-====
-Screenshot placeholder: decision list with several items and score badges.
-====
+image::curation/decision-list.png[Decision list with score badges]
 
 Score colour coding:
 
@@ -79,10 +70,7 @@ It shows two cards side by side:
 Use the *Previous* / *Next* controls on the right card to browse other entities within the proposed cluster.
 The confidence (*C:*) and similarity (*S:*) scores for this decision are shown in the header area.
 
-[NOTE]
-====
-Screenshot placeholder: comparison panel showing entity cards with diff highlighting.
-====
+image::curation/comparison-panel.png[Comparison panel with entity cards and diff highlighting]
 
 == Accepting a Decision
 
@@ -108,10 +96,7 @@ Below the comparison cards, the page lists the other candidate clusters that the
 
 Expand any cluster to compare its entities against the current entity mention, the same way as the proposed match.
 
-[NOTE]
-====
-Screenshot placeholder: alternative clusters section with one panel expanded.
-====
+image::curation/alternative-clusters.png[Alternative clusters section with expanded panel]
 
 === Selecting an Alternative Cluster
 
