@@ -75,7 +75,7 @@ image::curation/comparison-panel.png[Comparison panel with entity cards and diff
 
 == Accepting a Decision
 
-Accepting records your agreement that the proposed cluster is the correct match for this entity mention.
+Accepting a decision registers your feedback that the proposed cluster is a correct match for this entity mention.
 
 . Select the decision in the list.
 . Click the green *✓* button, **or** press kbd:[A].
@@ -84,7 +84,7 @@ Accepting records your agreement that the proposed cluster is the correct match 
 
 == Rejecting a Decision
 
-Rejecting records that none of the proposed candidates is an acceptable match.
+Rejecting a decision registers your feedback that none of the proposed candidates is an acceptable match.
 
 . Select the decision in the list.
 . Click the red *✗* button, **or** press kbd:[R].
