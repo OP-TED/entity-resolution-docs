@@ -1,23 +1,14 @@
 = ERS REST API
-team@openapitools.org
 0.1.0
 :toc: left
 :numbered:
 :toclevels: 4
 :source-highlighter: highlightjs
 :keywords: openapi, rest, ERS REST API
-:specDir: 
-:snippetDir: 
-:generator-template: v1 2019-12-20
-:info-url: 
 :app-name: ERS REST API
 
 == Introduction
 The Entity Resolution Service (ERS) REST API provides endpoints for resolving entity mentions to canonical cluster identifiers, looking up existing cluster assignments, and synchronising assignment deltas. It serves as the primary integration point for external systems that need to resolve, deduplicate, or track entity mentions across multiple sources.
-
-
-// markup not found, no include::{specDir}intro.adoc[opts=optional]
-
 
 
 == Endpoints
@@ -30,18 +21,11 @@ The Entity Resolution Service (ERS) REST API provides endpoints for resolving en
 [.healthGet]
 ==== GET /health
 
-Operation Id:: healthGet
-
-
 Health
 
 ===== Description
 
-
-
-
-// markup not found, no include::{specDir}health/GET/spec.adoc[opts=optional]
-
+Returns service liveness status and the entity types supported by this ERS instance.
 
 
 ===== Parameters
@@ -54,7 +38,7 @@ Health
 
 ===== Return Type
 
-<<HealthResponse>>
+<<HealthResponse,HealthResponse>>
 
 
 ===== Content Type
@@ -71,18 +55,10 @@ Health
 
 | 200
 | Successful Response
-|  <<HealthResponse>>
+| <<HealthResponse,HealthResponse>>
 
 |===
 
-
-ifdef::internal-generation[]
-===== Implementation
-
-// markup not found, no include::{specDir}health/GET/implementation.adoc[opts=optional]
-
-
-endif::internal-generation[]
 
 
 [.Lookup]
@@ -92,18 +68,11 @@ endif::internal-generation[]
 [.apiV1LookupGet]
 ==== GET /api/v1/lookup
 
-Operation Id:: apiV1LookupGet
-
-
 Lookup
 
 ===== Description
 
 Retrieve current cluster assignment for a mention triad.
-
-
-// markup not found, no include::{specDir}api/v1/lookup/GET/spec.adoc[opts=optional]
-
 
 
 ===== Parameters
@@ -141,7 +110,7 @@ Retrieve current cluster assignment for a mention triad.
 
 ===== Return Type
 
-<<LookupResponse>>
+<<LookupResponse,LookupResponse>>
 
 
 ===== Content Type
@@ -157,46 +126,31 @@ Retrieve current cluster assignment for a mention triad.
 
 
 | 200
-| Successful Response
-|  <<LookupResponse>>
+| Current cluster assignment for the requested mention.
+| <<LookupResponse,LookupResponse>>
 
 
 | 400
 | Validation error
-|  <<ErrorResponse>>
+| <<ErrorResponse,ErrorResponse>>
 
 
 | 404
 | Mention not found
-|  <<ErrorResponse>>
+| <<ErrorResponse,ErrorResponse>>
 
 |===
 
 
-ifdef::internal-generation[]
-===== Implementation
-
-// markup not found, no include::{specDir}api/v1/lookup/GET/implementation.adoc[opts=optional]
-
-
-endif::internal-generation[]
-
 
 [.bulkApiV1LookupBulkPost]
 ==== POST /api/v1/lookup-bulk
-
-Operation Id:: bulkApiV1LookupBulkPost
-
 
 Lookup Bulk
 
 ===== Description
 
 Look up cluster assignments for multiple entity mentions in a single batch.
-
-
-// markup not found, no include::{specDir}api/v1/lookup-bulk/POST/spec.adoc[opts=optional]
-
 
 
 ===== Parameters
@@ -209,7 +163,7 @@ Look up cluster assignments for multiple entity mentions in a single batch.
 |Name| Description| Required| Default| Pattern
 
 | BulkLookupRequest
-|  <<BulkLookupRequest>>
+|  <<BulkLookupRequest,BulkLookupRequest>>
 | X
 | 
 | 
@@ -222,7 +176,7 @@ Look up cluster assignments for multiple entity mentions in a single batch.
 
 ===== Return Type
 
-<<BulkLookupResponse>>
+<<BulkLookupResponse,BulkLookupResponse>>
 
 
 ===== Content Type
@@ -238,41 +192,26 @@ Look up cluster assignments for multiple entity mentions in a single batch.
 
 
 | 200
-| Successful Response
-|  <<BulkLookupResponse>>
+| Cluster assignments for all requested mentions.
+| <<BulkLookupResponse,BulkLookupResponse>>
 
 
 | 400
 | Validation error
-|  <<ErrorResponse>>
+| <<ErrorResponse,ErrorResponse>>
 
 |===
 
 
-ifdef::internal-generation[]
-===== Implementation
-
-// markup not found, no include::{specDir}api/v1/lookup-bulk/POST/implementation.adoc[opts=optional]
-
-
-endif::internal-generation[]
-
 
 [.bulkApiV1RefreshBulkPost]
 ==== POST /api/v1/refresh-bulk
-
-Operation Id:: bulkApiV1RefreshBulkPost
-
 
 Refresh Bulk
 
 ===== Description
 
 Retrieve delta of changed assignments since last synchronisation.
-
-
-// markup not found, no include::{specDir}api/v1/refresh-bulk/POST/spec.adoc[opts=optional]
-
 
 
 ===== Parameters
@@ -285,7 +224,7 @@ Retrieve delta of changed assignments since last synchronisation.
 |Name| Description| Required| Default| Pattern
 
 | RefreshBulkRequest
-|  <<RefreshBulkRequest>>
+|  <<RefreshBulkRequest,RefreshBulkRequest>>
 | X
 | 
 | 
@@ -298,7 +237,7 @@ Retrieve delta of changed assignments since last synchronisation.
 
 ===== Return Type
 
-<<RefreshBulkResponse>>
+<<RefreshBulkResponse,RefreshBulkResponse>>
 
 
 ===== Content Type
@@ -314,24 +253,16 @@ Retrieve delta of changed assignments since last synchronisation.
 
 
 | 200
-| Successful Response
-|  <<RefreshBulkResponse>>
+| Delta of cluster assignment changes since the last synchronisation cursor.
+| <<RefreshBulkResponse,RefreshBulkResponse>>
 
 
 | 400
 | Validation error
-|  <<ErrorResponse>>
+| <<ErrorResponse,ErrorResponse>>
 
 |===
 
-
-ifdef::internal-generation[]
-===== Implementation
-
-// markup not found, no include::{specDir}api/v1/refresh-bulk/POST/implementation.adoc[opts=optional]
-
-
-endif::internal-generation[]
 
 
 [.Resolution]
@@ -341,18 +272,11 @@ endif::internal-generation[]
 [.apiV1ResolvePost]
 ==== POST /api/v1/resolve
 
-Operation Id:: apiV1ResolvePost
-
-
 Resolve
 
 ===== Description
 
 Resolve an entity mention and return canonical or provisional cluster ID.
-
-
-// markup not found, no include::{specDir}api/v1/resolve/POST/spec.adoc[opts=optional]
-
 
 
 ===== Parameters
@@ -365,7 +289,7 @@ Resolve an entity mention and return canonical or provisional cluster ID.
 |Name| Description| Required| Default| Pattern
 
 | EntityMentionResolutionRequest
-|  <<EntityMentionResolutionRequest>>
+|  <<EntityMentionResolutionRequest,EntityMentionResolutionRequest>>
 | X
 | 
 | 
@@ -378,7 +302,7 @@ Resolve an entity mention and return canonical or provisional cluster ID.
 
 ===== Return Type
 
-<<EntityMentionResolutionResult>>
+<<EntityMentionResolutionResult,EntityMentionResolutionResult>>
 
 
 ===== Content Type
@@ -395,45 +319,30 @@ Resolve an entity mention and return canonical or provisional cluster ID.
 
 | 200
 | Canonical resolution
-|  <<EntityMentionResolutionResult>>
+| <<EntityMentionResolutionResult,EntityMentionResolutionResult>>
 
 
 | 202
 | Provisional resolution
-|  <<>>
+| -
 
 
 | 400
 | Validation error
-|  <<ErrorResponse>>
+| <<ErrorResponse,ErrorResponse>>
 
 |===
 
 
-ifdef::internal-generation[]
-===== Implementation
-
-// markup not found, no include::{specDir}api/v1/resolve/POST/implementation.adoc[opts=optional]
-
-
-endif::internal-generation[]
-
 
 [.bulkApiV1ResolveBulkPost]
 ==== POST /api/v1/resolve-bulk
-
-Operation Id:: bulkApiV1ResolveBulkPost
-
 
 Resolve Bulk
 
 ===== Description
 
 Resolve multiple entity mentions in a single batch.
-
-
-// markup not found, no include::{specDir}api/v1/resolve-bulk/POST/spec.adoc[opts=optional]
-
 
 
 ===== Parameters
@@ -446,7 +355,7 @@ Resolve multiple entity mentions in a single batch.
 |Name| Description| Required| Default| Pattern
 
 | BulkResolveRequest
-|  <<BulkResolveRequest>>
+|  <<BulkResolveRequest,BulkResolveRequest>>
 | X
 | 
 | 
@@ -459,7 +368,7 @@ Resolve multiple entity mentions in a single batch.
 
 ===== Return Type
 
-<<BulkResolveResponse>>
+<<BulkResolveResponse,BulkResolveResponse>>
 
 
 ===== Content Type
@@ -476,33 +385,25 @@ Resolve multiple entity mentions in a single batch.
 
 | 200
 | All canonical
-|  <<BulkResolveResponse>>
+| <<BulkResolveResponse,BulkResolveResponse>>
 
 
 | 202
 | All provisional
-|  <<>>
+| -
 
 
 | 207
 | Mixed outcomes
-|  <<>>
+| -
 
 
 | 400
 | Validation error
-|  <<ErrorResponse>>
+| <<ErrorResponse,ErrorResponse>>
 
 |===
 
-
-ifdef::internal-generation[]
-===== Implementation
-
-// markup not found, no include::{specDir}api/v1/resolve-bulk/POST/implementation.adoc[opts=optional]
-
-
-endif::internal-generation[]
 
 
 [#models]
@@ -510,7 +411,7 @@ endif::internal-generation[]
 
 
 [#BulkLookupRequest]
-=== _BulkLookupRequest_ BulkLookupRequest
+=== BulkLookupRequest
 
 Request body for POST /lookup-bulk.
 
@@ -523,7 +424,7 @@ Request body for POST /lookup-bulk.
 | mentions
 | X
 | 
-|   List   of <<LookupRequest>>
+|  `List` of <<LookupRequest,LookupRequest>>
 | One or more mention triads to look up in a single batch.
 |     
 
@@ -532,7 +433,7 @@ Request body for POST /lookup-bulk.
 
 
 [#BulkLookupResponse]
-=== _BulkLookupResponse_ BulkLookupResponse
+=== BulkLookupResponse
 
 Response body for POST /lookup-bulk.
 
@@ -545,7 +446,7 @@ Response body for POST /lookup-bulk.
 | results
 | X
 | 
-|   List   of <<BulkLookupResult>>
+|  `List` of <<BulkLookupResult,BulkLookupResult>>
 | Per-mention results, one for each item in the request.
 |     
 
@@ -554,7 +455,7 @@ Response body for POST /lookup-bulk.
 
 
 [#BulkLookupResult]
-=== _BulkLookupResult_ BulkLookupResult
+=== BulkLookupResult
 
 Result of looking up a single entity mention in a bulk batch.
 
@@ -570,28 +471,28 @@ or an error (error present), never both.
 | identified_by
 | X
 | 
-| <<EntityMentionIdentifier-Output>>    
+| <<EntityMentionIdentifierOutput,EntityMentionIdentifier>>
 | Triad identifying the entity mention this result refers to.
 |     
 
 | cluster_reference
 | 
 | X
-| <<ClusterReference>>    
+| <<ClusterReference,ClusterReference>>
 | Current canonical cluster assignment for the mention.
 |     
 
 | last_updated
 | 
 | X
-|   Date  
+|  `Date`
 | Timestamp of the most recent assignment update.
 | date-time    
 
 | error
 | 
 | X
-| <<ErrorResponse>>    
+| <<ErrorResponse,ErrorResponse>>
 | Error response with a code and description.
 |     
 
@@ -600,7 +501,7 @@ or an error (error present), never both.
 
 
 [#BulkResolveRequest]
-=== _BulkResolveRequest_ BulkResolveRequest
+=== BulkResolveRequest
 
 Request body for POST /resolveBulk.
 
@@ -613,7 +514,7 @@ Request body for POST /resolveBulk.
 | mentions
 | X
 | 
-|   List   of <<EntityMentionResolutionRequest>>
+|  `List` of <<EntityMentionResolutionRequest,EntityMentionResolutionRequest>>
 | One or more entity mentions to resolve in a single batch.
 |     
 
@@ -622,7 +523,7 @@ Request body for POST /resolveBulk.
 
 
 [#BulkResolveResponse]
-=== _BulkResolveResponse_ BulkResolveResponse
+=== BulkResolveResponse
 
 Response body for POST /resolveBulk.
 
@@ -635,7 +536,7 @@ Response body for POST /resolveBulk.
 | results
 | X
 | 
-|   List   of <<EntityMentionResolutionResult>>
+|  `List` of <<EntityMentionResolutionResult,EntityMentionResolutionResult>>
 | Per-mention results, one for each item in the request.
 |     
 
@@ -644,7 +545,7 @@ Response body for POST /resolveBulk.
 
 
 [#ClusterReference]
-=== _ClusterReference_ ClusterReference
+=== ClusterReference
 
 A reference to a cluster to which an entity is deemed to belong, with an associated confidence and similarity scores.
 
@@ -663,21 +564,21 @@ of equivalence.
 | cluster_id
 | X
 | 
-|   String  
+|  `String`
 | The identifier of the cluster/canonical entity that is considered equivalent to the subject entity mention that an &#x60;EntityMentionResolutionResponse&#x60; refers to. 
 |     
 
 | confidence_score
 | X
 | 
-|   BigDecimal  
+|  `BigDecimal`
 | A 0-1 value of how confident the ERE is about the equivalence between the subject entity mention and the target canonical entity. 
 |     
 
 | similarity_score
 | X
 | 
-|   BigDecimal  
+|  `BigDecimal`
 | A 0-1 score representing the pairwise comparison between a mention and a cluster (likely based on a representative representation). 
 |     
 
@@ -686,7 +587,7 @@ of equivalence.
 
 
 [#EntityMention]
-=== _EntityMention_ EntityMention
+=== EntityMention
 
 An entity mention is a representation of a real-world entity, as provided by the ERS.
 It contains the entity data, along with metadata like type and format.
@@ -700,42 +601,42 @@ It contains the entity data, along with metadata like type and format.
 | object_description
 | 
 | X
-|   String  
+|  `String`
 | Optional descriptive text for the model instance.
 |     
 
 | identifiedBy
 | X
 | 
-| <<EntityMentionIdentifier-Input>>    
+| <<EntityMentionIdentifierInput,EntityMentionIdentifier>>
 | The identification triad of the entity mention. 
 |     
 
 | content_type
 | X
 | 
-|   String  
+|  `String`
 | A string about the MIME format of &#x60;content&#x60; (e.g. text/turtle, application/ld+json) 
 |     
 
 | content
 | X
 | 
-|   String  
+|  `String`
 | A code string representing the entity mention details (eg, RDF or XML description). 
 |     
 
 | parsed_representation
 | 
 | X
-|   String  
+|  `String`
 | JSON representation of the parsed entity data. 
 |     
 
 | context
 | 
 | X
-|   String  
+|  `String`
 | Optional context reference (e.g. notice or document ID). 
 |     
 
@@ -743,8 +644,8 @@ It contains the entity data, along with metadata like type and format.
 
 
 
-[#EntityMentionIdentifierRequest]
-=== _EntityMentionIdentifierRequest_ EntityMentionIdentifier
+[#EntityMentionIdentifierInput]
+=== EntityMentionIdentifier
 
 A container that groups the attributes needed to identify an entity mention in a resolution request
 or response.
@@ -755,7 +656,7 @@ method to build a canonical identifier from the combination of &#x60;sourceId&#x
 in this hereby ERE service schema) can be built from an entity that is initially the only cluster member.
 
 
-[.fields-EntityMentionIdentifierRequest]
+[.fields-EntityMentionIdentifierInput]
 [cols="2,1,1,2,4,1"]
 |===
 | Field Name| Required| Nullable | Type| Description | Format
@@ -763,28 +664,28 @@ in this hereby ERE service schema) can be built from an entity that is initially
 | object_description
 | 
 | X
-|   String  
+|  `String`
 | Optional descriptive text for the model instance.
 |     
 
 | source_id
 | X
 | 
-|   String  
+|  `String`
 | The ID or URI of the ERS client that originated the request. This identifies an application or a  person accessing the ERS system. 
 |     
 
 | request_id
 | X
 | 
-|   String  
+|  `String`
 | A string representing the unique ID of the request made to the ERS system. In general, this is unique only within the scope of the source and the entity type, ie, within &#x60;sourceId&#x60; and &#x60;entityType&#x60;.   Moreover, this is **not** the same as &#x60;ereRequestId&#x60;, which instead, is internal to the ERE and is  used to match responses to requests. 
 |     
 
 | entity_type
 | X
 | 
-|   String  
+|  `String`
 | A string representing the entity type (based on CET). This is typically a URI.  Note that this is at this level, and not at &#x60;EntityMention&#x60;, since, as said above,  it&#39;s needed to identify the entity, even when its content is not present. For the same reason, it&#39;s used both for &#x60;EREResolutionRequest&#x60; and &#x60;EREResolutionResponse&#x60; messages., 
 |     
 
@@ -792,8 +693,8 @@ in this hereby ERE service schema) can be built from an entity that is initially
 
 
 
-[#EntityMentionIdentifierResponse]
-=== _EntityMentionIdentifierResponse_ EntityMentionIdentifier
+[#EntityMentionIdentifierOutput]
+=== EntityMentionIdentifier
 
 A container that groups the attributes needed to identify an entity mention in a resolution request
 or response.
@@ -804,7 +705,7 @@ method to build a canonical identifier from the combination of &#x60;sourceId&#x
 in this hereby ERE service schema) can be built from an entity that is initially the only cluster member.
 
 
-[.fields-EntityMentionIdentifierResponse]
+[.fields-EntityMentionIdentifierOutput]
 [cols="2,1,1,2,4,1"]
 |===
 | Field Name| Required| Nullable | Type| Description | Format
@@ -812,21 +713,21 @@ in this hereby ERE service schema) can be built from an entity that is initially
 | source_id
 | X
 | 
-|   String  
+|  `String`
 | The ID or URI of the ERS client that originated the request. This identifies an application or a  person accessing the ERS system. 
 |     
 
 | request_id
 | X
 | 
-|   String  
+|  `String`
 | A string representing the unique ID of the request made to the ERS system. In general, this is unique only within the scope of the source and the entity type, ie, within &#x60;sourceId&#x60; and &#x60;entityType&#x60;.   Moreover, this is **not** the same as &#x60;ereRequestId&#x60;, which instead, is internal to the ERE and is  used to match responses to requests. 
 |     
 
 | entity_type
 | X
 | 
-|   String  
+|  `String`
 | A string representing the entity type (based on CET). This is typically a URI.  Note that this is at this level, and not at &#x60;EntityMention&#x60;, since, as said above,  it&#39;s needed to identify the entity, even when its content is not present. For the same reason, it&#39;s used both for &#x60;EREResolutionRequest&#x60; and &#x60;EREResolutionResponse&#x60; messages., 
 |     
 
@@ -835,7 +736,7 @@ in this hereby ERE service schema) can be built from an entity that is initially
 
 
 [#EntityMentionResolutionRequest]
-=== _EntityMentionResolutionRequest_ EntityMentionResolutionRequest
+=== EntityMentionResolutionRequest
 
 Request body for POST /resolve (and each item in a bulk batch).
 
@@ -848,7 +749,7 @@ Request body for POST /resolve (and each item in a bulk batch).
 | mention
 | X
 | 
-| <<EntityMention>>    
+| <<EntityMention,EntityMention>>
 | The entity mention to resolve.
 |     
 
@@ -857,7 +758,7 @@ Request body for POST /resolve (and each item in a bulk batch).
 
 
 [#EntityMentionResolutionResult]
-=== _EntityMentionResolutionResult_ EntityMentionResolutionResult
+=== EntityMentionResolutionResult
 
 Result of resolving a single entity mention.
 
@@ -880,28 +781,28 @@ dedicated internal model at that point.
 | identified_by
 | X
 | 
-| <<EntityMentionIdentifier-Output>>    
+| <<EntityMentionIdentifierOutput,EntityMentionIdentifier>>
 | Triad identifying the entity mention this result refers to.
 |     
 
 | canonical_entity_id
 | 
 | X
-|   String  
+|  `String`
 | Cluster identifier assigned to the mention.
 |     
 
 | status
 | 
 | X
-|  <<ResolutionOutcome>>  
+| <<ResolutionOutcome,ResolutionOutcome>>
 | Whether the resolution is canonical or provisional.
 |    CANONICAL, PROVISIONAL,  
 
 | error
 | 
 | X
-| <<ErrorResponse>>    
+| <<ErrorResponse,ErrorResponse>>
 | Error response with a code a description.
 |     
 
@@ -910,7 +811,7 @@ dedicated internal model at that point.
 
 
 [#EntityTypeInfo]
-=== _EntityTypeInfo_ EntityTypeInfo
+=== EntityTypeInfo
 
 A supported entity type exposed by this ERS instance.
 
@@ -923,15 +824,15 @@ A supported entity type exposed by this ERS instance.
 | name
 | X
 | 
-|   String  
-| 
+|  `String`
+| Human-readable name of the entity type (e.g. &#39;person&#39;, &#39;organization&#39;).
 |     
 
 | rdf_type
 | X
 | 
-|   String  
-| 
+|  `String`
+| RDF class URI mapped to this entity type.
 |     
 
 |===
@@ -939,7 +840,7 @@ A supported entity type exposed by this ERS instance.
 
 
 [#ErrorCode]
-=== _ErrorCode_ ErrorCode
+=== ErrorCode
 
 Machine-readable error codes returned in error responses.
 
@@ -963,7 +864,7 @@ Machine-readable error codes returned in error responses.
 
 
 [#ErrorResponse]
-=== _ErrorResponse_ ErrorResponse
+=== ErrorResponse
 
 Standard error response body returned by all ERS REST API endpoints.
 
@@ -976,15 +877,15 @@ Standard error response body returned by all ERS REST API endpoints.
 | error_code
 | X
 | 
-|  <<ErrorCode>>  
+| <<ErrorCode,ErrorCode>>
 | 
 |    VALIDATION_ERROR, IDEMPOTENCY_CONFLICT, PARSING_FAILED, MENTION_NOT_FOUND, SOURCE_NOT_FOUND, SERVICE_ERROR, SERVICE_TIMEOUT,  
 
 | detail
 | X
 | 
-|   String  
-| 
+|  `String`
+| Human-readable explanation of the error.
 |     
 
 |===
@@ -992,7 +893,7 @@ Standard error response body returned by all ERS REST API endpoints.
 
 
 [#HTTPValidationError]
-=== _HTTPValidationError_ HTTPValidationError
+=== HTTPValidationError
 
 
 
@@ -1005,7 +906,7 @@ Standard error response body returned by all ERS REST API endpoints.
 | detail
 | 
 | 
-|   List   of <<ValidationError>>
+|  `List` of <<ValidationError,ValidationError>>
 | 
 |     
 
@@ -1014,7 +915,7 @@ Standard error response body returned by all ERS REST API endpoints.
 
 
 [#HealthResponse]
-=== _HealthResponse_ HealthResponse
+=== HealthResponse
 
 Response model for the health endpoint.
 
@@ -1027,15 +928,15 @@ Response model for the health endpoint.
 | status
 | X
 | 
-|   String  
-| 
+|  `String`
+| Service liveness status; always &#39;ok&#39; when the service is up.
 |     
 
 | supported_entity_types
 | X
 | 
-|   List   of <<EntityTypeInfo>>
-| 
+|  `List` of <<EntityTypeInfo,EntityTypeInfo>>
+| List of entity types this ERS instance is configured to resolve.
 |     
 
 |===
@@ -1043,7 +944,7 @@ Response model for the health endpoint.
 
 
 [#LocationElement]
-=== _LocationElement_ 
+=== 
 
 
 
@@ -1058,7 +959,7 @@ Response model for the health endpoint.
 
 
 [#LookupRequest]
-=== _LookupRequest_ LookupRequest
+=== LookupRequest
 
 Query parameters for GET /lookup.
 
@@ -1071,7 +972,7 @@ Query parameters for GET /lookup.
 | identified_by
 | X
 | 
-| <<EntityMentionIdentifier-Input>>    
+| <<EntityMentionIdentifierInput,EntityMentionIdentifier>>
 | Triad identifying the entity mention to look up.
 |     
 
@@ -1080,7 +981,7 @@ Query parameters for GET /lookup.
 
 
 [#LookupResponse]
-=== _LookupResponse_ LookupResponse
+=== LookupResponse
 
 Current cluster assignment for an entity mention.
 
@@ -1096,21 +997,21 @@ each item inside RefreshBulkResponse (delta synchronisation).
 | identified_by
 | X
 | 
-| <<EntityMentionIdentifier-Output>>    
+| <<EntityMentionIdentifierOutput,EntityMentionIdentifier>>
 | Triad identifying the entity mention.
 |     
 
 | cluster_reference
 | X
 | 
-| <<ClusterReference>>    
+| <<ClusterReference,ClusterReference>>
 | Current canonical cluster assignment for the mention.
 |     
 
 | last_updated
 | X
 | 
-|   Date  
+|  `Date`
 | Timestamp of the most recent assignment update.
 | date-time    
 
@@ -1119,7 +1020,7 @@ each item inside RefreshBulkResponse (delta synchronisation).
 
 
 [#RefreshBulkRequest]
-=== _RefreshBulkRequest_ RefreshBulkRequest
+=== RefreshBulkRequest
 
 Request body for POST /refreshBulk.
 
@@ -1132,21 +1033,21 @@ Request body for POST /refreshBulk.
 | source_id
 | X
 | 
-|   String  
+|  `String`
 | Source system whose deltas to retrieve.
 |     
 
 | limit
 | 
 | 
-|   Integer  
+|  `Integer`
 | Maximum number of delta assignments to return per page.
 |     
 
 | continuation_cursor
 | 
 | X
-|   String  
+|  `String`
 | Opaque cursor returned by a previous response for pagination.
 |     
 
@@ -1155,7 +1056,7 @@ Request body for POST /refreshBulk.
 
 
 [#RefreshBulkResponse]
-=== _RefreshBulkResponse_ RefreshBulkResponse
+=== RefreshBulkResponse
 
 Response body for POST /refreshBulk.
 
@@ -1168,21 +1069,21 @@ Response body for POST /refreshBulk.
 | deltas
 | 
 | 
-|   List   of <<LookupResponse>>
+|  `List` of <<LookupResponse,LookupResponse>>
 | Changed assignments since the last synchronisation snapshot.
 |     
 
 | has_more
 | X
 | 
-|   Boolean  
+|  `Boolean`
 | Whether additional pages of deltas are available.
 |     
 
 | continuation_cursor
 | 
 | X
-|   String  
+|  `String`
 | Cursor to pass in the next request to retrieve the next page.
 |     
 
@@ -1191,7 +1092,7 @@ Response body for POST /refreshBulk.
 
 
 [#ResolutionOutcome]
-=== _ResolutionOutcome_ ResolutionOutcome
+=== ResolutionOutcome
 
 Possible outcomes of a single entity mention resolution.
 
@@ -1213,7 +1114,7 @@ PROVISIONAL — the cluster ID was derived deterministically (singleton).
 
 
 [#ValidationError]
-=== _ValidationError_ ValidationError
+=== ValidationError
 
 
 
@@ -1226,39 +1127,38 @@ PROVISIONAL — the cluster ID was derived deterministically (singleton).
 | loc
 | X
 | 
-|   List   of <<LocationElement>>
+|  `List` of <<LocationElement>>
 | 
 |     
 
 | msg
 | X
 | 
-|   String  
+|  `String`
 | 
 |     
 
 | type
 | X
 | 
-|   String  
+|  `String`
 | 
 |     
 
 | input
 | 
 | X
-|   oas_any_type_not_mapped  
+|  `oas_any_type_not_mapped`
 | 
 |     
 
 | ctx
 | 
 | 
-|   Object  
+|  `Object`
 | 
 |     
 
 |===
-
 
 
