@@ -6,10 +6,44 @@ It lists resolution decisions that require manual review and lets you record you
 
 image::curation/full-decisions-page.png[Full Decisions page]
 
-== Filtering and Ordering Decisions
+== User Interface Overview
 
-The filter bar lets you narrow the decision list by score range, full-text search, and sort order.
-All filters are combinable and apply in real time.
+The page is divided into three main sections:
+
+* *Left* — the Decision List, showing all pending decisions matching the active filters.
+* *Center* — the Decision Area, showing the entity mention being resolved and the top candidate cluster proposed by the engine.
+* *Top* — a bar for filtering and ordering the Decision List.
+
+=== Decision List
+
+The left panel lists all decisions matching the active filters.
+Each item shows the entity name, its confidence and similarity scores (colour-coded), and when the decision was created.
+
+Select any item to load its detail in the right panel.
+
+image::curation/decision-list.png[Decision list with score badges]
+
+Score colour coding:
+
+[cols="1,1"]
+|===
+| Range | Colour
+
+| 0.00 – 0.39 (Low)
+| 🔴 Red
+
+| 0.40 – 0.69 (Medium)
+| 🟡 Orange/yellow
+
+| 0.70 – 1.00 (High)
+| 🟢 Green
+|===
+
+
+=== Filtering and Ordering Bar
+
+The filter bar lets you narrow down the decision list by score range, full-text search, and sort order.
+All filters can be combined and take effect instantly.
 
 image::curation/filter-bar.png[Filter bar with Confidence and Similarity dropdowns]
 
@@ -35,45 +69,53 @@ Options: _Created At (Newest/Oldest)_, _Updated At (Newest/Oldest)_, _Confidence
 |===
 
 
-== Decision List
+=== Decision Area
 
-The left panel lists all decisions matching the active filters.
-Each item shows the entity name, its confidence and similarity scores (colour-coded), and when the decision was created.
+The Decision Area displays the full details of a selected decision: the entity mention, the proposed cluster match with visual comparison aids, and a list of alternative candidates.
+It is also where the curator records their feedback.
 
-Select any item to load its detail in the right panel.
+image::curation/decision-area.png[Decision area with comparison panel and alternative clusters]
 
-image::curation/decision-list.png[Decision list with score badges]
+[[alternative-clusters]]
+=== Alternative Clusters
 
-Score colour coding:
+Below the comparison cards, the page lists the other candidate clusters that the engine considered — ranked from best to worst after the top proposal.
 
-[cols="1,1"]
-|===
-| Range | Colour
+Expand any cluster to compare its entities against the current entity mention, the same way as the proposed match.
 
-| 0.00 – 0.39 (Low)
-| 🔴 Red
+image::curation/alternative-clusters.png[Alternative clusters section with expanded panel]
 
-| 0.40 – 0.69 (Medium)
-| 🟡 Orange/yellow
 
-| 0.70 – 1.00 (High)
-| 🟢 Green
-|===
+== Actions
 
-== Reviewing a Decision
+This section provides details on available curation actions and explains how to perform them using the user interface.
 
-Selecting a decision opens the comparison view on the right.
+=== Reviewing a Decision
+The first step in the curation workflow is to review the proposed match for a given entity mention.
+
+Selecting a decision from the Decision List opens the comparison view in the Decision Area.
+
+In this view, you can inspect the details of the entity mention and the proposed cluster together with its member entities to determine if they are a correct match.
+
+The main area is a comparison panel that highlights the differences between the entity mention and an entity in the proposed cluster.
 It shows two cards side by side:
 
 * *Left* — the entity mention being resolved, with its field values.
-* *Right* — the top entity in the proposed cluster, with fields that differ from the current entity highlighted.
+* *Right* — entities of the proposed cluster, with fields that differ from the current entity highlighted.
 
 Use the *Previous* / *Next* controls on the right card to browse other entities within the proposed cluster.
+
+The comparison panel shows three types of differences between the entity mention and the currently selected cluster entity:
+
+* *Added* (green highlight) — field values that are present in the cluster entity but not in the entity mention.
+* *Removed* (red highlight) — field values that are present in the entity mention but not in the cluster entity.
+* *Changed* (yellow highlight) — field values that are present in both the entity mention and the cluster entity but have different values.
+
 The confidence (*C:*) and similarity (*S:*) scores for this decision are shown in the header area.
 
 image::curation/comparison-panel.png[Comparison panel with entity cards and diff highlighting]
 
-== Accepting a Decision
+=== Accepting a Decision
 
 Accepting a decision registers your feedback that the proposed cluster is a correct match for this entity mention.
 
@@ -82,7 +124,16 @@ Accepting a decision registers your feedback that the proposed cluster is a corr
 . Confirm the action in the dialog that appears.
 . The decision is removed from the queue and your feedback is recorded in the action history.
 
-== Rejecting a Decision
+[WARNING]
+====
+Curatorial actions are final and cannot be undone.
+Past actions remain visible in the xref:UserGuide/curation-guide-history.adoc[Action History].
+====
+
+NOTE: The decision is not immediately accepted in the system — your feedback is stored and used by the engine when re-evaluating future decisions, which may lead to this decision being accepted later on.
+
+
+=== Rejecting a Decision
 
 Rejecting a decision registers your feedback that none of the proposed candidates is an acceptable match.
 
@@ -91,15 +142,11 @@ Rejecting a decision registers your feedback that none of the proposed candidate
 . Confirm the action in the dialog that appears.
 . The decision is removed from the queue and your feedback is recorded in the action history.
 
-== Alternative Clusters
-
-Below the comparison cards, the page lists the other candidate clusters that the engine considered — ranked from best to worst after the top proposal.
-
-Expand any cluster to compare its entities against the current entity mention, the same way as the proposed match.
-
-image::curation/alternative-clusters.png[Alternative clusters section with expanded panel]
+NOTE: The decision is not immediately rejected in the system — your feedback is stored and used by the engine when re-evaluating future decisions.
 
 === Selecting an Alternative Cluster
+
+Access the alternative clusters in the lower portion of the Decision Area as described in <<alternative-clusters>>.
 
 If one of the alternatives is a better match than the top proposal:
 

@@ -2,11 +2,22 @@
 :description: How to browse and inspect past curatorial actions in the Curation Web Application.
 
 The *History* page provides a read-only audit trail of all curatorial actions taken by all users.
-Use it to verify past feedback, investigate discrepancies, or review a colleague's work.
+Use it to verify past feedback, investigate discrepancies, or review a colleague's work. This page has a similar layout to the Decisions page.
 
 image::curation/history-page.png[Full History page]
 
-== Filtering and Ordering Actions
+== User Interface Overview
+
+The page is divided into three main sections:
+
+* *Left* — the Reviewed Decisions List, showing all decisions evaluated by a user.
+* *Center* — the Decision Area, showing the entity mention that was evaluated, with the decision context (the top and alternative candidate clusters proposed by the engine).
+* *Top* — a bar for filtering and ordering the Reviewed Decisions List.
+
+== Filtering and Ordering Bar
+
+The filter bar lets you narrow down the reviewed decision list by curator action, user, and sort order.
+All filters can be combined and take effect instantly.
 
 [cols="1,3"]
 |===
@@ -26,7 +37,7 @@ image::curation/history-filter-bar.png[History filter bar with Action type and U
 
 == Action List
 
-The left panel lists all actions matching the active filters.
+The left panel lists all actions matching the active filters. Each item represents a reviewed decision and the feedback recorded by the curator.
 Each item shows the action type (colour-coded badge), the entity name, and when the action was recorded.
 
 [cols="1,1"]
@@ -51,7 +62,7 @@ image::curation/action-list.png[Action list with type badges]
 
 Selecting an action shows its full context.
 
-The header displays the entity name, action type badge, the curator's email, and the timestamp.
+The header displays the entity name, the action type badge, the curator's email, and the timestamp.
 
 === Entity and Selected Cluster
 
