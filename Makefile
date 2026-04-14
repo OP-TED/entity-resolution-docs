@@ -15,6 +15,31 @@ NPX ?= $(shell command -v npx)
 DOC_BUILD_DIR=docs/build
 ANTORA_PLAYBOOK := $(shell pwd)/docs/antora-playbook.local.yml
 
+# ERS repo settings for API docs generation
+ERS_REPO_URL ?= https://github.com/meaningfy-ws/entity-resolution-service.git
+ERS_REPO_BRANCH ?= develop
+ERS_CLONE_DIR = .ers-clone
+API_DOCS_REL = docs/modules/ROOT/pages/api-docs
+
+#-----------------------------------------------------------------------------
+# API docs generation
+#-----------------------------------------------------------------------------
+.PHONY: update-api-docs
+
+update-api-docs: ## Regenerate API reference docs from the ERS repo
+	@ echo -e "$(BUILD_PRINT)$(ICON_PROGRESS) Cloning ERS repo ($(ERS_REPO_BRANCH))$(END_BUILD_PRINT)"
+	@ rm -rf $(ERS_CLONE_DIR)
+	@ git clone --depth 1 --branch $(ERS_REPO_BRANCH) $(ERS_REPO_URL) $(ERS_CLONE_DIR)
+	@ echo -e "$(BUILD_PRINT)$(ICON_PROGRESS) Installing ERS dependencies$(END_BUILD_PRINT)"
+	@ $(MAKE) -C $(ERS_CLONE_DIR) install
+	@ echo -e "$(BUILD_PRINT)$(ICON_PROGRESS) Generating API docs$(END_BUILD_PRINT)"
+	@ $(MAKE) -C $(ERS_CLONE_DIR) api-docs DOCS_API_REL=../$(API_DOCS_REL)
+	@ echo -e "$(BUILD_PRINT)$(ICON_PROGRESS) Cleaning up$(END_BUILD_PRINT)"
+	@ rm -rf $(ERS_CLONE_DIR)
+	@ rm -rf $(API_DOCS_REL)/ers/.openapi-generator $(API_DOCS_REL)/curation/.openapi-generator \
+		$(API_DOCS_REL)/ers/.openapi-generator-ignore $(API_DOCS_REL)/curation/.openapi-generator-ignore
+	@ echo -e "$(BUILD_PRINT)$(ICON_DONE) API docs updated at $(API_DOCS_REL)/$(END_BUILD_PRINT)"
+
 #-----------------------------------------------------------------------------
 # Documentation commands
 #-----------------------------------------------------------------------------
