@@ -3,10 +3,12 @@
 *Use Case Level:* White (Summary) +
 *Primary Actor:* Entity Resolution Engine (ERE) +
 *Scope:* Entity Resolution System (ERSys) +
+
 *Stakeholders and Interests*
 
 * Curators require that large-scale clustering recalculations do not introduce hidden override semantics and that resulting Cluster Assignment changes remain observable through normal refresh mechanisms.
 * Originators and downstream consumers require continuity of canonical identifiers and transparent exposure of Cluster Assignment changes through standard synchronisation flows.
+
 *Brief Description* +
 This use case describes how ERS integrates large-scale reclustering operations performed internally by ERE. +
 Reclustering is executed by ERE for a defined scope (for example, an entity type). ERE emits updated clustering outcomes for affected Entity Mentions. +
@@ -18,27 +20,32 @@ For each emitted outcome, ERS:
 * updates delta tracking to support refresh operations.
 Reclustering uses the same asynchronous integration rules as standard resolution responses. No special governance path or override mechanism exists. +
 Cluster Assignment for a mention may change as a result of reclustering. Such changes are exposed through normal refresh operations. +
+
 *Preconditions*
 
 * ERE initiates reclustering for a defined scope.
 * Asynchronous communication between ERE and ERS is operational.
 * The Decision Store is available for updates.
+
 *Success Guarantee (Postconditions)* +
 For each affected Entity Mention:
 
 . The Decision Store reflects the latest Cluster Assignment emitted by ERE.
 . Delta tracking is updated so that subsequent refresh operations expose the change.
-ERS continues to operate in normal incremental mode during and after reclustering. +
+ERS continues to operate in normal incremental mode during and after reclustering.
+
 *Minimal Guarantees (On Failure)*
 
 * If integration is interrupted, successfully processed updates remain effective.
 * Previously stored Cluster Assignments remain in place until replaced by authoritative outcomes from ERE.
 * No partial or inconsistent Cluster Assignment is exposed for any individual mention.
+
 *Out of Scope*
 
 * Single-mention re-evaluation through public APIs.
 * Manual override of clustering results.
 * Historical lineage reconstruction within ERS.
+
 *Frequency of Occurrence* +
 Low; reclustering is exceptional and typically triggered by engine-level logic or configuration changes.
 

@@ -16,6 +16,7 @@ This document is intended for the following audiences:
 * Enterprise, solution, and system architects, responsible for positioning ERSys within a broader architectural landscape and ensuring boundary alignment.
 * Implementation and integration roles, who require clear responsibility separation, explicit contracts, and well-defined behavioural expectations.
 * Reviewers and auditors, who need to understand what ERSys is accountable for, what it explicitly does not do, and how architectural consistency is enforced.
+
 Readers are not expected to be familiar with internal resolution algorithms or specific technology choices. They are expected to be comfortable with architectural concepts such as system boundaries, contracts, authority, and invariants.
 
 === 1.3 How to read this document

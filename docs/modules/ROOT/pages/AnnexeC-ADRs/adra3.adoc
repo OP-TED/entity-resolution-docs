@@ -25,6 +25,7 @@ A clear distinction is therefore required between:
 . *No Versioned Canonical Identifiers*
 .. The system does not introduce versioned canonical identifiers, lineage chains, or revocation markers.
 .. The current canonical identity of a mention is always the latest cluster assignment returned by ERE.
+
 === Scope and Applicability
 
 This decision applies to all clusterIds exposed through ERS APIs and referenced by clients or downstream systems. +

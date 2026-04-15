@@ -3,31 +3,39 @@
 *Use Case Level:* White (Summary) +
 *Primary Actor:*  Curator (human user) +
 *Scope:* Entity Resolution System (ERSys) +
+
 *Stakeholders and Interests*
 
 * The Curator requires a controlled mechanism to request re-evaluation of a mention’s current Cluster Assignment when the observed canonical identity appears incorrect or incomplete.
 * Originators and downstream consumers require that any change in canonical identity remains consistent with the engine-authoritative model and is observable through standard synchronisation mechanisms.
 * ERS operators require that user actions do not introduce independent governance semantics or override engine authority.
+
 *Brief Description* +
 This use case describes how a User requests re-evaluation of the Cluster Assignment of an existing Entity Mention. +
 Canonical identity is defined as a cluster managed by the Entity Resolution Engine (ERE). Cluster identifiers are canonical identifiers. ERE is authoritative for clustering outcomes and its decisions are binding. +
+
 A User may request re-evaluation in one of two forms:
 
 . *Placement Recommendation*  the User recommends that a mention be assigned to a specific cluster.
 . *Exclusion Recommendation*  the User recommends that specific clusters be excluded from consideration during re-resolution.
+
 User actions are recommendations only. They do not directly modify the Cluster Assignment stored in ERS. +
 Upon receiving a valid re-evaluation request, ERS forwards the recommendation to ERE using the appropriate resolution interaction. ERE evaluates the request according to its internal clustering logic and returns an authoritative clustering outcome. +
 ERS records the latest Cluster Assignment returned by ERE in the Decision Store and exposes it as the current canonical identity. +
+
 A re-evaluation request may result in:
 
 * confirmation of the existing Cluster Assignment,
 * assignment to a different existing cluster, or
 * assignment to a new cluster created by ERE.
+
 Cluster Assignment may change over time as a result of such re-evaluation. Stability means that cluster identifiers are not reused improperly; it does not imply immutability of assignment. +
+
 *Preconditions*
 
 * The mention exists in the Decision Store with a current Cluster Assignment.
 * The User provides the required mention identifiers and, where applicable, recommended cluster identifiers or exclusion lists.
+
 *Success Guarantee (Postconditions)* +
 For a valid re-evaluation request:
 
@@ -35,31 +43,38 @@ For a valid re-evaluation request:
 . ERE evaluates the recommendation and determines the authoritative clustering outcome.
 . ERS updates the Decision Store to reflect the latest Cluster Assignment returned by ERE.
 . Any change in Cluster Assignment updates delta tracking to support refresh operations.
+
 The resulting Cluster Assignment is authoritative and replaces the previous assignment if different. +
+
 *Minimal Guarantees (On Failure)*
 
 * If the re-evaluation request is invalid or refers to an unknown mention, ERS returns an explicit validation error.
 * If ERE is temporarily unavailable, the request is not applied and the existing Cluster Assignment remains unchanged.
 * User recommendations do not directly modify canonical identity without an authoritative outcome from ERE.
+
 *Main Success Scenario  Placement Recommendation*
 
 . The User requests that a mention be assigned to a specified cluster.
 . ERS validates the request and forwards it to ERE as a placement recommendation.
 . ERE evaluates the recommendation and determines the resulting Cluster Assignment.
 . ERS records the returned Cluster Assignment in the Decision Store.
+
 *Alternate Scenario  Exclusion Recommendation*
 
 . The User requests re-resolution with one or more clusters excluded.
 . ERS forwards the exclusion list to ERE.
 . ERE re-evaluates clustering under its internal logic.
 . ERS records the authoritative Cluster Assignment returned by ERE.
+
 *Special Requirements*
 
 * User actions are recommendations and do not constitute governance overrides.
 * ERE decisions are binding.
 * ERS stores only the latest Cluster Assignment per mention and does not maintain canonical lineage.
 * All Cluster Assignment changes resulting from re-evaluation must update delta tracking.
+
 *Technology and Data Variations* +
 The re-evaluation interface may be exposed through different transport mechanisms depending on deployment. Interaction types and message structures are defined in the ERS–ERE contract. +
+
 *Frequency of Occurrence* +
 Low to medium; invoked when manual intervention or operational correction is required.

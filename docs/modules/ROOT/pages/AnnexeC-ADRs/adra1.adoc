@@ -29,6 +29,7 @@ SHA256(concat(sourceId, requestId, entityType))
 . *Assignment Mutability*
 .. While clusterIds are stable values, the assignment of a mention to a clusterId may change over time as determined by ERE.
 .. Canonical identity for a mention therefore reflects the latest cluster assignment, not an immutable binding established at first exposure.
+
 === Scope and Applicability
 
 This decision applies to all usages of clusterIds and canonical identifiers across ERS APIs, ERS–ERE interaction, persistence projections, and documentation. +
@@ -40,6 +41,7 @@ It does not prescribe internal clustering algorithms, scoring models, or merge/s
 * Centralised runtime minting of canonical identifiers in ERS.
 * Engine-specific identifier generation with translation at the ERS boundary.
 * Deterministic shared identifier space with cluster-as-canonical semantics. _(Selected)_
+
 === Rationale
 
 Using a shared deterministic identifier space eliminates translation between "cluster identifiers" and "canonical identifiers" and removes ambiguity about which component confers identity. +
