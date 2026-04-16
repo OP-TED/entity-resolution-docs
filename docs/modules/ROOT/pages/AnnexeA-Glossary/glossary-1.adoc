@@ -22,7 +22,7 @@ It must remain stable for traceability but carries no identity semantics beyond 
 record identifier, mention identifier
 Entity Mention Representation
 The descriptive payload of an entity mention, expressed in a specific serialised form.
-Supplied externally as part of a mention submission. Used for transport, parsing, validation, and extraction. It is not an identity construct. It includes both the payload and the indication of its format (e.g. JSON, XML, RDF).
+Supplied externally as part of a mention submission. Used for transport, parsing, validation, and extraction. It is not an identity construct. It includes both the payload and the indication of its format (e.g. RDF).
 mention payload, input payload, source payload
 Entity Representation
 A descriptive information artefact that conveys information about an entity without asserting or carrying identity.
@@ -53,7 +53,7 @@ Similarity scores are engine-internal assessment signals exposed via the contrac
 Entity Type
 An ontological category that classifies real-world entities according to their nature or role within a domain.
 They define what kind of thing an entity is (e.g. Person, Organisation) and may constrain applicable properties, resolution rules, or matching strategies. Entity types are not tags or identifiers, they do not identify entities, and do not imply the existence of a canonical entity or cluster.
-class, entity category, entity class, reference type, canonical entity type (CET)
+class, entity category, entity class, reference type
 Resolution Decision
 
 A projection artefact maintained by ERS that records the latest authoritative clustering outcome received from the ERE for a single entity mention.
