@@ -2,6 +2,7 @@
 
 Spine C defines the read-only interaction by which a downstream consumer synchronises placement changes in bulk, using the supported delta mechanism (*refreshBulk*). In the engine-authoritative model, mention-to-cluster assignment can evolve over time due to late outcomes, engine-initiated reclustering, or curator recommendations. This spine therefore makes explicit how clients obtain a bounded set of updates, without triggering resolution and without relying on push callbacks. +
 This spine is intentionally about *bounded read access and continuation*, not about lookup of a single mention. It is expressed in UML Sequence notation and focuses on responsibility transfer and state observation at the ERS boundary. +
+
 *Simplified sequence diagram (Spine C)*
 
 [mermaid]

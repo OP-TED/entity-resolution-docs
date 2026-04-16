@@ -1,0 +1,100 @@
+= Curation Web Application — User Guide
+:description: User guide for the Entity Resolution curation web application.
+
+This document provides an overview of the Curation Web Application and serves as a guide for curators and administrators to understand its purpose, navigate its pages, and use its features.
+
+The Curation Web Application offers a graphical user interface which curators use to review entity resolution decisions produced by the Entity Resolution Engine (ERE) and record their feedback.
+
+== Purpose
+
+The application plays an important role in the Entity Resolution System, allowing curators to inspect and evaluate automatic entity resolution decisions.
+It enables a human-in-the-loop approach and guides the automatic resolution process.
+
+== Capabilities
+
+The application provides the following capabilities:
+
+* Browse and review pending decisions produced by the resolution engine.
+* Record curator feedback on proposed matches.
+* View the history of past curatorial actions.
+* Display simple statistics about the curation process.
+* Manage user accounts and permissions (admin only).
+
+== Workflow
+
+The curation cycle begins when the resolution engine produces a decision and ends when a curator records their verdict.
+The following steps describe a typical review cycle:
+
+. The resolution engine proposes a cluster match for an entity mention and attaches *confidence* and *similarity scores* reflecting its certainty.
+. Decisions whose confidence falls below a configurable threshold are surfaced in the Decisions Queue for manual review.
+. The curator examines the proposed match — comparing the entity mention against the candidate cluster — and records their feedback:
+  * *Accept* the top candidate,
+  * *Select* an alternative cluster, or
+  * *Reject* all candidates.
+. The recorded feedback is stored and used by the engine when re-evaluating future decisions.
+. The curator may also browse the Action History to review past decisions and their outcomes.
+
+== Application Pages
+
+The application consists of the following pages that are described in detail in the linked sections.
+
+[cols="1,3"]
+|===
+| Page | Purpose
+
+| xref:UserGuide/curation-guide-decisions.adoc[Decisions Queue]
+| Browse decisions pending review and record curator feedback.
+
+| xref:UserGuide/curation-guide-history.adoc[Action History]
+| Browse the log of all past curatorial actions.
+Filter by action type and actor; inspect the clusters and candidates at the time of each action.
+
+| xref:UserGuide/curation-guide-admin.adoc[User Management]
+| Create and manage user accounts.
+Control who can access the application, verify users to grant curation access, and assign superuser privileges.
+Available to superusers only.
+|===
+
+== Top Application Bar
+
+The top bar is visible on all pages and provides global navigation. It consists of three main areas:
+
+* *Left* — navigation menu with links to the main sections of the application (Decisions, History; Admin for superusers only).
+* *Center* — simple statistics about the current decision queue.
+* *Right* — user icon with dropdown menu for accessing the user profile and logging out.
+
+image::curation/application-bar.png[Application top bar]
+
+
+== Authentication
+
+Access to the application requires a verified account provisioned by an administrator. To log in:
+
+. Navigate to the application URL.
+. Enter your *email* and *password* and click *Sign In*.
+. On success you are redirected to the Decisions Queue.
+. If the page redirects back to login, contact your administrator — your account may not be verified yet.
+
+== Keyboard Shortcuts
+
+The application supports keyboard shortcuts to facilitate efficient navigation and decision review.
+Keyboard shortcuts are available on the *Decisions* page only.
+
+[cols="1,3"]
+|===
+| Key | Action
+
+| kbd:[↑] / kbd:[↓]
+| Navigate up or down through the decision queue list.
+
+| kbd:[Enter]
+| Select the highlighted decision for review, displaying the comparison panel.
+
+| kbd:[A]
+| Accept the currently displayed decision.
+
+| kbd:[R]
+| Reject the currently displayed decision.
+|===
+
+NOTE: Shortcuts are disabled when keyboard focus is inside a text input or text area (e.g., the Search box).

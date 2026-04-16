@@ -25,3 +25,12 @@
 * ERE
 ** xref:ERE/ere-dev-guide.adoc[ERE Developer Guide]
 ** xref:ERE/ere-reference-impl.adoc[Basic ERE Reference Implementation]
+
+* xref:UserGuide/curation-guide-overview.adoc[Curation User Guide]
+** xref:UserGuide/curation-guide-decisions.adoc[Decisions Review]
+** xref:UserGuide/curation-guide-history.adoc[Action History]
+** xref:UserGuide/curation-guide-admin.adoc[User Management]
+
+* API Reference
+** xref:api-docs/ers/index.adoc[ERS REST API]
+** xref:api-docs/curation/index.adoc[Curation REST API]

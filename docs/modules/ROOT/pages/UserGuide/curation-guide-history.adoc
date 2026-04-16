@@ -1,0 +1,84 @@
+= Action History
+:description: How to browse and inspect past curatorial actions in the Curation Web Application.
+
+The *History* page provides a read-only audit trail of all curatorial actions taken by all users.
+Use it to verify past feedback, investigate discrepancies, or review a colleague's work. This page has a similar layout to the Decisions page.
+
+image::curation/history-page.png[Full History page]
+
+== User Interface Overview
+
+The page is divided into three main sections:
+
+* *Left* — the Reviewed Decisions List, showing all decisions evaluated by a user.
+* *Center* — the Decision Area, showing the entity mention that was evaluated, with the decision context (the top and alternative candidate clusters proposed by the engine).
+* *Top* — a bar for filtering and ordering the Reviewed Decisions List.
+
+== Filtering and Ordering Bar
+
+The filter bar lets you narrow down the reviewed decision list by curator action, user, and sort order.
+All filters can be combined and take effect instantly.
+
+[cols="1,3"]
+|===
+| Filter | Description
+
+| *Action*
+| Filter by action type: _All Actions_, _Accept Top_, _Accept Alternative_, _Reject All_.
+
+| *User*
+| Filter by the curator who performed the action.
+
+| *Sort by*
+| Order by _Created At (Newest)_ or _Created At (Oldest)_.
+|===
+
+image::curation/history-filter-bar.png[History filter bar with Action type and User dropdowns]
+
+== Action List
+
+The left panel lists all actions matching the active filters. Each item represents a reviewed decision and the feedback recorded by the curator.
+Each item shows the action type (colour-coded badge), the entity name, and when the action was recorded.
+
+[cols="1,1"]
+|===
+| Action type | Badge colour
+
+| Accept Top
+| 🟢 Green
+
+| Accept Alternative
+| 🔵 Blue
+
+| Reject All
+| 🔴 Red
+|===
+
+Select any item to load its detail in the right panel.
+
+image::curation/action-list.png[Action list with type badges]
+
+== Action Detail
+
+Selecting an action shows its full context.
+
+The header displays the entity name, the action type badge, the curator's email, and the timestamp.
+
+=== Entity and Selected Cluster
+
+Two cards are shown side by side:
+
+* *Left* — the entity mention that was curated.
+* *Right* — the cluster the curator selected.
+  For *Accept Top* and *Accept Alternative* actions, this shows the chosen cluster with its entities and scores.
+  For *Reject All* actions, this area shows that no cluster was selected.
+
+image::curation/selected-cluster.png[Action detail showing entity card and selected cluster]
+
+=== Candidates
+
+Below the cards, all candidate clusters that were presented to the curator at the time of the action are listed.
+Expand any candidate to inspect its entities and scores.
+The cluster that was selected is visually distinguished from the others.
+
+image::curation/candidates-section.png[Candidates section with selected cluster highlighted]

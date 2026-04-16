@@ -8,6 +8,7 @@ ERS operates in a distributed, asynchronous environment where:
 * Provisional identifiers may be issued.
 * Cluster assignments may later change.
 * Delta updates are exposed via refreshBulk.
+
 Operational insight is required to understand request flow, timing behaviour, reassignment events, and integration outcomes. +
 However, observability must not:
 

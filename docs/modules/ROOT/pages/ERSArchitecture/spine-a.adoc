@@ -5,6 +5,7 @@ Spine A defines the client-facing *Resolve* interaction in which an Originator s
 * *Idempotent intake* correlated by the triad _(sourceId, requestId, entityType)_.
 * *Dual time budgets*, where the ERS ↔ ERE execution window is shorter than the client ↔ ERS timeout budget.
 * *Identifier availability semantics*, including the provisional singleton lifecycle when the engine does not respond in time.
+
 *Simplified sequence diagram (Spine A)* +
 
 [mermaid, align=center, width=100%]
