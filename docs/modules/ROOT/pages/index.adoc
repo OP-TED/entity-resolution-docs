@@ -1,6 +1,6 @@
 = Entity Resolution System Documentation
 
-This documentation describes the Entity Resolution System (ERS), a set of baseline architecture, technical contracts, and supporting materials for managing canonical entity identifiers across distributed systems.
+This documentation describes the Entity Resolution System (ERSys), a set of baseline architecture, technical contracts, and supporting materials for managing canonical entity identifiers across distributed systems.
 
 Use this guide to understand the system scope, integration points, and architectural decisions. Start with the table below to navigate to your area of interest.
 
