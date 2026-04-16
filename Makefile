@@ -26,8 +26,8 @@ clean-docs:
 	@ echo -e "$(BUILD_PRINT)$(ICON_DONE) Antora build successfully cleaned!$(END_BUILD_PRINT)"
 
 serve-docs:
-	@ echo -e "$(BUILD_PRINT)$(ICON_PROGRESS) Serving docs at http://localhost:8080 (Ctrl+C to stop)...$(END_BUILD_PRINT)"
-	python3 -m http.server 8080 --directory $(DOC_BUILD_DIR)/site
+	@ echo -e "$(BUILD_PRINT)$(ICON_PROGRESS) Serving docs at http://localhost:8088 (Ctrl+C to stop)...$(END_BUILD_PRINT)"
+	python3 -m http.server 8088 --directory $(DOC_BUILD_DIR)/site
 
 preview-docs: build-docs serve-docs
 

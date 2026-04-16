@@ -14,8 +14,11 @@ Use this guide to understand the system scope, integration points, and architect
 | xref:ERS-ERE-Contarct/index.adoc[ERS-ERE Technical Contract]
 | Specifies the message-based interfaces, idempotent processing rules, and canonical identifier semantics for ERS–ERE communication.
 
-| xref:ERE/ere-dev-guide.adoc[ERE Developer guide]
+| xref:ERE/ere-dev-guide.adoc[ERE Developer Guide]
 | Provides guidance for developers implementing an Entity Resolution Engine (ERE) compatible with ERS.
+
+| xref:ERE/ere-reference-impl.adoc[Basic ERE Reference Implementation]
+| A reference implementation of the ERS–ERE Technical Contract. Shows how online greedy clustering, Redis messaging, and configurable RDF parsing fit together in a conformant ERE.
 
 | xref:AnnexeA-Glossary/index.adoc[Annexe A: Glossary]
 | Definitions of domain terms, abbreviations, and concepts used throughout the documentation.
