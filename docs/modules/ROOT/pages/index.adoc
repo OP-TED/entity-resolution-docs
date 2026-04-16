@@ -25,4 +25,13 @@ Use this guide to understand the system scope, integration points, and architect
 
 | xref:AnnexeC-ADRs/index.adoc[Annexe C: Architecture Decision Records]
 | Records of key architectural decisions (ADR-A through ADR-G) and their rationale.
+
+| xref:UserGuide/curation-guide-overview.adoc[Curation User Guide]
+| Step-by-step guide for curators who review entity resolution decisions, record feedback, and manage user accounts in the Curation Web Application.
+
+| xref:api-docs/ers/index.adoc[ERS REST API]
+| Auto-generated reference for the Entity Resolution Service REST API — resolution, lookup, and refresh endpoints.
+
+| xref:api-docs/curation/index.adoc[Curation REST API]
+| Auto-generated reference for the Curation application REST API — authentication, decisions, actions, and user management endpoints.
 |===

@@ -28,11 +28,13 @@ Within this boundary, ERSys has the following mandatory responsibilities. +
 First, bounded canonical identity assignment. For every valid entity mention, ERS must return a canonical identifier within the defined client-facing time budget. The identifier shall be either the clusterId produced by the ERE within the execution window or a provisional singleton clusterId issued by ERS under the deterministic derivation rule. Subsequent authoritative outcomes from the ERE may replace provisional assignments. +
 Second, canonical state exposure. ERSys must make the current mention-to-cluster assignment observable through stable interfaces, including bulk synchronisation mechanisms that reveal assignment changes over time. +
 Third, resolution orchestration. ERSys forwards resolution and recommendation requests to the ERE, correlates asynchronous responses using the mention identifier tuple, applies the defined time-budget model, and updates its stored record of the latest resolution outcome accordingly. +
+
 Fourth, persistence of authoritative runtime state. ERSys maintains:
 
 * an immutable System of Record for submitted mentions and request metadata,
 * a Decision Store that contains the latest resolution decision per mention, including the current clusterId and the top N alternatives returned by the most recent ERE outcome,
 * a User Action Log that records human curation actions as a read-only log for traceability and potential training use.
+
 The Decision Store does not redefine identity semantics. It records the most recent authoritative clustering outcome received from the ERE. Historical lineage of canonical assignments is not maintained beyond what is required for operational traceability. +
 Fifth, human-in-the-loop re-evaluation. ERSys accepts user recommendations through the Link Curation Web Application, records the action in the User Action Log, and forwards the recommendation to the ERE for authoritative evaluation. The resulting cluster assignment is determined exclusively by the ERE and, once received, replaces the previously recorded authoritative assignment in the Decision Store. +
 These responsibilities are constrained by the Architecture Decision Records and realised through the White-level Use Cases.

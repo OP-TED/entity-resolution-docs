@@ -65,6 +65,7 @@ end
 
 * *recommendedPlacement* (a preferred target clusterId), and/or
 * *recommendedExclusions* (a set of clusterIds that must not be used).
+
 Field names and allowed combinations are normative and defined in the ERS–ERE Technical Contract; any UI action vocabulary (acceptTop/acceptAlt/rejectAll) is non-normative and must map to these contract fields. +
 
 *Validate and accept or reject.* The Link Curation Service forwards the action to ERS, which validates:

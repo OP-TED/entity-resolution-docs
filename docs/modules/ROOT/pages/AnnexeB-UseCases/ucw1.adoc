@@ -68,7 +68,9 @@ For every valid request received within the client timeout budget:
 * Cluster identifiers are canonical identifiers and originate either from ERE clustering or deterministic singleton derivation.
 * ERE decisions are binding; ERS does not override clustering outcomes.
 * ERS stores only the latest Cluster Assignment per mention in the Decision Store; canonical entity lineage is not maintained.
+
 *Technology and Data Variations* +
 Entity Mention payloads may vary in format and structure, subject to validation rules and supported entity type configuration. +
+
 *Frequency of Occurrence* +
 High; expected to be invoked repeatedly as part of automated ingestion, reconciliation, and synchronisation pipelines.
