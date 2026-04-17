@@ -24,6 +24,7 @@
 
 * ERE
 ** xref:ERE/ere-dev-guide.adoc[ERE Developer Guide]
+** xref:ERE/ere-reference-impl.adoc[Basic ERE Reference Implementation]
 
 * xref:UserGuide/curation-guide-overview.adoc[Curation User Guide]
 ** xref:UserGuide/curation-guide-decisions.adoc[Decisions Review]
