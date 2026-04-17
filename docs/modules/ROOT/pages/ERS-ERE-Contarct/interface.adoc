@@ -112,6 +112,10 @@ This is the counterpart of the resolution request, which the ERE sends to the en
 }
 ----
 
+The `candidates` list MUST contain at least one entry.
+The first entry (`candidates[0]`) MUST be the ERE's top proposed cluster assignment — the candidate the ERE considers most likely equivalent to the input entity mention.
+ERS always selects `candidates[0]` as the primary resolution outcome; ordering is therefore normative, not advisory.
+
 [Informative] one way to use multiple canonical identifier candidates is to feed the curation application, so that the user can decide which entity is actually equivalent to the input, or they can reject all the candidates (see below). +
 As you can see, the response reports the composite entity ID of the mention it refers to. This isn’t strictly needed, since it could be reconstructed by going back to the original request through +ere_request_id+. Nonetheless, we repeat these data in the response for convenience.
 
