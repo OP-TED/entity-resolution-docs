@@ -126,6 +126,12 @@ The ERE is the authority to determine the membership of an entity to clusters.
 It is the ERS responsibility to manage and govern the canonical entities, including IDs, integration of entity mention memberships, and if necessary canonical representations. +
 This follows from the normative derivation rule defined in the section _Canonical Identifier Derivation and Stability_.
 
+==== Score semantics for singleton clusters (Normative)
+
+When the ERE finds no equivalent cluster for the entity mention and creates a new singleton cluster, it shall return a response with a single candidate whose +confidence_score+ and +similarity_score+ are both +0.0+. +
+These values indicate the absence of any pairwise comparison: the newly created cluster has no prior members against which a similarity or equivalence assessment can be made. +
+A +confidence_score+ of +0.0+ shall not be interpreted as a resolution failure; it is the expected value for a valid singleton outcome. ERS shall accept and record such a response normally.
+
 === Resolution Request with proposed placements
 
 A resolution request might contain a list of proposed cluster IDs. The ERE might take them into account, but that is not mandatory, the ERE can still decide a different entity classification and it remains the ultimate authority to decide the clustering of an entity. +
