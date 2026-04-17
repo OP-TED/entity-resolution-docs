@@ -1,7 +1,7 @@
 === UC-B1.2  Integrate ERE Resolution Outcomes (Asynchronous)
 
 *Use Case Level:* Blue (User-goal) +
-*Primary Actor:* Entity Resolution System (ERS) +
+*Primary Actor:* Entity Resolution System (ERSys) +
 *Scope:* ERS internal integration boundary towards the Entity Resolution Engine (ERE) +
 
 *Supporting Actors*
