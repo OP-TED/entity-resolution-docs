@@ -6,7 +6,7 @@
 
 *Supporting Actors*
 
-* Entity Resolution System (ERS)
+* Entity Resolution System (ERSys)
 * Entity Resolution Engine (ERE)
 * Decision Store (latest Cluster Assignment per mention)
 

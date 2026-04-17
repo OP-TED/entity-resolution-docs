@@ -51,6 +51,10 @@ image::curation/filter-bar.png[Filter bar with Confidence and Similarity dropdow
 |===
 | Filter | Description
 
+| *Entity Type*
+| Restrict the list to decisions for a specific entity type.
+Select one or more types from the dropdown, or leave it empty to show decisions for all entity types.
+
 | *Confidence*
 | Restrict by confidence score range.
 Select a predefined band (Low / Medium / High) or set custom min/max values.
@@ -66,7 +70,27 @@ Options: _Created At (Newest/Oldest)_, _Updated At (Newest/Oldest)_, _Confidence
 
 | *Search*
 | Full-text search across entity mention field data (name, identifiers, and other parsed attributes).
+
 |===
+
+=== Confirmation Preferences
+
+Four toggles in the user pop-up let you suppress the confirmation dialogs for Accept, Reject, and Assign actions, or disable all of them at once.
+When a toggle is on, clicking the action button (or pressing the keyboard shortcut) applies the action immediately, without a confirmation step.
+
+image::curation/skip-confirmation-toggles.png[Skip-confirmation toggles]
+
+The preferences can be also set during an action by checking the *Don't show again* box in the confirmation dialog.
+
+image::curation/confirmation-dialog.png[Skip-confirmation in confirmation dialog]
+
+The preferences are only active during the current session.
+
+
+[WARNING]
+====
+Curatorial actions are final and cannot be undone. The toggles are disabled by default to provide an extra safety check before recording feedback. Use them with caution.
+====
 
 
 === Decision Area

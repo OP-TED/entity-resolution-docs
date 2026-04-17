@@ -80,6 +80,19 @@ Click *OK* to save your changes.
 
 image::curation/admin-edit-user.png[Edit User modal showing the Active, Superuser, and Verified toggles]
 
+== Changing a User's Password
+
+If a user forgets their password and cannot sign in, an administrator can set a new password on their behalf.
+
+. Click the *edit* icon on the user's row to open the edit form.
+. Enter a new password in the *Password* field (at least 8 characters).
+. Click *OK* to apply the change.
+
+The user can sign in immediately with the new password.
+No notification is sent automatically — inform the user of their new credentials separately.
+
+image::curation/admin-edit-user-password.png[Edit User modal with the New Password field]
+
 NOTE: The system prevents removing the last active administrator. If you attempt to deactivate or remove superuser status from the only remaining active superuser, the action will be rejected with an error.
 
 == Deactivating a User
