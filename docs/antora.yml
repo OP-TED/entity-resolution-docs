@@ -1,5 +1,5 @@
 name: entity-resolution-docs
-title: Entity Resolution Service Documentation
+title: Entity Resolution System Documentation
 version: '~'
 start_page: ROOT:index.adoc
 asciidoc:

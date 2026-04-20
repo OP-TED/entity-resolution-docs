@@ -1,36 +1,34 @@
 * xref:index.adoc[Home]
 
 * xref:ERSArchitecture/index.adoc[ERS Architecture]
-** xref:ERSArchitecture/introduction.adoc[Introduction]
-** xref:ERSArchitecture/scope.adoc[Scope]
-** xref:ERSArchitecture/actors.adoc[Actors]
-** xref:ERSArchitecture/decissions.adoc[Decisions]
-** xref:ERSArchitecture/core-capabilities.adoc[Core Capabilities]
-** xref:ERSArchitecture/behaviour-spines.adoc[Behaviour Spines]
-** xref:ERSArchitecture/conceptual-model.adoc[Conceptual Model]
-** xref:ERSArchitecture/system-context.adoc[System Context]
-** xref:ERSArchitecture/deployment-architecture.adoc[Deployment Architecture]
 
-* xref:ERS-ERE-Contarct/index.adoc[ERS-ERE Technical Contract]
-** xref:ERS-ERE-Contarct/introduction.adoc[Introduction]
-** xref:ERS-ERE-Contarct/interface.adoc[Interface Specification]
-** xref:ERS-ERE-Contarct/suppliment.adoc[Supplement]
-
-* xref:AnnexeA-Glossary/index.adoc[Annexe A: Glossary]
-
-* xref:AnnexeB-UseCases/index.adoc[Annexe B: Use Cases]
-
-* xref:AnnexeC-ADRs/index.adoc[Annexe C: ADRs]
+* ERS
+** xref:ERSArchitecture/index.adoc[Architecture]
+*** xref:ERSArchitecture/introduction.adoc[Introduction]
+*** xref:ERSArchitecture/scope.adoc[Scope]
+*** xref:ERSArchitecture/actors.adoc[Actors]
+*** xref:ERSArchitecture/decissions.adoc[Decisions]
+*** xref:ERSArchitecture/core-capabilities.adoc[Core Capabilities]
+*** xref:ERSArchitecture/behaviour-spines.adoc[Behaviour Spines]
+*** xref:ERSArchitecture/conceptual-model.adoc[Conceptual Model]
+*** xref:ERSArchitecture/system-context.adoc[System Context]
+*** xref:ERSArchitecture/deployment-architecture.adoc[Deployment Architecture]
+** xref:AnnexeB-UseCases/index.adoc[Use Cases]
+** API Reference
+*** xref:api-docs/ers/index.adoc[ERS REST API]
+*** xref:api-docs/curation/index.adoc[Curation REST API]
 
 * ERE
-** xref:ERE/ere-dev-guide.adoc[ERE Developer Guide]
+** xref:ERS-ERE-Contarct/index.adoc[ERS-ERE Technical Contract]
+*** xref:ERS-ERE-Contarct/introduction.adoc[Introduction]
+*** xref:ERS-ERE-Contarct/interface.adoc[Interface Specification]
+*** xref:ERS-ERE-Contarct/suppliment.adoc[Supplement]
+** xref:ERE/ere-dev-guide.adoc[Developer Guide]
 ** xref:ERE/ere-reference-impl.adoc[Basic ERE Reference Implementation]
 
-* xref:UserGuide/curation-guide-overview.adoc[Curation User Guide]
+* xref:UserGuide/curation-guide-overview.adoc[Curation App (User Guide)]
 ** xref:UserGuide/curation-guide-decisions.adoc[Decisions Review]
 ** xref:UserGuide/curation-guide-history.adoc[Action History]
 ** xref:UserGuide/curation-guide-admin.adoc[User Management]
 
-* API Reference
-** xref:api-docs/ers/index.adoc[ERS REST API]
-** xref:api-docs/curation/index.adoc[Curation REST API]
+* xref:AnnexeA-Glossary/index.adoc[Glossary]

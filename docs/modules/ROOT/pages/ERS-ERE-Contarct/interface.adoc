@@ -112,6 +112,10 @@ This is the counterpart of the resolution request, which the ERE sends to the en
 }
 ----
 
+The `candidates` list MUST contain at least one entry.
+The first entry (`candidates[0]`) MUST be the ERE's top proposed cluster assignment — the candidate the ERE considers most likely equivalent to the input entity mention.
+ERS always selects `candidates[0]` as the primary resolution outcome; ordering is therefore normative, not advisory.
+
 [Informative] one way to use multiple canonical identifier candidates is to feed the curation application, so that the user can decide which entity is actually equivalent to the input, or they can reject all the candidates (see below). +
 As you can see, the response reports the composite entity ID of the mention it refers to. This isn’t strictly needed, since it could be reconstructed by going back to the original request through +ere_request_id+. Nonetheless, we repeat these data in the response for convenience.
 
@@ -121,6 +125,12 @@ The ERE is the authority to determine the membership of an entity to clusters.
 
 It is the ERS responsibility to manage and govern the canonical entities, including IDs, integration of entity mention memberships, and if necessary canonical representations. +
 This follows from the normative derivation rule defined in the section _Canonical Identifier Derivation and Stability_.
+
+==== Score semantics for singleton clusters (Normative)
+
+When the ERE finds no equivalent cluster for the entity mention and creates a new singleton cluster, it shall return a response with a single candidate whose +confidence_score+ and +similarity_score+ are both +0.0+. +
+These values indicate the absence of any pairwise comparison: the newly created cluster has no prior members against which a similarity or equivalence assessment can be made. +
+A +confidence_score+ of +0.0+ shall not be interpreted as a resolution failure; it is the expected value for a valid singleton outcome. ERS shall accept and record such a response normally.
 
 === Resolution Request with proposed placements
 
