@@ -26,7 +26,7 @@ The following steps outline the main activities involved in building an ERE. Eac
 . Clone `entity-resolution-spec` and use or generate data models for your language (Python/Pydantic models are already available in the repository; for other languages, models can be generated from the LinkML schema — see <<data-model-and-entity-types>>).
 . Implement the request handler loop (see <<request-handling-lifecycle>>).
 . Specify a configuration that complies with the minimal set of expected configuration parameters (see xref:ERS-ERE-Contarct/suppliment.adoc#configuration[contract supplement — Configuration]).
-. Implement a test adhering to the expected behaviour and verify it passes. An abstract specification of the expected behaviour is provided as Gherkin feature files in the https://github.com/meaningfy-ws/entity-resolution-spec/tree/develop/test/features[entity-resolution-spec repository].
+. Implement a test adhering to the expected behaviour and verify it passes. An abstract specification of the expected behaviour is provided as Gherkin feature files in the https://github.com/OP-TED/entity-resolution-spec/tree/develop/test/features[entity-resolution-spec repository].
 . Use the xref:ERE/ere-reference-impl.adoc[basic ERE reference implementation] as a concrete example of one realisation.
 . Validate your implementation against the test data provided in `entity-resolution-spec`.
 

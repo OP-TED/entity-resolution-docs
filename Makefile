@@ -16,7 +16,7 @@ DOC_BUILD_DIR=docs/build
 ANTORA_PLAYBOOK := $(shell pwd)/docs/antora-playbook.local.yml
 
 # ERS repo settings for API docs generation
-ERS_REPO_URL ?= https://github.com/meaningfy-ws/entity-resolution-service.git
+ERS_REPO_URL ?= https://github.com/OP-TED/entity-resolution-service.git
 ERS_REPO_BRANCH ?= develop
 ERS_CLONE_DIR = .ers-clone
 DOCS_API_PATH ?= $(shell pwd)/docs/modules/ROOT/pages/api-docs
