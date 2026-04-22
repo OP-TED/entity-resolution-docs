@@ -1,6 +1,7 @@
 === 8.3 Spine B: Asynchronous engine interaction and outcome integration (ERS - ERE)
 
 Spine B defines the asynchronous interaction between ERS and the Entity Resolution Engine (ERE) for resolution requests and clustering outcomes. This spine is the architectural “shock absorber” of ERSys: it makes explicit that messaging is at-least-once, outcomes can be late or duplicated, and the engine may publish outcomes even when ERS did not just send a request (for example, due to engine-initiated reclustering). The key point is simple: the ERE is authoritative for clustering outcomes, and ERS is responsible for correlating, recording, and exposing the latest outcome per mention. +
+
 *Simplified sequence diagram (Spine B)*
 
 [mermaid]
@@ -57,7 +58,7 @@ Optionally, ERS may include additional request metadata that shapes how the engi
 
 * *recommendedExclusions* (negative evidence), and/or
 * *recommendedPlacement* (preferred clusterId), including provisional singleton placement.
-These fields are not “governance overrides”. They are inputs to engine evaluation. +
+These fields are not “governance overrides”. They are inputs to engine evaluation.+
 *Deliver to the engine under at-least-once semantics.* The messaging middleware delivers the request to the ERE asynchronously. Duplicates can occur, and delivery ordering is not guaranteed. +
 *Produce and publish an authoritative outcome.* The ERE performs its internal resolution logic and publishes a resolution result that includes:
 
@@ -65,7 +66,9 @@ These fields are not “governance overrides”. They are inputs to engine evalu
 * the primary *clusterId (canonical identifier)*,
 * top alternative clusterIds
 * For each cluster the related scoring metadata: confidence and similarity scores.
+
 Outcomes may be *solicited* (in response to an ERS request) or *unsolicited* (for example, engine-initiated reclustering). Both are handled using the same integration pattern. +
+
 *Validate, correlate, and record.* ERS validates the message envelope and schema against the ERS–ERE Technical Contract.
 
 * If the delivery violates the contract (for example, missing triad, invalid schema), ERS records the violation for traceability and ignores the payload for decision state.

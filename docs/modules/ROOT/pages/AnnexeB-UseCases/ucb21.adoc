@@ -3,15 +3,19 @@
 *Use Case Level:* Blue (User-goal) +
 *Primary Actor:* Authorised User (e.g. Curator or Operational Reviewer) +
 *Scope:* Link Curation Application and ERS User Interaction Interface +
+
 *Supporting Actors*
 
-* Entity Resolution System (ERS)
+* Entity Resolution System (ERSys)
 * Entity Resolution Engine (ERE)
 * Decision Store (latest Cluster Assignment per mention)
+
 *Goal* +
 Allow a User to request re-evaluation of the current Cluster Assignment of a single Entity Mention by submitting a placement recommendation or exclusion list for forwarding to ERE. +
+
 *Trigger* +
 The User selects an existing Entity Mention in the Link Curation application and chooses to request re-evaluation of its Cluster Assignment. +
+
 *Preconditions*
 
 * The Entity Mention exists in the Decision Store and has a current Cluster Assignment.
@@ -20,6 +24,7 @@ The User selects an existing Entity Mention in the Link Curation application and
 ** the current Cluster Assignment (clusterId),
 ** the top N alternative clusters returned by the latest ERE outcome.
 * The User is authenticated and authorised to submit re-evaluation requests.
+
 *Brief Description* +
 This use case describes the processing of a User-initiated re-evaluation request under the engine-authoritative clustering model. +
 Canonical identity is defined as a cluster managed by ERE. Cluster identifiers are canonical identifiers. ERE is authoritative for clustering outcomes and its decisions are binding. +
@@ -34,6 +39,7 @@ Upon submission:
 * ERS does not modify the current Cluster Assignment at this stage.
 ERE evaluates the recommendation according to its internal clustering logic and returns an authoritative clustering outcome asynchronously. +
 Only after receiving the authoritative outcome from ERE does ERS update the Decision Store to reflect the latest Cluster Assignment. +
+
 *Success Guarantee (Postconditions)* +
 For a valid re-evaluation submission:
 
@@ -46,30 +52,36 @@ The final Cluster Assignment may:
 * remain unchanged,
 * move to a different existing cluster, or
 * be assigned to a new cluster created by ERE.
+
 *Minimal Guarantees (On Failure)*
 
 * If the request is invalid or refers to an unknown mention, ERS rejects the submission and returns a validation error.
 * If ERS cannot forward the request to ERE, the current Cluster Assignment remains unchanged and no intermediate state is created.
 * User recommendations do not directly modify canonical identity without an authoritative outcome from ERE.
+
 *Main Success Scenario  Placement Recommendation*
 
 . The User selects a mention and recommends assignment to a specific cluster.
 . ERS validates the request and forwards the recommendation to ERE.
 . ERE evaluates the recommendation and determines the authoritative clustering outcome.
 . ERS updates the Decision Store to reflect the resulting Cluster Assignment.
+
 *Alternate Scenario  Exclusion Recommendation*
 
 . The User selects a mention and specifies one or more clusters to exclude.
 . ERS forwards the exclusion request to ERE.
 . ERE re-evaluates clustering under its internal logic.
 . ERS updates the Decision Store with the authoritative Cluster Assignment returned by ERE.
+
 *Special Requirements*
 
 * User actions are recommendations and do not constitute governance overrides.
 * ERE decisions are binding.
 * ERS stores only the latest Cluster Assignment per mention and does not maintain canonical lineage.
 * All resulting Cluster Assignment changes must update delta tracking.
+
 *Technology and Data Variations* +
 The interaction mechanism between the Link Curation application and ERS may vary by deployment. Message formats and interaction types are defined in the ERS–ERE contract. +
+
 *Frequency of Occurrence* +
 Low to medium; invoked when manual review or operational correction is required.

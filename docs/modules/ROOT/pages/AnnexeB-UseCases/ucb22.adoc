@@ -3,15 +3,19 @@
 *Use Case Level:* Blue (User-goal) +
 *Primary Actor:* Curator (human user) +
 *Scope:* Link Curation Application and ERS Curator Interaction Interface (bulk mode) +
+
 *Supporting Actors*
 
-* Entity Resolution System (ERS)
+* Entity Resolution System (ERSys)
 * Entity Resolution Engine (ERE)
 * Decision Store (latest Cluster Assignment per mention)
+
 *Goal* +
 Allow a Curator to request re-evaluation of multiple Entity Mentions in a single bulk operation by applying a uniform recommendation pattern, without directly modifying canonical identity. +
+
 *Trigger* +
 The Curator selects multiple Entity Mentions in the Link Curation application and initiates a bulk re-evaluation action. +
+
 *Preconditions*
 
 * Each selected Entity Mention exists in the Decision Store and has a current Cluster Assignment.
@@ -32,6 +36,7 @@ Upon submission:
 * ERS does not modify any Cluster Assignment at submission time.
 ERE evaluates each mention independently and returns authoritative clustering outcomes asynchronously. +
 ERS updates the Decision Store per mention only after receiving authoritative outcomes from ERE. +
+
 *Success Guarantee (Postconditions)* +
 For each valid mention in the bulk submission:
 

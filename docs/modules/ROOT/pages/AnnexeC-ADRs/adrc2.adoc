@@ -21,12 +21,14 @@ Explicit delivery and message-structure rules are required so that both componen
 * Duplicate messages are expected and must be tolerated.
 * Message ordering is not guaranteed and must not be relied upon.
 * All consumers must be idempotent.
+
 *2. Correlation*
 
 * All requests and responses are correlated using the mention identifier tuple:
 * (sourceId, requestId, entityType)
 * This tuple uniquely identifies the resolution context.
 * No additional implicit correlation mechanism shall be assumed.
+
 *3. Unified Resolution Request Types*
 
 * All interactions from ERS to ERE use a unified resolution envelope.
@@ -41,6 +43,7 @@ Explicit delivery and message-structure rules are required so that both componen
 ** reResolveConsideringExclusions (+ excluded cluster IDs)
 ** recluster (full cluster rebuild triggered discreetly by ERE, not ERS)
 * Provisional placements and user actions are transmitted using the same message structure as initial resolution.
+
 *4. Response Handling*
 
 * Responses from ERE contain the clustering outcome for the given mention context.
@@ -51,6 +54,7 @@ Explicit delivery and message-structure rules are required so that both componen
 * Late, duplicate, or out-of-order responses are treated as normal behaviour.
 * The latest processed ERE outcome becomes the authoritative projection in ERS. If multiple responses are received for the same mention, the response with the most recent clustering state according to ERE semantics shall prevail.
 * ERS shall not reject a valid ERE response solely due to lateness relative to a client-facing synchronous request.
+
 5. *Error Handling*
 
 * Engine errors, timeouts, and partial failures are absorbed within the asynchronous boundary.

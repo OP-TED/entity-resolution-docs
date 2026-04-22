@@ -50,6 +50,7 @@ It does not prescribe specific timeout durations, infrastructure mechanisms, or 
 * Return explicit error on engine timeout and never issue provisional identifiers.
 * Expose asynchronous polling or pending states to clients.
 * Issue provisional singleton placements within bounded time and allow later correction by ERE. _(Selected)_
+
 === Rationale
 
 Issuing provisional singleton placements ensures that clients receive a usable canonical identifier within bounded time, independent of engine latency. +

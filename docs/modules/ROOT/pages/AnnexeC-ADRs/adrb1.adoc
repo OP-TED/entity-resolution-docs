@@ -11,6 +11,7 @@ A single component must therefore be authoritative for clustering outcomes and c
 
 The ERE is the sole authority for clustering outcomes. +
 The ERS acts as a façade and coordinator and is not an authority over clustering semantics. +
+
 The following rules are binding:
 
 . *Canonical identity source of truth*
@@ -44,6 +45,7 @@ The following rules are binding:
 .. Maintain clusters and cluster identifiers in its authoritative store.
 .. Evaluate recommendations (provisional placements, user placements, exclusions) and return a new clustering outcome.
 .. Ensure cluster identifier management prevents improper reuse.
+
 === Scope and Applicability
 
 This decision applies to all ERS–ERE interactions and contracts, including resolution requests, recommendation requests, reclustering, and any asynchronous update mechanism through which ERE returns clustering outcomes. +
@@ -54,6 +56,7 @@ This decision governs authority boundaries and ownership of identity semantics. 
 * ERS authoritative for identity and governance, ERE advisory.
 * Shared authority with coordinated governance semantics.
 * ERE authoritative for clustering and canonical identity; ERS façade and coordinator. _(Selected)_
+
 === Rationale
 
 Making the ERE authoritative for clustering establishes a single semantic source of truth for identity, which removes the need for cross-component reconciliation and prevents silent divergence between “computed clusters” and “served canonical identifiers”. +

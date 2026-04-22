@@ -1,25 +1,86 @@
 = Entity Resolution System Documentation
 
-This documentation describes the Entity Resolution System (ERS), a set of baseline architecture, technical contracts, and supporting materials for managing canonical entity identifiers across distributed systems.
+This documentation covers the architecture, technical contracts, and supporting materials for the Entity Resolution System (ERSys).
 
-Use this guide to understand the system scope, integration points, and architectural decisions. Start with the table below to navigate to your area of interest.
+== Introduction
+
+The Publications Office of the European Union processes thousands of procurement notices daily through the TED ecosystem.
+These notices reference real-world entities — organisations, procedures, lots — that may be described differently across submissions yet refer to the same thing.
+ERSys addresses this by automatically identifying when different entity representations refer to the same real-world entity and assigning each a stable canonical identifier.
+
+== Entity Resolution System Overview
+
+ERSys is an open-source, scalable entity resolution platform with a pluggable architecture, designed to evolve alongside AI and machine learning technologies.
+Its core responsibility is to assign and maintain stable canonical identifiers for entity mentions submitted by external systems, so that downstream consumers always have a consistent, dereferenceable identity even as resolution quality improves over time.
+
+ERSys is composed of three main components:
+
+* *Entity Resolution Service (ERS)* — orchestrates resolution requests, enforces time budgets, persists assignment state, and exposes canonical identifiers through stable APIs.
+* *Entity Resolution Engine (ERE)* — the authoritative clustering component that decides whether two entity mentions refer to the same real-world entity. ERSys is designed to work with any conformant ERE implementation.
+* *Curation Web Application* — supports human-in-the-loop review and re-evaluation of resolution decisions, with a full audit trail.
+
+The following sections describe each documentation area in detail.
+
+== ERS
+
+Documentation of the Entity Resolution Service — its architecture, supported use cases, and REST API.
 
 [cols="2,4"]
 |===
 | Section | Purpose
 
-| xref:ERSArchitecture/index.adoc[ERS Architecture]
-| Describes system scope, actors, capabilities, behaviour spines, conceptual models, and deployment architecture.
+| xref:ERSArchitecture/index.adoc[Architecture]
+| System scope, actors, core capabilities, behaviour spines, conceptual model, and deployment architecture.
 
-| xref:ERS-ERE-Contarct/index.adoc[ERS-ERE Technical Contract]
-| Specifies the message-based interfaces, idempotent processing rules, and canonical identifier semantics for ERS–ERE communication.
-
-| xref:AnnexeA-Glossary/index.adoc[Annexe A: Glossary]
-| Definitions of domain terms, abbreviations, and concepts used throughout the documentation.
-
-| xref:AnnexeB-UseCases/index.adoc[Annexe B: Use Cases]
+| xref:AnnexeB-UseCases/index.adoc[Use Cases]
 | Catalogue of business use cases covering worker and back-office workflows.
 
-| xref:AnnexeC-ADRs/index.adoc[Annexe C: Architecture Decision Records]
-| Records of key architectural decisions (ADR-A through ADR-G) and their rationale.
+| xref:api-docs/ers/index.adoc[ERS REST API]
+| Auto-generated reference for the Entity Resolution Service REST API — resolution, lookup, and refresh endpoints.
+
+| xref:api-docs/curation/index.adoc[Curation REST API]
+| Auto-generated reference for the Curation application REST API — authentication, decisions, actions, and user management endpoints.
+
 |===
+
+== ERE
+
+Documentation for developers implementing an Entity Resolution Engine (ERE) and the technical contract it must fulfil.
+
+[cols="2,4"]
+|===
+| Section | Purpose
+
+| xref:ERS-ERE-Contarct/index.adoc[ERS-ERE Technical Contract]
+| Message-based interfaces, idempotent processing rules, and canonical identifier semantics for ERS–ERE communication.
+
+| xref:ERE/ere-dev-guide.adoc[Developer Guide]
+| Guidance for developers implementing an ERE compatible with ERS.
+
+| xref:ERE/ere-reference-impl.adoc[Basic ERE Reference Implementation]
+| A reference implementation of the ERS–ERE contract showing online greedy clustering, Redis messaging, and configurable RDF parsing.
+
+|===
+
+== xref:UserGuide/curation-guide-overview.adoc[Curation App (User Guide)]
+
+Step-by-step guide for curators who review entity resolution decisions, record feedback, and manage user accounts in the Curation Web Application.
+
+[cols="2,4"]
+|===
+| Section | Purpose
+
+| xref:UserGuide/curation-guide-decisions.adoc[Decisions Review]
+| How to review, accept, or reject automatic entity resolution proposals.
+
+| xref:UserGuide/curation-guide-history.adoc[Action History]
+| Browsing and searching the audit trail of past curation actions.
+
+| xref:UserGuide/curation-guide-admin.adoc[User Management]
+| Managing curator accounts and roles.
+
+|===
+
+== xref:AnnexeA-Glossary/index.adoc[Glossary]
+
+Definitions of domain terms, abbreviations, and concepts used throughout the documentation.

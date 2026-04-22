@@ -1,5 +1,5 @@
 site:
-  title: Entity Resolution Service Documentation
+  title: Entity Resolution System Documentation
 #  url: https://entity-resolution-service.readthedocs.io
   start_page: entity-resolution-docs::index.adoc
 

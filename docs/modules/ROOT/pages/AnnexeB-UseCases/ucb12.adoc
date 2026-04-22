@@ -1,45 +1,55 @@
 === UC-B1.2  Integrate ERE Resolution Outcomes (Asynchronous)
 
 *Use Case Level:* Blue (User-goal) +
-*Primary Actor:* Entity Resolution System (ERS) +
+*Primary Actor:* Entity Resolution System (ERSys) +
 *Scope:* ERS internal integration boundary towards the Entity Resolution Engine (ERE) +
+
 *Supporting Actors*
 
 * Entity Resolution Engine (ERE)
 * Messaging Middleware (asynchronous messaging infrastructure)
 * Decision Store (latest Cluster Assignment per mention)
+
 *Stakeholders and Interests*
 
 * ERS requires a deterministic and engine-agnostic mechanism to reflect authoritative clustering outcomes without introducing independent identity semantics.
 * ERE implementers require a stable contract whereby ERS forwards resolution interactions and accepts binding clustering outcomes.
 * Operators require traceability of Cluster Assignment changes and reliable delta tracking for refresh operations.
+
 *Brief Description* +
 This use case describes how ERS integrates clustering outcomes produced by ERE into the Decision Store. +
 Canonical identity is defined as a cluster managed by ERE. Cluster identifiers are canonical identifiers. ERE is authoritative for clustering outcomes and its decisions are binding. +
+
 The following interaction types between ERS-ERE are foreseen:
 
 * resolve  initial clustering request,
 * resolveConsideringRecommendation  clustering request with a recommended Cluster Assignment (e.g. Draft Identifier or user recommendation),
 * resolveWithExclusions  clustering request with recommended exclusions,
 * recluster  outcome notification emitted by ERE when it performs internal reclustering (not requested by ERS).
+
 ERE responds asynchronously with a clustering outcome for a mention, including:
 
 * the resulting Cluster Assignment (clusterId),
 * the top N alternative cluster candidates with associated scores.
 ERS does not evaluate, override, or reinterpret clustering outcomes. Upon receiving a valid response, ERS updates the Decision Store to reflect the latest Cluster Assignment and stores the top N alternatives as returned by ERE. +
+
 Integration of ERE outcomes may occur:
 
 . As continuation of a synchronous resolve interaction.
 . As confirmation or replacement of a Draft Identifier.
 . As result of user-triggered recommendation or exclusion flows.
 . As result of ERE-initiated reclustering.
+
 The canonical identifier exposed by ERS always reflects the latest Cluster Assignment stored in the Decision Store. +
+
 *Trigger* +
 ERE emits a clustering outcome (either in response to resolution request or as a discrete reclustering) for a given entity mention including the cluster placement and the top-N alternative clusters. +
+
 *Preconditions*
 
 * The mention is registered in the Request Registry.
 * Asynchronous messaging channels between ERS and ERE are operational.
+
 *Success Guarantee (Postconditions)* +
 When a valid clustering outcome is received from ERE:
 
@@ -47,13 +57,16 @@ When a valid clustering outcome is received from ERE:
 . The Decision Store is updated to reflect the latest Cluster Assignment.
 . The top N alternative clusters from the latest ERE response are stored.
 . The update timestamp is refreshed to support delta computation for refreshBulk.
+
 If the received outcome replaces a previously stored Cluster Assignment (including a Draft Identifier), the Decision Store reflects the new assignment. +
 Previously stored Cluster Assignments remain valid until replaced by a subsequent authoritative ERE outcome. +
+
 *Minimal Guarantees (On Failure)*
 
 * If ERS cannot publish a request to ERE, the failure is logged and no Decision Store state is modified.
 * If an ERE response is invalid, uncorrelated, duplicated, or arrives out of order, ERS applies correlation rules and updates the Decision Store only if the outcome is applicable under the current request context.
 * ERE failures do not invalidate existing Cluster Assignments.
+
 *Main Success Scenario  Standard Resolution*
 
 . ERS sends a resolve message to ERE.
@@ -61,24 +74,29 @@ Previously stored Cluster Assignments remain valid until replaced by a subsequen
 . ERE returns the clusterId and top N alternatives.
 . ERS correlates the response.
 . ERS updates the Decision Store with the latest Cluster Assignment and alternatives.
+
 *Alternate Scenario  Internal Reclustering Outcome*
 
 . ERE performs internal reclustering and emits an updated clustering outcome for one or more mentions.
 . ERS consumes the outcome message(s) and correlates them to the affected mention identifiers.
 . ERS updates the Decision Store and delta tracking accordingly.
+
 *Alternate Scenario  Draft Identifier Replacement*
 
 . ERS issues a Draft Identifier due to execution window timeout.
 . ERS forwards the recommended Cluster Assignment to ERE.
 . ERE re-evaluates and returns a clustering outcome.
 . ERS updates the Decision Store to reflect the confirmed or replaced Cluster Assignment.
+
 *Special Requirements*
 
 * ERE decisions are binding.
 * ERS stores only the latest Cluster Assignment per mention and does not maintain canonical entity lineage.
 * ERS does not alter similarity or confidence scores returned by ERE.
 * All Cluster Assignment changes must update delta tracking to support refreshBulk semantics.
+
 *Technology and Data Variations* +
 Messaging infrastructure may vary by deployment. Message formats and interaction types are defined in the ERS–ERE contract. +
+
 *Frequency of Occurrence* +
 High; triggered for each mention requiring clustering, re-evaluation, or reclustering.

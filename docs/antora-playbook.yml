@@ -1,10 +1,10 @@
 site:
-  title: Entity Resolution Service Documentation
+  title: Entity Resolution System Documentation
   start_page: entity-resolution-docs::index.adoc
 
 content:
   sources:
-    - url: https://github.com/meaningfy-ws/entity-resolution-docs.git
+    - url: https://github.com/OP-TED/entity-resolution-docs.git
       start_path: docs
       branches: [develop]
       tags: []

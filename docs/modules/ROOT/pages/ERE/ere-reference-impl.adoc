@@ -1,0 +1,238 @@
+= Basic Entity Resolution Engine
+:description: A reference implementation of the ERE that conforms to the ERS–ERE Technical Contract.
+
+This page describes the *Basic Entity Resolution Engine* — a reference implementation of the
+xref:ERS-ERE-Contarct/index.adoc[ERS–ERE Technical Contract]. It is provided as a concrete,
+deployable example that shows one way to build a conformant ERE.
+
+
+[NOTE]
+====
+This page is *non-normative*. It describes one implementation, not the only
+possible implementation. The sole authoritative specification is the
+xref:ERS-ERE-Contarct/index.adoc[ERS–ERE Technical Contract].
+====
+
+The source code is available in the
+https://github.com/OP-TED/entity-resolution-engine-basic[entity-resolution-engine-basic] repository.
+
+This page focuses on a conceptual description of the engine in the context of contract conformance;
+it is intended for ERE developers building their own engine who want to use this implementation as a reference.
+It does not provide exhaustive implementation details or configuration documentation — those are
+available in the https://github.com/OP-TED/entity-resolution-engine-basic[repository documentation].
+
+== Overview
+
+The Basic ERE implements an *online clustering algorithm* that resolves entity mentions into
+clusters incrementally as they arrive.
+Each incoming mention is scored against existing mentions using probabilistic record linkage;
+it is assigned to the best-matching cluster when similarity meets a configurable threshold,
+or placed in a new singleton cluster when no sufficiently similar candidate exists.
+The service reads requests from a Redis queue, processes them through a five-step pipeline,
+and publishes clustering outcomes back to a response queue — storing mention data and similarity
+scores in an embedded DuckDB database with configurable RDF/Turtle field extraction.
+
+It demonstrates the *minimum viable contract interaction*: request, resolution, response.
+It is intended as a learning resource and a baseline — not as a production-ready solution
+for advanced use cases such as curator-guided resolution.
+
+The current configuration supports the `ORGANISATION` entity type
+(`http://www.w3.org/ns/org#Organization`).
+
+== The Resolution Algorithm
+
+When a valid `EntityMentionResolutionRequest` arrives, the service executes five steps.
+
+=== Step 1 — Idempotency Check
+
+The service first checks whether the incoming entity mention has already been resolved.
+If a cluster assignment already exists for this mention identifier, the cached result
+is returned immediately and no further processing occurs.
+
+This satisfies the idempotent processing requirement defined in the contract:
+re-submitting the same request produces the same outcome without duplicating state.
+
+=== Step 2 — Blocking
+
+Before comparing the new mention against all known mentions, the service applies
+*blocking rules* to reduce the candidate set. Only mentions that share a
+common attribute (for example, the same `country_code`) are considered for comparison.
+
+Blocking prevents unnecessary computation and keeps latency bounded as the mention
+store grows.
+
+=== Step 3 — Similarity Scoring
+
+The new mention is compared against each blocked candidate using
+https://moj-analytical-services.github.io/splink/[Splink], a probabilistic record
+linkage library. Splink implements the Fellegi-Sunter model, which computes a
+*match probability* for each candidate pair based on agreement across multiple fields
+(`legal_name`, `country_code`, `nuts_code`, `post_code`, etc.).
+
+All pairwise scores are persisted as mention-link records, *regardless of whether
+they meet the clustering threshold*. Scores below threshold are still used later
+when generating the candidate list for the response.
+
+==== Cold Start and Learned Priors
+
+The Splink model requires initial probability estimates (*m/u priors*) for each field.
+The basic ERE ships with hand-tuned priors that allow meaningful scoring from the
+first request, without any training data. Once 50 mentions have been processed, the
+service triggers a background *Expectation-Maximisation* (EM) training pass to refine
+these priors automatically. Subsequent requests benefit from the improved estimates.
+
+=== Step 4 — Cluster Assignment
+
+Once similarity scores are available, the service applies a *greedy* assignment rule:
+
+. Find the candidate mention with the highest similarity score.
+. If that score meets or exceeds the configured threshold (default: 0.20), assign the
+  new mention to the same cluster as that candidate.
+. If no candidate meets the threshold, create a new *singleton cluster* whose identifier
+  is derived deterministically from the new mention's identifier.
+
+This is an *online* algorithm: decisions are made one mention at a time, in arrival
+order. There is no retrospective re-clustering when new evidence arrives. This makes
+the algorithm fast and predictable, at the cost of order-sensitivity.
+
+==== Canonical Identifier Derivation
+
+Cluster identifiers are derived deterministically using the rule defined in the contract:
+
+----
+SHA256(concat(source_id, request_id, entity_type))
+----
+
+Because the cluster identifier of a singleton cluster equals the mention identifier
+of its founding member, and that identifier is computed by the same rule, all cluster
+identifiers are stable and reproducible across replays and re-submissions.
+
+=== Step 5 — Candidate Generation
+
+Finally, the service constructs the `ResolutionResult` to return to the caller:
+
+. Collect all clusters that have any mention-link to the new mention (including
+  below-threshold links).
+. Rank them by similarity score, highest first.
+. Prune to the top-N (default: 100).
+. Ensure the assigned cluster always appears in the list.
+
+The result is serialised as an `EntityMentionResolutionResponse` and published to
+the `ere_responses` channel.
+
+== What This Implementation Supports
+
+[cols="1,3", options="header"]
+|===
+| Feature | Behaviour
+
+| Entity resolution requests
+| Each `EntityMentionResolutionRequest` is processed through the five-step algorithm.
+
+| Idempotent processing
+| Re-submitting a previously resolved mention returns the cached result.
+
+| Deterministic cluster IDs
+| Cluster identifiers conform to the `SHA256(source_id, request_id, entity_type)` rule.
+
+| Error responses
+| Malformed requests or internal failures produce an `EREErrorResponse`.
+
+| Multiple candidates with scores
+| The response includes up to 100 ranked candidate clusters, each with
+a `confidence_score` and `similarity_score`.
+
+| Organisation entity type
+| The service is configured for `http://www.w3.org/ns/org#Organization`.
+Other entity types can be added via configuration.
+
+| Background model improvement
+| EM training runs automatically in a background thread once sufficient
+data is available.
+|===
+
+== What This Implementation Does Not Support
+
+The following features are part of the contract but are *not implemented* in the
+basic ERE. They are explicitly out of scope for this reference implementation.
+
+=== Proposed and Excluded Cluster IDs (Placements)
+
+The contract allows an `EntityMentionResolutionRequest` to carry:
+
+* `proposed_cluster_ids` — cluster identifiers suggested by a previous resolution or
+  by curator input,
+* `excluded_cluster_ids` — cluster identifiers the caller considers invalid for this mention.
+
+The basic ERE does not act on either field. When present in a request, they are
+accepted at the message level but have no effect on the clustering outcome. The service
+makes its own decision based solely on the incoming mention and its internal state.
+
+This behaviour doesn't violate the contract, as it treats these fields as *advisory*: an ERE is not
+required to honour them, and it remains the ultimate clustering authority.
+
+=== Spontaneous Update Notifications
+
+The contract defines the `ereNotification:` prefix for `ere_request_id` to signal
+that a response was not triggered by a request but by an internal re-clustering event.
+The basic ERE does not emit such notifications. Any cluster change that results from
+its internal state transitions is not proactively communicated to ERS.
+
+=== Cluster Merging
+
+Once a mention is assigned to a cluster, that assignment is not revised. The basic ERE
+does not implement any form of cluster fusion, splitting, or retrospective correction.
+
+== Running the Reference Implementation
+
+The repository includes a Docker Compose configuration for a self-contained environment:
+
+----
+git clone https://github.com/OP-TED/entity-resolution-engine-basic.git
+cd entity-resolution-engine-basic
+docker compose -f infra/compose.dev.yaml up
+----
+
+A `demo/` directory contains sample datasets (8, 100, and 1000 entity mentions) and
+a script that sends requests and summarises the clustering outcomes.
+
+For configuration, see `config/resolver.yaml` (model parameters and thresholds) and
+`config/rdf_mapping.yaml` (entity type field extraction paths). All settings can be
+overridden via environment variables.
+
+Refer to the repository README for full setup, configuration reference, and test
+execution instructions.
+
+== Tech Stack and Design
+
+The basic ERE is a *Python 3.12* microservice structured in a layered architecture
+(models → adapters → services → entrypoints). All infrastructure concerns live in
+the adapters layer, keeping domain and service logic independent of any particular
+technology.
+
+[cols="1,3", options="header"]
+|===
+| Component | Role
+
+| *Redis*
+| Message broker — `BRPOP` on `ere_requests` for incoming requests; `LPUSH` to `ere_responses` for outgoing responses.
+
+| *DuckDB*
+| Embedded in-process analytical database for mentions, pairwise similarity scores, and cluster assignments.
+Runs in-memory during development; file-backed in production.
+
+| *Splink*
+| Probabilistic record linkage (Fellegi-Sunter) for pairwise similarity scoring, with background EM model training.
+
+| *entity-resolution-spec*
+| Shared message models and domain types (`EntityMentionResolutionRequest`, `EntityMentionResolutionResponse`, `EREErrorResponse`).
+|===
+
+== See Also
+
+* xref:ERS-ERE-Contarct/index.adoc[ERS–ERE Technical Contract] — normative specification of
+  messages, idempotency, and canonical identifier derivation.
+* xref:ERS-ERE-Contarct/interface.adoc[Interface Specification] — channel names and message
+  formats (`EntityMentionResolutionRequest`, `EntityMentionResolutionResponse`, `EREErrorResponse`).
+* xref:ERE/ere-dev-guide.adoc[ERE Developer Guide] — practical guidance for implementers building
+  their own ERE.
