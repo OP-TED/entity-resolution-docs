@@ -1,7 +1,7 @@
 = User Management
 :description: How to create and manage user accounts in the Curation Web Application admin panel.
 
-The *Admin* page is accessible to superusers only.
+The *Admin panel* is accessible to superusers only.
 It provides a central view of all registered accounts and lets you control who can access the curation application and with what level of privilege.
 
 image::curation/admin-user-list.png[User management page showing the user table]
