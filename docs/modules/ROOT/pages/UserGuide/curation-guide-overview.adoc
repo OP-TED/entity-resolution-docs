@@ -26,7 +26,7 @@ The curation cycle begins when the resolution engine produces a decision and end
 The following steps describe a typical review cycle:
 
 . The resolution engine proposes a cluster match for an entity mention and attaches *confidence* and *similarity scores* reflecting its certainty.
-. Decisions whose confidence falls below a configurable threshold are surfaced in the Decisions Queue for manual review.
+. All decisions are surfaced in the Decisions Queue for manual review.
 . The curator examines the proposed match — comparing the entity mention against the candidate cluster — and records their feedback:
   * *Accept* the top candidate,
   * *Select* an alternative cluster, or

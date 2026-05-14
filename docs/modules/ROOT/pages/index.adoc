@@ -21,6 +21,11 @@ ERSys is composed of three main components:
 
 The following sections describe each documentation area in detail.
 
+== New to ERSys?
+
+xref:ERSys/index.adoc[Overview] — the identity model, ERS vs ERE responsibilities, and role-based entry points. +
+xref:ERSys/getting-started.adoc[Getting Started] — prerequisites, minimal configuration, two API workflow walkthroughs, and the full-cycle demo script.
+
 == ERS
 
 Documentation of the Entity Resolution Service — its architecture, supported use cases, and REST API.

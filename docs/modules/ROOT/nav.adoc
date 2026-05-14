@@ -1,5 +1,9 @@
 * xref:index.adoc[Home]
 
+* ERSys
+** xref:ERSys/index.adoc[Overview]
+** xref:ERSys/getting-started.adoc[Getting Started]
+
 * xref:ERSArchitecture/index.adoc[ERS Architecture]
 
 * ERS

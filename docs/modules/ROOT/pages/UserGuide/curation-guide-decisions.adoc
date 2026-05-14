@@ -58,7 +58,7 @@ Select one or more types from the dropdown, or leave it empty to show decisions 
 | *Confidence*
 | Restrict by confidence score range.
 Select a predefined band (Low / Medium / High) or set custom min/max values.
-By default the list shows decisions below the system's curation confidence threshold.
+By default the list shows all pending decisions; use this filter to focus on the score range most in need of review.
 
 | *Similarity*
 | Restrict by similarity score range.
@@ -154,7 +154,7 @@ Curatorial actions are final and cannot be undone.
 Past actions remain visible in the xref:UserGuide/curation-guide-history.adoc[Action History].
 ====
 
-NOTE: The decision is not immediately accepted in the system — your feedback is stored and used by the engine when re-evaluating future decisions, which may lead to this decision being accepted later on.
+NOTE: Your feedback is recorded as a recommendation and forwarded to the engine for re-evaluation. The engine remains the authority for the resulting cluster assignment, which may be updated asynchronously after the recommendation is processed.
 
 
 === Rejecting a Decision
@@ -166,7 +166,7 @@ Rejecting a decision registers your feedback that none of the proposed candidate
 . Confirm the action in the dialog that appears.
 . The decision is removed from the queue and your feedback is recorded in the action history.
 
-NOTE: The decision is not immediately rejected in the system — your feedback is stored and used by the engine when re-evaluating future decisions.
+NOTE: Your feedback is recorded as a recommendation and forwarded to the engine for re-evaluation. The engine remains the authority for the resulting cluster assignment, which may be updated asynchronously after the recommendation is processed.
 
 === Selecting an Alternative Cluster
 

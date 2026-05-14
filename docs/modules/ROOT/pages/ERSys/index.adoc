@@ -1,0 +1,70 @@
+= ERSys Overview
+:description: Introduction to the Entity Resolution System — what it does, what it does not do, and where to find documentation for your role.
+
+ERSys is an open-source, scalable entity resolution platform.
+It assigns and maintains stable canonical identifiers for entity mentions submitted by external systems,
+so that downstream consumers have a consistent identity even as resolution quality improves over time.
+
+== How ERSys Works
+
+ERSys separates three distinct layers that are often conflated in data integration projects:
+
+* *Real-world entities* — organisations, procedures, and other domain objects that exist independently of ERSys.
+  ERSys does not store them, version them, or model them. It processes descriptions of them.
+* *Entity mentions* — immutable information artefacts submitted by originators, each identified by a `(sourceId, requestId, entityType)` tuple.
+  A mention describes an entity; it does not decide equivalence.
+* *Clusters* — the identity constructs managed inside the Entity Resolution Engine (ERE).
+  A `clusterId` is the canonical identifier exposed to clients. Cluster IDs are stable — once created they are never reused — but assignment can change as resolution quality improves.
+
+ERS follows an *engine-authoritative model*: the ERE determines all clustering outcomes.
+ERS orchestrates interaction, enforces time budgets, maintains the projection of the latest cluster assignment per mention, and exposes canonical identifiers through stable APIs.
+When the ERE does not respond within the configured time window, ERS issues a deterministically derived provisional `clusterId` so that downstream processing can continue.
+
+== What ERSys Does NOT Do
+
+=== System scope
+
+* Does not produce golden records or merge attribute values across mentions.
+* Does not clean, normalise, or enrich incoming entity data.
+* Does not maintain an authoritative entity registry or ontology.
+* Does not provide advanced RBAC beyond the role separation required by the curation use cases.
+* Does not manage the machine learning or model lifecycle inside an ERE.
+
+=== ERS vs ERE responsibility
+
+ERS is not an authoritative decision-maker over clustering.
+Curator actions (accept, reject, assign) are recorded and forwarded to the ERE as recommendations — they are evidence, not commands.
+The ERE determines the final cluster assignment.
+ERS projects and exposes the latest authoritative outcome returned by the ERE.
+
+See xref:ERSArchitecture/decissions.adoc[Architectural Decisions] (ADR-B1N, B2N, C1N) for the normative statements.
+
+== Where to Start
+
+[cols="1,2,2",options="header"]
+|===
+| User type | How they interact | Where to start
+
+| Curator
+| Reviews decisions in the web app, records feedback
+| xref:UserGuide/curation-guide-overview.adoc[Curation App User Guide]
+
+| Originator / external system
+| Submits entity mentions via the ERS REST API, looks up canonical identifiers
+| xref:api-docs/ers/index.adoc[ERS REST API Reference]
+
+| ERE implementer
+| Builds a compatible Entity Resolution Engine
+| xref:ERE/ere-dev-guide.adoc[ERE Developer Guide]
+
+| Administrator
+| Manages curator accounts and roles
+| xref:UserGuide/curation-guide-admin.adoc[User Management]
+|===
+
+== Related Documentation
+
+* xref:ERSArchitecture/index.adoc[ERS Architecture] — system scope, actors, core capabilities, behaviour spines
+* xref:ERSArchitecture/conceptual-model.adoc[Conceptual Model] — information objects, identity rules, authority boundaries
+* xref:AnnexeA-Glossary/index.adoc[Glossary] — normative term definitions
+* xref:ERSys/getting-started.adoc[Getting Started] — step-by-step first resolution request and curation workflow
