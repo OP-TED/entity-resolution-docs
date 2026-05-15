@@ -1,16 +1,20 @@
 = ERS Configuration Reference
-:description: Overview of ERS configuration areas, what each controls, and where to find the full reference documentation.
+:description: ERS configuration areas, what each controls, and where to find the full reference documentation.
+:ers-repo: https://github.com/OP-TED/entity-resolution-service
+:ere-repo: https://github.com/OP-TED/entity-resolution-engine-basic
+:default-branch: develop
 
-This page explains what ERS configuration governs and points to the authoritative reference for each area.
-It also clarifies the boundary with ERE configuration, which is the responsibility of each ERE implementation.
+ERS configuration is split into two areas: runtime behaviour, controlled through environment variables, and entity type mapping, controlled through a YAML file.
+A third area, ERE configuration, is owned by each ERE implementation and is outside ERS.
 
+[#runtime-environment-variables]
 == Runtime Environment Variables
 
 Runtime behaviour is controlled entirely through environment variables, set in the deployment environment or in `src/infra/.env` for local development.
 
 The key operational areas governed by environment variables:
 
-* *Time budgets* — the per-mention timeout (how long ERS waits for an ERE response before issuing a provisional identifier) and the per-bulk-request timeout (maximum total time for a bulk resolution request). Setting either to `0` enables provisional-only mode, which issues provisional identifiers immediately without contacting the ERE. See xref:ERS/capabilities.adoc#_time_budgeted_asynchronous_orchestration[Capabilities — Time-Budgeted Asynchronous Orchestration] for the operational implications.
+* *Time budgets* — the per-mention timeout (how long ERS waits for an ERE response before issuing a provisional identifier) and the per-bulk-request timeout (maximum total time for a bulk resolution request). Setting either to `0` enables provisional-only mode, which issues provisional identifiers immediately without contacting the ERE. See xref:ERS/capabilities.adoc#time-budgeted-asynchronous-orchestration[Capabilities — Time-Budgeted Asynchronous Orchestration] for the operational implications.
 
 * *Redis connection* — the host, port, and authentication credentials for the shared Redis instance used for ERS–ERE communication. ERS and any connected ERE must point to the same Redis instance.
 
@@ -20,9 +24,9 @@ The key operational areas governed by environment variables:
 
 * *Database connection* — connection settings for the MongoDB-compatible store (FerretDB in the default stack) that backs the Decision Store, Request Registry, and User Action Log.
 
-The full environment variable reference — all variables, their defaults, and descriptions grouped by concern — is maintained in the ERS repository:
-https://github.com/OP-TED/entity-resolution-service/blob/develop/docs/configuration.md[entity-resolution-service/docs/configuration.md].
+The full environment variable reference — every variable, its default, and its description, grouped by concern — is maintained in the ERS repository: {ers-repo}/blob/{default-branch}/docs/configuration.md[entity-resolution-service/docs/configuration.md].
 
+[#entity-type-mapping-configuration]
 == Entity Type Mapping Configuration
 
 Entity types are registered via `src/config/rdf_mention_config.yaml` in the ERS repository.
@@ -35,12 +39,12 @@ For the configuration format and a fully annotated example, see xref:ERSys/examp
 
 For guidance on aligning ERE field extraction with ERS entity type configuration, see xref:ERE/ere-dev-guide.adoc#data-model-and-entity-types[ERE Developer Guide — Data Model and Entity Types].
 
+[#ere-configuration]
 == ERE Configuration
 
 Configuration of the Entity Resolution Engine is the responsibility of each ERE implementation and is not governed by ERS.
 
-For the basic ERE reference implementation, clustering thresholds, Splink model parameters, and DuckDB settings are documented in the ERE repository:
-https://github.com/OP-TED/entity-resolution-engine-basic/tree/develop/src/config[entity-resolution-engine-basic/src/config].
+For the basic ERE reference implementation, clustering thresholds, Splink model parameters, and DuckDB settings are documented in the ERE repository: {ere-repo}/tree/{default-branch}/src/config[entity-resolution-engine-basic/src/config].
 
 The one ERS-side constraint is that the ERE must connect to the same Redis instance as ERS.
 No other ERS runtime parameter needs to be mirrored in the ERE configuration.

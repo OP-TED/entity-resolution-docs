@@ -43,10 +43,11 @@ There is currently only one version. Until a `v2` exists, clients can rely on `v
 
 == Authentication
 
-*ERS REST API* endpoints (`/api/v1/resolve`, `/api/v1/lookup`, `/api/v1/refresh-bulk`) do not require authentication.
+*Curation REST API* endpoints require a JWT Bearer Token, signed using HMAC with SHA-256.
 
-*Curation REST API* endpoints require a JWT Bearer Token.
-Tokens are signed using HMAC with SHA-256.
+*ERS REST API* endpoints are open: they do not require authentication. The unauthenticated health endpoint (`GET /health`) is described in the <<health-endpoint,Health Endpoint>> section.
+
+The token lifetimes are not fixed by contract; they are deployment-configured. See xref:ERS/configuration.adoc[Configuration Reference].
 
 === Obtaining a Token
 
@@ -175,7 +176,7 @@ Response envelope:
 }
 ----
 
-[[error-reference]]
+[#error-reference]
 == Error Handling
 
 All error responses use a JSON body with an `error_code` field (machine-readable) and a `message` field (human-readable explanation):
@@ -256,6 +257,7 @@ The mention will be re-evaluated when the ERE becomes available.
 
 |===
 
+[#health-endpoint]
 == Health Endpoint
 
 `GET /health` performs a liveness check and does not require authentication.

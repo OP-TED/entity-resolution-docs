@@ -1,29 +1,22 @@
 = Entity Resolution System Documentation
 
-This documentation covers the architecture, technical contracts, and supporting materials for the Entity Resolution System (ERSys).
-
-== Introduction
-
 The Publications Office of the European Union processes thousands of procurement notices daily through the TED ecosystem.
 These notices reference real-world entities — organisations, procedures, lots — that may be described differently across submissions yet refer to the same thing.
-ERSys addresses this by automatically identifying when different entity representations refer to the same real-world entity and assigning each a stable canonical identifier.
+The Entity Resolution System (ERSys) automatically identifies when different entity representations refer to the same real-world entity and assigns each a stable canonical identifier, so downstream consumers always have a consistent identity even as resolution quality improves over time.
 
-== Entity Resolution System Overview
+ERSys is a platform of three cooperating components — the Entity Resolution Service (ERS), a pluggable Entity Resolution Engine (ERE), and a Curation Web Application.
+For the full capability and authority model, see the xref:ERSys/index.adoc[ERSys Overview].
 
-ERSys is an open-source, scalable entity resolution platform with a pluggable architecture, designed to evolve alongside AI and machine learning technologies.
-Its core responsibility is to assign and maintain stable canonical identifiers for entity mentions submitted by external systems, so that downstream consumers always have a consistent, dereferenceable identity even as resolution quality improves over time.
+[TIP]
+====
+New to ERSys? Start with xref:ERSys/getting-started.adoc[Getting Started] — prerequisites, minimal configuration, and two end-to-end workflow walkthroughs.
+====
 
-ERSys is composed of three main components:
-
-* *Entity Resolution Service (ERS)* — orchestrates resolution requests, enforces time budgets, persists assignment state, and exposes canonical identifiers through stable APIs.
-* *Entity Resolution Engine (ERE)* — the authoritative clustering component that decides whether two entity mentions refer to the same real-world entity. ERSys is designed to work with any conformant ERE implementation.
-* *Curation Web Application* — supports human-in-the-loop review and re-evaluation of resolution decisions, with a full audit trail.
-
-== ERSys
+== Entity Resolution System (ERSys)
 
 Platform-level documentation: concepts, onboarding, architecture, and use cases.
 
-[cols="2,4"]
+[cols="2,4",options="header"]
 |===
 | Section | Purpose
 
@@ -44,11 +37,11 @@ Platform-level documentation: concepts, onboarding, architecture, and use cases.
 
 |===
 
-== ERS
+== Entity Resolution Service (ERS)
 
 Documentation for the Entity Resolution Service — what it does, how it is configured, and its REST APIs.
 
-[cols="2,4"]
+[cols="2,4",options="header"]
 |===
 | Section | Purpose
 
@@ -69,11 +62,11 @@ Documentation for the Entity Resolution Service — what it does, how it is conf
 
 |===
 
-== ERE
+== Entity Resolution Engine (ERE)
 
 Documentation for developers implementing an Entity Resolution Engine (ERE) and the technical contract it must fulfil.
 
-[cols="2,4"]
+[cols="2,4",options="header"]
 |===
 | Section | Purpose
 
@@ -88,11 +81,12 @@ Documentation for developers implementing an Entity Resolution Engine (ERE) and 
 
 |===
 
-== xref:UserGuide/curation-guide-overview.adoc[Curation App (User Guide)]
+== Curation App (User Guide)
 
 Step-by-step guide for curators who review entity resolution decisions, record feedback, and manage user accounts in the Curation Web Application.
+See the xref:UserGuide/curation-guide-overview.adoc[Curation App User Guide] for the full walkthrough.
 
-[cols="2,4"]
+[cols="2,4",options="header"]
 |===
 | Section | Purpose
 
@@ -107,6 +101,7 @@ Step-by-step guide for curators who review entity resolution decisions, record f
 
 |===
 
-== xref:AnnexeA-Glossary/index.adoc[Glossary]
+== Glossary
 
 Definitions of domain terms, abbreviations, and concepts used throughout the documentation.
+See the xref:AnnexeA-Glossary/index.adoc[Glossary].

@@ -1,8 +1,17 @@
 = Examples
 :description: Annotated request and response examples for the ERS REST API, Curation REST API, and entity type configuration.
+:ers-api-base: http://localhost:8001
+
+[IMPORTANT]
+====
+These examples assume a running full stack.
+Complete xref:ERSys/getting-started.adoc[Getting Started] first to stand up ERS, an ERE, and the Curation Web App.
+====
 
 This page provides examples demonstrating how to integrate with ERSys.
 It covers the most common request and response patterns for the ERS REST API (submitting entity mentions, looking up cluster assignments, retrieving assignment deltas), the Curation REST API (recording curator decisions), and the entity type configuration format used to register new entity types with ERS.
+
+The endpoint base URL is `{ers-api-base}`; relative paths below are appended to it.
 
 == ERS REST API
 
@@ -18,7 +27,7 @@ Content-Type: application/json
 
 {
   "mention": {
-    "identifiedBy": {
+    "identified_by": {
       "source_id": "demo-source-001",
       "request_id": "org-regensburg-001",
       "entity_type": "ORGANISATION"
@@ -38,7 +47,7 @@ Content-Type: application/json
     "request_id": "org-regensburg-001",
     "entity_type": "ORGANISATION"
   },
-  "canonical_entity_id": "a3f1c9b2d45e78f0912345678901abcd12345678901234567890abcdef012345",
+  "cluster_id": "a3f1c9b2d45e78f0912345678901abcd12345678901234567890abcdef012345",
   "status": "CANONICAL"
 }
 ----
@@ -52,15 +61,15 @@ Content-Type: application/json
     "request_id": "org-regensburg-001",
     "entity_type": "ORGANISATION"
   },
-  "canonical_entity_id": "7c3e9db45a12ef890123456789abcde01234567890abcdef12345678901234ab",
+  "cluster_id": "7c3e9db45a12ef890123456789abcde01234567890abcdef12345678901234ab",
   "status": "PROVISIONAL"
 }
 ----
 
 Both canonical and provisional identifiers are 64-character lowercase SHA-256 hex strings.
 A `PROVISIONAL` response means the ERE did not respond within the configured time budget.
-The provisional identifier is deterministically derived from the mention triad and remains valid until the ERE returns an authoritative outcome.
-See xref:AnnexeA-Glossary/glossary-2.adoc[Glossary — Draft Identifier] for the stability guarantees.
+The provisional identifier is deterministically derived from the mention triad — the (`source_id`, `request_id`, `entity_type`) tuple that uniquely identifies a mention — and remains valid until the ERE returns an authoritative outcome.
+See xref:AnnexeA-Glossary/index.adoc[Glossary — Provisional Identifier] for the stability guarantees.
 
 === Look Up Current Cluster Assignment
 
@@ -137,10 +146,12 @@ NOTE: The Curation REST API is the backend for the xref:UserGuide/curation-guide
 In most scenarios curators interact with the web interface rather than calling the API directly.
 These examples are provided for tooling developers and system integrators who need programmatic access.
 
+This section shows the `assign` action; the API also supports accept and reject decisions, documented in the xref:api-docs/curation/index.adoc[Curation REST API Reference].
+
 === Record a Curator Assignment
 
 `+POST /api/v1/curation/decisions/{decision_id}/assign+` — record a curator's choice to assign a mention to a specific cluster.
-The cluster ID must come from the decision's candidate list.
+The cluster identifier must come from the decision's candidate list.
 
 .Request
 [source,http]
@@ -162,7 +173,7 @@ HTTP/1.1 204 No Content
 ERS records the action in the User Action Log and forwards a re-evaluation recommendation to the ERE.
 The ERE determines the final cluster assignment.
 
-[[ers-entity-type-configuration]]
+[#ers-entity-type-configuration]
 == ERS Entity Type Configuration
 
 The file `src/config/rdf_mention_config.yaml` in the ERS repository defines how entity mention representations are parsed.
@@ -209,10 +220,10 @@ entity_types:
 To register a new entity type, add an entry under `entity_types`, declare its `rdf_type`, choose an `entity_label_field`, and list the field paths.
 ERE implementations must handle the same entity type keys.
 
-[[error-response]]
+[#error-response]
 == Error Response
 
-All ERS REST API errors use the same `ErrorResponse` envelope with `error_code` (machine-readable) and `message` (human-readable explanation) fields.
+ERS REST API errors use the `ErrorResponse` envelope with `error_code` (machine-readable) and `message` (human-readable explanation) fields.
 See xref:api-docs/api-integration-guide.adoc#error-reference[API Integration Guide — Error Handling] for the full list of error codes and their meanings.
 
 .Example: mention not found

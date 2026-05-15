@@ -1,101 +1,130 @@
 = Getting Started with ERSys
-:description: Prerequisites, configuration, and two end-to-end workflow walkthroughs — API submission and UI-based curation review.
+:description: Prerequisites, minimal configuration, and two end-to-end workflow walkthroughs — API submission and UI-based curation review.
+:ers-api-base: http://localhost:8001
 
 This guide walks through a first resolution request via the REST API and a curation review workflow using the Curation Web App.
 
+[IMPORTANT]
+====
+A running full stack is a prerequisite for this guide *and* for the xref:ERSys/examples.adoc[Examples].
+Complete the *Prerequisites* section before attempting either workflow.
+====
+
 == Prerequisites
 
-=== Run the full stack
+You need the following installed locally before starting:
 
-ERSys requires three services running together: ERS, an ERE such as the Basic ERE, and the Entity Resolution Curation web application.
-Each repository contains installation, startup and service management instructions in its README:
-
-* https://github.com/OP-TED/entity-resolution-service[entity-resolution-service] — ERS core, Resolution and Curation APIs
-* https://github.com/OP-TED/entity-resolution-engine-basic[entity-resolution-engine-basic] — Basic ERE implementation
-* https://github.com/OP-TED/entity-resolution-service-webapp[entity-resolution-service-webapp] — Curation Web App
-
-
-By default, locally run services are available at the following URLs:
-
-[cols="1,2"]
+[cols="2,4",options="header"]
 |===
-| Service | Default
+| Requirement | Notes
 
-| ERS API | `http://localhost:8001`
+| Docker
+| Container runtime for the ERSys services.
+
+| Docker Compose
+| Orchestrates the multi-service stack.
+
+| Make
+| Runs the `make up` startup target in each repository.
+
+| git
+| Clones the three source repositories.
+
+| Disk and memory
+| Approximately 5 GB free disk and 8 GB RAM for the full stack.
+|===
+
+== Run the Full Stack
+
+The goal of this section is a running full stack: ERS, an ERE such as the Basic ERE, and the Curation Web App, all reachable locally.
+
+. *Clone the three repositories.*
++
+[source,bash]
+----
+git clone https://github.com/OP-TED/entity-resolution-service.git
+git clone https://github.com/OP-TED/entity-resolution-engine-basic.git
+git clone https://github.com/OP-TED/entity-resolution-service-webapp.git
+----
+
+. *Set environment variables.* Each repository ships an example environment file; copy it and adjust values as described in that repository's README.
+
+. *Start each service* with `make up` in its repository directory. Each README contains the authoritative installation, startup, and service-management instructions.
+
+By default, locally run services are available at:
+
+[cols="1,2",options="header"]
+|===
+| Service | Default URL
+
+| ERS API | `{ers-api-base}`
 | Curation API | `http://localhost:8000`
 | Curation web app | `http://localhost:8080`
 |===
 
+[start=4]
+. *Verify the stack is up.* The ERS health endpoint should return HTTP 200:
++
+[source,bash]
+----
+curl -i {ers-api-base}/health
+----
++
+A `200 OK` response confirms ERS is running and ready to accept resolution requests.
+
 == Workflow 1 — Submit a Mention and Retrieve Its Cluster Identifier
 
-This workflow submits a single entity mention and polls until the ERE returns a canonical cluster identifier.
+Submit a single entity mention and poll until the ERE returns a canonical cluster identifier.
 
-. *Submit the mention* — `POST http://localhost:8001/api/v1/resolve`
+. *Submit the mention.*
 +
-The request body contains a `mention` object with `identifiedBy` (source_id, request_id, entity_type)
-and the RDF/Turtle content of the mention.
-The response immediately returns a `canonical_entity_id`.
-If the ERE has not yet processed the mention, this may be a provisional identifier.
+[source,bash]
+----
+curl -i -X POST {ers-api-base}/api/v1/resolve \
+  -H "Content-Type: application/json" \
+  -d '{
+    "mention": {
+      "identified_by": {
+        "source_id": "demo-source-001",
+        "request_id": "org-regensburg-001",
+        "entity_type": "ORGANISATION"
+      },
+      "content_type": "text/turtle",
+      "content": "@prefix org: <http://www.w3.org/ns/org#> .\n@prefix epo: <http://data.europa.eu/a4g/ontology#> .\nepd:entorg-regensburg-001 a org:Organization ; epo:hasLegalName \"Landratsamt Regensburg\" ."
+    }
+  }'
+----
++
+The response returns a `cluster_id` immediately.
+If the ERE has not yet processed the mention, the `status` is `PROVISIONAL` and the identifier is a provisional one; otherwise the `status` is `CANONICAL`.
 
-. *Poll for the confirmed identifier* — `+GET http://localhost:8001/api/v1/lookup?source_id={source_id}&request_id={request_id}&entity_type=ORGANISATION+`
+. *Poll for the confirmed identifier.*
++
+[source,bash]
+----
+curl -i "{ers-api-base}/api/v1/lookup?source_id=demo-source-001&request_id=org-regensburg-001&entity_type=ORGANISATION"
+----
 +
 Poll until the response `status` is `CANONICAL`.
-A `PROVISIONAL` identifier is returned immediately and is valid for downstream use, but will be superseded once the ERE responds.
+A `PROVISIONAL` identifier is returned immediately and is valid for downstream use; it is superseded once the ERE responds, typically within the configured response time budget (a few seconds in a default local setup).
+If the identifier is still provisional after that budget, see the xref:ERS/configuration.adoc[Configuration Reference] for the time-budget setting and the xref:api-docs/api-integration-guide.adoc[API Integration Guide] for error handling.
 
-NOTE: A cluster identifier is stable (never reused for a different cluster)
-but cluster *assignment* can change if resolution quality improves or a curator intervenes.
+NOTE: A cluster identifier is stable (never reused for a different cluster), but cluster *assignment* can change if resolution quality improves or a curator intervenes.
 
 For a complete set of tested scenarios (idempotency, batch resolution, refresh-bulk, edge cases), see the manual HTTP test files in
 https://github.com/OP-TED/entity-resolution-service/tree/develop/test/ersys/manual/full_cycle[test/ersys/manual/full_cycle].
 
 == Workflow 2 — Review a Resolution Decision in the Curation Web App
 
-Once an entity is resolved automatically, it can be reviewed by a curator who evaluates whether the match is correct.
-This workflow demonstrates the single set of steps to achieve that.
+Once an entity is resolved automatically, a curator can review whether the match is correct. The full narrative walkthrough lives in the xref:UserGuide/curation-guide-overview.adoc[Curation App User Guide]; the skeleton is:
 
-. *Log in* to the Curation Web App.
-+
-Navigate to the application URL, enter your email and password, and click *Sign In*.
-On success you are redirected to the Decisions Queue.
-
-. *Find the entity you want to review* in the Decision List.
-+
-The Decision List is the queue of resolution decisions waiting for human review.
-Each item represents one entity mention for which the engine has proposed a cluster match.
-The score badges tell you at a glance how certain the engine is about the proposal: green means high confidence, yellow medium, red low.
-Decisions with lower scores are the ones most in need of careful review, but all decisions in the queue require a curator verdict before they are acted upon.
-+
-Use the *Search* box to find a specific entity by name or identifier, or use the *Confidence* and *Similarity* filters to focus on the cases most in need of review.
-Click any item to open it.
-+
-image::curation/decision-list.png[Decision list with score badges,50%]
-
-. *Understand what the engine is proposing.*
-+
-When you open a decision you see the *comparison panel*: the entity mention on the left, and one entity from the proposed cluster on the right.
-The comparison panel presents the engine's resolution proposal for curator validation: the entity mention and the proposed cluster are placed side by side so the curator can assess whether they refer to the same real-world entity.
-+
-To help you judge the match, the panel highlights where the two sides differ:
-field values that are new, missing, or changed between the mention and the cluster entity are colour-coded so you can spot discrepancies without reading every field.
-If the proposed cluster contains more than one entity, use the *Previous* / *Next* controls to browse them all.
-+
-image::curation/comparison-panel.png[Comparison panel with entity cards and diff highlighting]
-
-. *Record your verdict.*
-+
-After inspecting the match, you tell the system what you found:
-+
-* *Accept* (green *✓* or kbd:[A]) — the proposed cluster is the right match.
-  Your feedback confirms the engine's proposal and is used to improve future decisions.
-* *Reject* (red *✗* or kbd:[R]) — none of the proposed candidates is acceptable.
-  Your feedback tells the engine the mention should not be placed in any of the suggested clusters.
-* *Select an alternative* — the engine proposed the wrong cluster as its top pick, but another candidate lower in the list is the correct one.
-  See xref:UserGuide/curation-guide-decisions.adoc#alternative-clusters[Selecting an Alternative Cluster] in the User Guide.
-+
-Each action asks for confirmation before it is recorded.
+. *Log in* to the Curation Web App and land on the Decisions Queue.
+. *Find the entity* in the Decision List, using the *Search* box or the *Confidence* and *Similarity* filters, then click an item to open it.
+. *Inspect the proposal* in the comparison panel — the entity mention on the left, a proposed cluster entity on the right, with differing fields colour-coded.
+. *Record your verdict* — *Accept*, *Reject*, or *Select an alternative* (see xref:UserGuide/curation-guide-decisions.adoc#alternative-clusters[Selecting an Alternative Cluster]). Each action asks for confirmation.
 
 NOTE: Curatorial actions are final and cannot be undone.
-Your feedback is stored and forwarded to the ERE as a recommendation for re-evaluation; the ERE determines the final cluster assignment.
+Feedback is stored and forwarded to the ERE as a recommendation for re-evaluation; the ERE determines the final cluster assignment.
 
 == Full-Cycle Demo Script
 
@@ -120,8 +149,4 @@ Use `--skip-curation` to bypass this step.
 
 == Where to Go Next
 
-* xref:api-docs/ers/index.adoc[ERS REST API Reference] — full endpoint reference with request/response schemas
-* xref:api-docs/curation/index.adoc[Curation REST API Reference] — authentication, decisions, bulk operations
-* xref:UserGuide/curation-guide-overview.adoc[Curation App User Guide] — GUI walkthrough for curators
-* xref:ERSArchitecture/index.adoc[Architecture] — system design, behaviour spines, and deployment
-* xref:AnnexeA-Glossary/index.adoc[Glossary] — authoritative term definitions
+include::partial$shared/next-steps.adoc[leveloffset=+0]
