@@ -295,7 +295,7 @@ Accept multiple decisions in a single request.
 
 
 [.alternativeCanonicalEntitiesApiV1CurationDecisionsDecisionIdAlternativeCanonicalEntitiesGet]
-==== GET /api/v1/curation/decisions/{decision_id}/alternative-canonical-entities
+==== GET /api/v1/curation/decisions/\{decision_id}/alternative-canonical-entities
 
 Get Alternative Canonical Entities
 
@@ -385,7 +385,7 @@ Get alternative canonical entities for a given decision.
 
 
 [.decisionApiV1CurationDecisionsDecisionIdAcceptPost]
-==== POST /api/v1/curation/decisions/{decision_id}/accept
+==== POST /api/v1/curation/decisions/\{decision_id}/accept
 
 Accept Decision
 
@@ -457,7 +457,7 @@ Accept the proposed canonical entity match.
 
 
 [.decisionApiV1CurationDecisionsDecisionIdAssignPost]
-==== POST /api/v1/curation/decisions/{decision_id}/assign
+==== POST /api/v1/curation/decisions/\{decision_id}/assign
 
 Assign Decision
 
@@ -542,7 +542,7 @@ Assign the subject entity mention to a specific cluster.
 
 
 [.decisionApiV1CurationDecisionsDecisionIdRejectPost]
-==== POST /api/v1/curation/decisions/{decision_id}/reject
+==== POST /api/v1/curation/decisions/\{decision_id}/reject
 
 Reject Decision
 
@@ -728,7 +728,7 @@ Retrieve cursor-paginated list of decisions with optional filtering.
 
 
 [.proposedCanonicalEntityApiV1CurationDecisionsDecisionIdProposedCanonicalEntityGet]
-==== GET /api/v1/curation/decisions/{decision_id}/proposed-canonical-entity
+==== GET /api/v1/curation/decisions/\{decision_id}/proposed-canonical-entity
 
 Get Proposed Canonical Entity
 
@@ -1041,7 +1041,7 @@ Retrieve registry statistics and curation statistics with optional filtering.
 
 
 [.candidatesApiV1UserActionsActionIdCandidatesGet]
-==== GET /api/v1/user-actions/{action_id}/candidates
+==== GET /api/v1/user-actions/\{action_id}/candidates
 
 Get Candidates
 
@@ -1126,7 +1126,7 @@ Get paginated candidate cluster previews with top entity mentions.
 
 
 [.selectedClusterApiV1UserActionsActionIdSelectedClusterGet]
-==== GET /api/v1/user-actions/{action_id}/selected-cluster
+==== GET /api/v1/user-actions/\{action_id}/selected-cluster
 
 Get Selected Cluster
 
@@ -1422,7 +1422,7 @@ Create a new user (admin only).
 
 
 [.userApiV1UsersUserIdPatch]
-==== PATCH /api/v1/users/{user_id}
+==== PATCH /api/v1/users/\{user_id}
 
 Patch User
 
