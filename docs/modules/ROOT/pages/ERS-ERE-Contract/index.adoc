@@ -1,17 +1,17 @@
 = ERS-ERE System Technical Contract
 
-This document specifies the technical contract governing the integration between ERS and the Entity Resolution Engine (ERE). It defines the ERE's responsibilities, the messaging channels and request types, the formal data model, and the rules for engine replaceability and canonical identifier derivation.
+The ERS–ERE technical contract governs the integration between ERS and the Entity Resolution Engine (ERE). It defines the ERE's responsibilities, the messaging channels and request types, the formal data model, and the rules for engine replaceability and canonical identifier derivation. This section is a guide to its parts.
 
-[cols="2,4"]
+[cols="2,4",options="header"]
 |===
 | Section | Purpose
 
-| xref:ROOT:ERS-ERE-Contract/introduction.adoc[Introduction]
-| Purpose, scope, ERE responsibilities, and engine replaceability rules.
+| xref:ERS-ERE-Contract/introduction.adoc[Introduction]
+| Purpose, scope, ERE responsibilities, engine replaceability rules, and the normative canonical-identifier derivation rule.
 
-| xref:ROOT:ERS-ERE-Contract/interface.adoc[Interface Specification]
+| xref:ERS-ERE-Contract/interface.adoc[Interface Specification]
 | Messaging channels, request types, and their delivery semantics.
 
-| xref:ROOT:ERS-ERE-Contract/suppliment.adoc[Supplement]
+| xref:ERS-ERE-Contract/supplement.adoc[Supplement]
 | Formal LinkML data model for all message types, with generated PlantUML schema diagram.
 |===

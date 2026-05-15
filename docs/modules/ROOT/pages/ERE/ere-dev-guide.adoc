@@ -1,9 +1,9 @@
 = ERE Developer Guide
 :description: Non-normative guidance for developers implementing an Entity Resolution Engine compatible with ERS.
 
-== About This Document
+== About This Guide
 
-This document is *supplementary* to the xref:ERS-ERE-Contract/index.adoc[ERS-ERE Technical Contract].
+This guide is *supplementary* to the xref:ERS-ERE-Contract/index.adoc[ERS-ERE Technical Contract].
 The information provided here is *non-normative* and is intended to support developers in implementing an Entity Resolution Engine (ERE) that interacts with the Entity Resolution Service (ERS) ecosystem.
 
 The guidance focuses on practical considerations and provides information about available supporting resources.
@@ -31,7 +31,7 @@ The following steps outline the main activities involved in building an ERE. Eac
 . Read the ERS-ERE Technical Contract to understand the normative requirements your implementation must satisfy.
 . Clone `entity-resolution-spec` and use or generate data models for your language (Python/Pydantic models are already available in the repository; for other languages, models can be generated from the LinkML schema — see <<data-model-and-entity-types>>).
 . Implement the request handler loop (see <<request-handling-lifecycle>>).
-. Specify a configuration that complies with the minimal set of expected configuration parameters (see xref:ERS-ERE-Contract/suppliment.adoc#configuration[contract supplement — Configuration]).
+. Specify a configuration that complies with the minimal set of expected configuration parameters (see xref:ERS-ERE-Contract/supplement.adoc#configuration[contract supplement — Configuration]).
 . Implement a test adhering to the expected behaviour and verify it passes. An abstract specification of the expected behaviour is provided as Gherkin feature files in the https://github.com/OP-TED/entity-resolution-spec/tree/develop/test/features[entity-resolution-spec repository].
 . Use the xref:ERE/ere-reference-impl.adoc[basic ERE reference implementation] as a concrete example of one realisation.
 . Validate your implementation against the test data provided in `entity-resolution-spec`.
@@ -40,19 +40,19 @@ The following steps outline the main activities involved in building an ERE. Eac
 
 This section describes the key behavioural and structural constraints that apply to all ERE implementations, independent of the chosen technology stack.
 
-* An ERE shall maintain internal storage to persist its operational state as required by the implementation.
-* *JSON* is the serialisation format for all messages exchanged between an ERE and ERS.
-* The actual entity data payload (entity representation) *must be embedded* within exchanged JSON messages as *text*. The payload *shall be annotated with a MIME type* that instructs recipients on how the payload should be decoded and processed.
+* An ERE typically maintains internal storage to persist its operational state as required by the implementation.
+* The contract requires *JSON* as the serialisation format for all messages exchanged between an ERE and ERS.
+* The contract requires the entity data payload (entity representation) to be embedded within exchanged JSON messages as text, annotated with a MIME type that instructs recipients on how the payload should be decoded and processed.
 * ERE developers are expected to implement *payload preprocessing and parsing logic* appropriate to their chosen technologies and data formats.
-* ERE is expected to handle all entity types registered in ERS (currently: Organization and Procedure).
-* ERE is expected to support both *reactive* (request-driven) and *self-initiated* (scheduled or internally triggered) communication modes: it must process resolution requests arriving in the queue and may also push updated resolution outcomes to ERS based on internal scheduling rules (for example, after re-clustering existing content, ERE self-initiates pushing the updated results to the Redis response queue).
+* An ERE is expected to handle all entity types registered in ERS (currently Organization and Procedure).
+* An ERE is expected to support both *reactive* (request-driven) and *self-initiated* (scheduled or internally triggered) communication modes: it processes resolution requests arriving in the queue and may also push updated resolution outcomes to ERS based on internal scheduling rules (for example, after re-clustering existing content, the ERE self-initiates pushing the updated results to the Redis response queue).
 * Caching strategies may be considered to reduce communication between the ERE and ERS, reducing network overhead and improving performance.
 
 
-[[request-handling-lifecycle]]
+[#request-handling-lifecycle]
 == Request Handling Lifecycle
 
-This section describes the abstract algorithm that every ERE implementation must follow.
+This section describes the abstract algorithm that a typical ERE implementation follows to satisfy the contract.
 The choice of similarity algorithm (statistical, ML, LLM-based, or other), storage technology, and concurrency model is entirely implementation-specific and is not constrained by this guide.
 The xref:ERE/ere-reference-impl.adoc[basic ERE reference implementation] provides one concrete realisation; the steps below are independent of any particular approach.
 
@@ -77,7 +77,7 @@ ERS and ERE communicate via two Redis lists used as queues:
 
 === Processing Loop
 
-For each incoming request, the ERE must:
+For each incoming request, a typical ERE performs the following steps to satisfy the contract:
 
 . *Subscribe*: Block on the `ere_requests` channel using `BRPOP`.
 . *Decode and parse*: Deserialise the raw bytes as UTF-8 JSON. Dispatch on the `type` field to produce a typed request object. The primary request type is `EntityMentionResolutionRequest`.
@@ -111,36 +111,35 @@ Common handling patterns include:
 * Filtering the excluded cluster IDs from the candidates list before publishing the response.
 * Storing exclusions as negative evidence to inform future resolution of related mentions.
 
-The ERE may use these signals in any way it sees fit, including disregarding them, and must still return a valid `EntityMentionResolutionResponse`.
+The ERE may use these signals in any way it sees fit, including disregarding them, and still returns a valid `EntityMentionResolutionResponse` as required by the contract.
 
 == Scoring Conventions
 
 Resolution responses include two numeric signals per candidate cluster.
-Both are defined authoritatively in the xref:AnnexeA-Glossary/glossary-1.adoc[Business Glossary]:
+Both are defined authoritatively in the xref:AnnexeA-Glossary/index.adoc[Glossary]:
 
 [cols="1,3"]
 |===
 | Score | Definition
 
-| *Confidence Score* (`confidenceScore`)
+| *Confidence Score* (`confidence_score`)
 | Expresses the engine's confidence in a specific cluster assignment.
 Continuous range: 0.0–1.0.
 Governed and generated exclusively by the ERE; ERS stores and exposes this value without reinterpretation.
 
-| *Similarity Score* (`similarityScore`)
+| *Similarity Score* (`similarity_score`)
 | Represents the similarity between a mention and a candidate cluster.
 Continuous range: 0.0–1.0.
 An engine-internal assessment signal exposed via the contract.
 |===
 
-The `candidates` list in a response must contain *at least one entry*.
-The first entry must be the ERE's top proposed cluster assignment.
+The contract requires the `candidates` list in a response to contain *at least one entry*, with the first entry being the ERE's top proposed cluster assignment.
 
-The ERE should apply sensible pruning before publishing: ERS enforces its own top-N limit downstream, but returning a very large number of low-confidence candidates wastes resources and should be avoided.
+A well-behaved ERE applies sensible pruning before publishing: ERS enforces its own top-N limit downstream, but returning a very large number of low-confidence candidates wastes resources and is best avoided.
 
-NOTE: In the basic ERE reference implementation, `confidenceScore` and `similarityScore` are currently set to the same value (the pairwise similarity score from the linker). Implementations may choose to differentiate them.
+NOTE: In the basic ERE reference implementation, `confidence_score` and `similarity_score` are currently set to the same value (the pairwise similarity score from the linker). Implementations may choose to differentiate them.
 
-[[data-model-and-entity-types]]
+[#data-model-and-entity-types]
 == Data Model and Entity Types
 
 === Data Model
@@ -152,8 +151,8 @@ For other programming languages, executable models can be generated from the Lin
 ==== Canonical Identifiers
 
 A critical aspect of the data model is identifier derivation.
-The canonical identifier derivation rule is normative and defined in the xref:ERS-ERE-Contract/index.adoc[ERS-ERE Technical Contract].
-All ERE implementations *must derive canonical identifiers consistently* using that rule.
+The canonical identifier derivation rule is normative and defined in xref:ERS-ERE-Contract/introduction.adoc#canonical-identifier-derivation[Canonical Identifier Derivation and Stability].
+The contract requires every ERE implementation to derive canonical identifiers consistently using that rule; the rule is not re-derived here.
 
 === Entity Types
 
@@ -164,13 +163,12 @@ The following types are currently registered in ERS:
 * `PROCEDURE`, identified by the IRI `http://data.europa.eu/a4g/ontology#Procedure` (also referred to as `epo:Procedure`)
 
 The list of supported entity types is *static* — it is declared at startup via the `entity_types` configuration parameter and maintained in the https://github.com/OP-TED/entity-resolution-service[entity-resolution-service] repository.
-ERE developers *must use the same identifiers* as defined for ERS.
+The contract requires ERE developers to use the same identifiers as defined for ERS.
 
 Although not required, ERE developers are strongly encouraged to align their entity mention mappings with those used by ERS.
 The reference mappings are available in the https://github.com/OP-TED/entity-resolution-service/blob/develop/src/config/rdf_mention_config.yaml[ERS entity mention configuration].
 
-If a resolution request arrives for an entity type not present in the configured list, the ERE must publish an `EREErrorResponse` indicating the reason.
-It must not silently discard the message.
+If a resolution request arrives for an entity type not present in the configured list, the contract requires the ERE to publish an `EREErrorResponse` indicating the reason rather than silently discarding the message.
 
 ==== ERS Entity Type Configuration Structure
 
@@ -201,24 +199,24 @@ For the complete file and a fully annotated example, see xref:ERSys/examples.ado
 ERE implementations receive the parsed field values in the `EntityMentionResolutionRequest` payload.
 Aligning field extraction with this configuration ensures that the ERE processes the same representation that ERS presents to curators in the comparison panel.
 
-[[error-handling]]
+[#error-handling]
 == Error Handling
 
-* On any failure — malformed input, unsupported request type, algorithm error, or internal exception — the ERE must publish an `EREErrorResponse` to `ere_responses`. Never drop a message silently.
+* On any failure — malformed input, unsupported request type, algorithm error, or internal exception — the contract requires the ERE to publish an `EREErrorResponse` to `ere_responses` rather than dropping a message silently.
 * The `error_type` field has no fixed vocabulary. Common patterns: use the exception class name for algorithm errors (for example, `"ValueError"`), or a descriptive string for structural failures (for example, `"UnsupportedEntityType"`, `"MissingCorrelationTriad"`).
 * The `error_detail` field should describe the failure concisely to aid debugging.
-* The `error_trace` field is optional and should be *omitted in production* to avoid leaking internal implementation details.
-* The `ere_request_id` in the error response must match the value from the incoming request. If the request could not be fully parsed, extract it from the raw JSON on a best-effort basis; use `"unknown"` as a fallback.
+* The `error_trace` field is optional and is best *omitted in production* to avoid leaking internal implementation details.
+* The `ere_request_id` in the error response is expected to match the value from the incoming request. If the request could not be fully parsed, extract it from the raw JSON on a best-effort basis; use `"unknown"` as a fallback.
 
 == Rebuild and Update Notifications
 
 A rebuild is an ERE-internal reprocessing operation that re-evaluates previously computed clustering outcomes.
 How a rebuild is triggered — for example, via a scheduled job, an admin command, or an automated model update — is entirely up to the ERE implementation. No external trigger or API surface for rebuilds is defined by the contract.
 
-When a rebuild produces clustering changes, those changes must be communicated through the standard `ere_responses` channel using `EntityMentionResolutionResponse` messages, following the same correlation and idempotency rules as regular responses.
+When a rebuild produces clustering changes, the contract requires those changes to be communicated through the standard `ere_responses` channel using `EntityMentionResolutionResponse` messages, following the same correlation and idempotency rules as regular responses.
 Rebuild-originated responses are identified by the prefix `ereNotification:` on the `ere_request_id` field.
 
-For the normative specification of rebuild communication, refer to the xref:ERS-ERE-Contract/index.adoc[ERS-ERE Technical Contract].
+For the normative specification of rebuild communication, refer to the xref:ERS-ERE-Contract/interface.adoc[Interface Specification].
 
 == Testing and Reference Implementations
 
@@ -234,9 +232,9 @@ For the normative specification of rebuild communication, refer to the xref:ERS-
   The documentation pages you are reading have been built from the sources in that repository.
   ERE developers are encouraged to use the same terminology as used in this documentation.
 
-== Conformance Checklist
+== Conformance Checklist (Reference)
 
-Use the following checklist to verify that your ERE implementation satisfies the contract:
+This checklist is a reference summary of behaviours the xref:ERS-ERE-Contract/index.adoc[ERS-ERE Technical Contract] requires. It is a convenience aid for self-verification; the contract pages remain the authoritative source for every item.
 
 * Subscribes to `ere_requests` using `BRPOP`.
 * Publishes responses to `ere_responses` using `LPUSH`.
@@ -245,11 +243,11 @@ Use the following checklist to verify that your ERE implementation satisfies the
 * Implements idempotent processing: repeated delivery of the same triad `(source_id, request_id, entity_type)` returns the same result without re-running the clustering algorithm.
 * Rejects requests where the same triad is submitted with a different payload (conflict guard).
 * Publishes `EREErrorResponse` on any failure; never drops messages.
-* Derives canonical identifiers using the normative SHA-256 rule defined in the contract.
+* Derives canonical identifiers using the normative SHA-256 rule defined in xref:ERS-ERE-Contract/introduction.adoc#canonical-identifier-derivation[the contract].
 * Accepts `proposed_cluster_ids` and `excluded_cluster_ids` fields on requests (treating them as advisory signals).
 * Publishes clustering outcome changes from rebuilds to `ere_responses` with `ereNotification:` prefix on `ere_request_id`.
 * Supports only entity types declared in `entity_types` configuration; returns `EREErrorResponse` for unsupported types.
-* Does not include `errorTrace` in production error responses.
+* Does not include `error_trace` in production error responses.
 
 == Future Considerations
 
