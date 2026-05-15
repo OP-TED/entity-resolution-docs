@@ -2,59 +2,71 @@
 
 This section defines domain concepts, identity constructs, information artefacts, and data-level elements. These terms describe *what exists conceptually* and *what the system manages as information*, independent of concrete system components or runtime behaviour.
 
+[cols="2,3,4,2",options="header"]
 |===
-|*Preferred term*|*Definition*|*Scope and use context*|*Alternative terms*
+|Preferred term|Definition|Scope and use context|Alternative terms
 
+[#term-real-world-entity]
 |*Real-World Entity*
 |A concrete or abstract object that exists independently of the system and is the intended target of reference.
 |A real-world entity is a referent. It is not stored, versioned, or directly identified by the system. All system-managed artefacts (mentions, clusters, identifiers) only ever refer to real-world entities indirectly and provisionally.
 |referent, real-world object, real entity, domain entity, business object (conceptual)
 
+[#term-entity-mention]
 |*Entity Mention*
 |A record-level information artefact submitted to the system by a source system/actor that describes or refers to a real-world entity. An entity mention includes an Entity Mention Representation (payload + format) and request context (e.g. originator, timestamps, declared entity type).
 |They are representations, not identities. They are the atomic inputs to entity resolution and may be duplicated, inconsistent, incomplete, or wrong. They can be reprocessed multiple times (e.g. during rebuilds).
 |entity record, mention, input entity, source record, submitted entity
 
+[#term-mention-identifier]
 |*Mention Identifier*
 |A structured correlation identifier composed of (sourceId, requestId, entityType) that uniquely identifies an entity mention within ERSys. It is used for correlation, idempotency, and traceability of resolution requests and outcomes.
 |The mention identifier does not constitute canonical identity. Its components serve as input to the deterministic canonical identifier derivation rule defined in the ERS–ERE contract. It identifies request context, not real-world identity. It must remain stable for traceability but carries no identity semantics beyond the mention itself.
-|record identifier, mention identifier
+|record identifier
 
+[#term-entity-mention-representation]
 |*Entity Mention Representation*
 |The descriptive payload of an entity mention, expressed in a specific serialised form.
 |Supplied externally as part of a mention submission. Used for transport, parsing, validation, and extraction. It is not an identity construct. It includes both the payload and the indication of its format (e.g. RDF).
 |mention payload, input payload, source payload
 
+[#term-entity-representation]
 |*Entity Representation*
 |A descriptive information artefact that conveys information about an entity without asserting or carrying identity.
 |Entity Representation is an abstract concept realised concretely as either an Entity Mention Representation or a Canonical Entity Representation. It exists solely to carry descriptive content and must never be used as an identity construct, identifier, or evidence of equivalence. Representations may be duplicated, inconsistent, incomplete, or replaced without affecting identity.
 |entity description, descriptive artefact, entity payload
 
+[#term-cluster]
 |*Cluster*
-|A cluster is the authoritative identity construct managed by the ERE. It groups entity mentions that the engine determines to be co-referent under its resolution logic. The clusterId is the canonical identifier.
+|A cluster is the authoritative identity construct managed by the ERE. It groups entity mentions that the engine determines to be co-referent under its resolution logic. The cluster identifier is the canonical identifier.
 |Clusters define canonical identity in ERSys. Cluster identifiers are canonical identifiers within the single deterministic identifier value space defined by the ERS–ERE Technical Contract. Cluster membership may change over time. Cluster identifiers are never reused for unrelated clusters.
 |canonical identity, co-reference group
 
+[#term-canonical-identifier]
 |*Canonical Identifier*
-|A stable, opaque, and deterministically derived value that represents a cluster managed by the ERE. In ERSys, the canonical identifier is identical to the clusterId.
-|Used across ERS APIs, the Decision Store, and external contracts to reference canonical identity. Identifier stability guarantees non-reuse of values. Assignment of a mention to a canonical identifier may change over time as clustering outcomes evolve. ERS does not maintain an independent canonical registry. Although currently identical to clusterIds, the concept is defined at the architectural level and could diverge from cluster identifiers under a future governance model.
+|A stable, opaque, and deterministically derived value that represents a cluster managed by the ERE. In ERSys, the canonical identifier is identical to the cluster identifier.
+|Used across ERS APIs, the Decision Store, and external contracts to reference canonical identity. Identifier stability guarantees non-reuse of values. Assignment of a mention to a canonical identifier may change over time as clustering outcomes evolve. ERS does not maintain an independent canonical registry. Although currently identical to cluster identifiers, the concept is defined at the architectural level and could diverge from cluster identifiers under a future governance model.
 |canonical ID, stable identifier
 
+[#term-confidence-score]
 |*Confidence Score*
 |A numeric signal produced by the ERE expressing the engine's confidence in a specific cluster assignment.
 |Confidence scores are generated and governed exclusively by the ERE. ERS stores and exposes them without reinterpretation or modification. Confidence scores are continuous (0..1).
 |matching score, assignment confidence
 
+[#term-similarity-score]
 |*Similarity Score*
 |A metric produced by the ERE representing similarity between a mention and a candidate cluster.
 |Similarity scores are engine-internal assessment signals exposed via the contract. ERS does not alter, recompute, or govern their semantics.
 |
 
+[#term-entity-type]
 |*Entity Type*
 |An ontological category that classifies real-world entities according to their nature or role within a domain.
 |They define what kind of thing an entity is (e.g. Person, Organisation) and may constrain applicable properties, resolution rules, or matching strategies. Entity types are not tags or identifiers, they do not identify entities, and do not imply the existence of a canonical entity or cluster.
 |class, entity category, entity class, reference type
 
+[#term-resolution-decision]
 |*Resolution Decision*
 |A projection artefact maintained by ERS that records the latest authoritative clustering outcome received from the ERE for a single entity mention.
 |A Resolution Decision contains exactly one current cluster assignment per mention, together with the top N alternative clusters returned by the latest ERE response. Superseded assignments are replaced. ERS does not maintain historical canonical lineage.
