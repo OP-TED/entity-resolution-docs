@@ -1,0 +1,316 @@
+== The ERE Interface
+
+This section specifies the ERE channels and the requests they support. The data types exchanged by the requests are described here and formally defined in a separate LinkML schema, presented in the xref:ERS-ERE-Contract/supplement.adoc[contract supplement].
+
+=== Requests channel
+
+Name: `ere_requests`
+
+The requests channel receives ERE requests and internally enqueues them for asynchronous execution. It carries instances of the `ERERequest` subclasses in JSON format. The interface data model is defined in the xref:ERS-ERE-Contract/supplement.adoc[contract supplement].
+
+=== Responses channel
+
+Name: `ere_responses`
+
+The responses channel is the counterpart of the requests channel. Results are published asynchronously on this channel when the ERE completes the execution of a request. It carries instances of the `EREResponse` subclasses in JSON format, including error responses (see <<Error Response>>).
+
+=== Entity Mention
+
+An entity mention represents data submitted to the system by a source system or actor that describes, or refers to, a real‑world entity. An entity mention is always conveyed as part of an entity resolution request and constitutes the subject of the resolution operation.
+
+An entity mention consists of:
+
+* an *entity mention identifier*, used for correlation and scoping of the request, and
+* an *entity representation*, provided as a text‑based serialisation together with its declared MIME type.
+
+An example entity mention:
+
+[source,json]
+----
+{
+  "identifier": {
+    "request_id": "324fs3r345vxab",
+    "source_id": "TEDSWS",
+    "entity_type": "http://www.w3.org/ns/org#Organization"
+  },
+  "content": "epd:ent005 a org:Organization; ...   cccev:telephone \"+44 1924306780\" .",
+  "content_type": "text/turtle"
+}
+----
+
+==== Entity Mention Identifiers
+
+Each entity mention MUST be associated with an entity mention identifier. The identifier is a structured value composed of the following triple:
+
+* `source_id` – identifies the originating system or actor,
+* `request_id` – uniquely identifies the request within the scope of the originating system,
+* `entity_type` – identifies the type of entity being described.
+
+These values are provided by the ERS client and MUST be present in every entity resolution request. Together, the triple uniquely identifies an entity mention within the scope of the ER System.
+
+Entity mention identifiers serve the following purposes:
+
+* correlation of asynchronous requests and responses (the ERE adds an additional `ere_request_id` field to deal with multiple requests or responses about the same entity — see <<Entity Mention Resolution Request>>),
+* enforcement of idempotent request handling,
+* traceability of resolution proposals and decisions across system components.
+
+An entity mention identifier MUST NOT be interpreted as a canonical identifier and MUST NOT carry governance semantics. Its role is limited to request scoping and correlation.
+
+==== Relationship to Canonical Identifiers
+
+Canonical identifiers are not defined or governed within the entity mention identifier itself. The components of the entity mention identifier (`source_id`, `request_id`, `entity_type`) are used as inputs to the deterministic derivation rule that defines the canonical identifier value space. The canonical identifier for an entity mention is established through the clustering outcome produced by the ERE: identifier generation according to the deterministic rule does not by itself imply cluster membership; canonical status arises only when the ERE assigns an entity mention to a cluster in a valid clustering outcome.
+
+The derivation rule, its inputs, and its stability guarantees are specified normatively in xref:ERS-ERE-Contract/introduction.adoc#canonical-identifier-derivation[Canonical Identifier Derivation and Stability]. That section is the sole normative home of this rule; it is not restated here.
+
+=== Entity Mention Resolution Request
+
+This is the main service the ERE provides. An entity resolution request is sent to the requests channel, and it contains details of an entity mention for which the ERE finds equivalence cluster candidates. The ERE replies with a resolution response object (an instance of `EntityMentionResolutionResponse`) sent to the responses channel.
+
+The following is an example consistent with the LinkML data model defined in the xref:ERS-ERE-Contract/supplement.adoc[contract supplement].
+
+[source,json]
+----
+{
+  "type": "EntityMentionResolutionRequest",
+  "entity_mention": {
+    "identifier": {
+      "request_id": "324fs3r345vx",
+      "source_id": "TEDSWS",
+      "entity_type": "http://www.w3.org/ns/org#Organization"
+    },
+    "content": "epd:ent005 a org:Organization; ...   cccev:telephone \"+44 1924306780\" .",
+    "content_type": "text/turtle"
+  },
+  "timestamp": "2026-01-14T12:34:56Z",
+  "ere_request_id": "324fs3r345vx:01"  <1>
+}
+----
+<1> `ere_request_id` disambiguates multiple requests for the same entity mention; auto-generate with a UUID.
+
+The request contains an entity mention, which in turn has a composite identifier. The `ere_request_id` is an ERE-specific field used to match responses to requests: two requests may contain the same entity mention, so this disambiguation field is required in addition to the entity mention identifier triad.
+
+For the purposes of idempotent handling, a resolution request is correlated by its entity mention identifier together with any applicable recommended placements (such as rejected canonical identifiers).
+
+[#message-fields]
+The request and response messages exchanged on the channels share the following fields:
+
+[cols="2,2,1,4",options="header"]
+|===
+| Field | Type | Required | Description
+
+| `type`
+| string
+| Yes
+| Discriminates the message subclass (for example `EntityMentionResolutionRequest`, `EntityMentionResolutionResponse`, `EREErrorResponse`).
+
+| `entity_mention`
+| object
+| Yes (requests)
+| The entity mention to resolve: its `identifier` triad, `content`, and `content_type`.
+
+| `entity_mention_id`
+| object
+| Yes (responses)
+| The `(source_id, request_id, entity_type)` triad of the mention the response refers to.
+
+| `candidates`
+| array
+| Yes (resolution responses)
+| Ordered list of candidate clusters, each with `cluster_id`, `confidence_score`, and `similarity_score`. `candidates[0]` is the ERE's top proposal.
+
+| `proposed_cluster_ids`
+| array
+| No
+| Advisory cluster identifiers suggested as the preferred assignment.
+
+| `excluded_cluster_ids`
+| array
+| No
+| Advisory cluster identifiers the caller considers invalid for this mention.
+
+| `timestamp`
+| string (ISO 8601)
+| Yes
+| Time the message was produced.
+
+| `ere_request_id`
+| string
+| Yes
+| ERE-specific correlation handle that disambiguates multiple requests for the same entity mention.
+|===
+
+=== Entity Mention Resolution Response
+
+This is the counterpart of the resolution request, which the ERE sends asynchronously to the `ere_responses` channel. This object contains a set of references to candidate clusters, together with confidence scores. The input entity is considered equivalent to the referred clusters with the given score.
+
+[source,json]
+----
+{
+  "type": "EntityMentionResolutionResponse",
+  "entity_mention_id": {
+    "request_id": "324fs3r345vx",
+    "source_id": "TEDSWS",
+    "entity_type": "http://www.w3.org/ns/org#Organization"
+  },
+  "candidates": [
+    {
+      "cluster_id": "324fs3r345vx-aa32wa",
+      "confidence_score": 0.91,
+      "similarity_score": 0.85
+    },
+    {
+      "cluster_id": "324fs3r345vx-bb45we",
+      "confidence_score": 0.65,
+      "similarity_score": 0.8
+    }
+  ],
+  "timestamp": "2026-01-14T12:34:59Z",
+  "ere_request_id": "324fs3r345vx:01"
+}
+----
+
+The `candidates` list MUST contain at least one entry. The first entry (`candidates[0]`) MUST be the ERE's top proposed cluster assignment — the candidate the ERE considers most likely equivalent to the input entity mention. ERS always selects `candidates[0]` as the primary resolution outcome; ordering is therefore normative, not advisory.
+
+The response reports the composite entity mention identifier of the mention it refers to. This is redundant, since it could be reconstructed from the original request through `ere_request_id`, but it is repeated in the response for convenience.
+
+The ERE contract does not concern itself with returning entity representations associated with clusters. If an organisation `O1` is associated with a cluster `CL1` whose canonical entity is `CO1`, the ERE returns the cluster identifier for `CL1` without any representation of the entity `CO1`. The cluster identifier is the same as the canonical identifier of `CO1`.
+
+The ERE is the authority that determines the membership of an entity in clusters. It is the ERS responsibility to manage and govern the canonical entities, including identifiers, integration of entity mention memberships, and, if necessary, canonical representations. This follows from the rule defined in xref:ERS-ERE-Contract/introduction.adoc#canonical-identifier-derivation[Canonical Identifier Derivation and Stability].
+
+[NOTE]
+====
+Multiple candidate clusters can feed the curation application, so that a curator can decide which entity is actually equivalent to the input, or reject all candidates (see <<Resolution Request with Rejections>>). This note is informative.
+====
+
+==== Score semantics for singleton clusters (Normative)
+
+When the ERE finds no equivalent cluster for the entity mention and creates a new singleton cluster, it MUST return a response with a single candidate whose `confidence_score` and `similarity_score` are both `0.0`.
+
+These values indicate the absence of any pairwise comparison: the newly created cluster has no prior members against which a similarity or equivalence assessment can be made.
+
+A `confidence_score` of `0.0` MUST NOT be interpreted as a resolution failure; it is the expected value for a valid singleton outcome. ERS MUST accept and record such a response normally.
+
+=== Resolution Request with proposed placements
+
+A resolution request MAY contain a list of proposed cluster identifiers. The ERE MAY take them into account, but this is not mandatory: the ERE can still decide a different entity classification and remains the ultimate authority over the clustering of an entity.
+
+An example of such a request:
+
+[source,json]
+----
+{
+  "type": "EntityMentionResolutionRequest",
+  "entity_mention": {
+    "identifier": {
+      "request_id": "324fs3r345vx",
+      "source_id": "TEDSWS",
+      "entity_type": "http://www.w3.org/ns/org#Organization"
+    },
+    "content": "epd:ent005 a org:Organization; ...   cccev:telephone \"+44 1924306780\" .",
+    "content_type": "text/turtle"
+  },
+  "proposed_cluster_ids": [
+    "324fs3r345vx-aa32wa", "324fs3r345vx-bb45we"
+  ],
+  "timestamp": "2026-01-14T12:34:56Z",
+  "ere_request_id": "324fs3r345vx:01"  <1>
+}
+----
+<1> `ere_request_id` disambiguates multiple requests for the same entity mention; auto-generate with a UUID.
+
+Whether the order of elements in `proposed_cluster_ids` is relevant depends on the ERE implementation, which MAY give more importance to the top elements.
+
+=== ERE timeouts and singleton proposals
+
+An ERE client MAY place a single element in `proposed_cluster_ids` derived from `entity_mention.identifier` via the canonical identifier derivation rule. In other words, it can be proposed that an entity mention is placed into a singleton cluster containing the entity only.
+
+[NOTE]
+====
+ERS is expected to do this when the ERE does not reply to an initial resolution request within a configured timeout. In that case, ERS may continue with the initial entity as the possible canonical one. The ERE has no obligation to classify the entity in this proposed way. Given the asynchronous nature of the ERE, an answer to the initial request may arrive after the timeout, and the client may decide to consider it despite the subsequent singleton request. This note is non-normative.
+====
+
+=== Resolution Request with Rejections
+
+An entity resolution request can include the parameter `excluded_cluster_ids`, to indicate that a previously proposed clustering is not deemed valid and alternative resolutions are requested. One use case for this operation is to account for a negative curator decision on an automatic alignment.
+
+An example of a request with rejections:
+
+[source,json]
+----
+{
+  "type": "EntityMentionResolutionRequest",
+  "entity_mention": {
+    "identifier": {
+      "request_id": "324fs3r345vxab",
+      "source_id": "TEDSWS",
+      "entity_type": "http://www.w3.org/ns/org#Organization"
+    },
+    "content": "epd:ent005 a org:Organization; ...   cccev:telephone \"+44 1924306780\" .",
+    "content_type": "text/turtle"
+  },
+  "excluded_cluster_ids": [
+    "324fs3r345vx-bb45we",
+    "324fs3r345vx-cc67ui"
+  ],
+  "timestamp": "2026-01-14T12:40:56Z",
+  "ere_request_id": "324fs3r345vxab:01"
+}
+----
+
+As with proposed placements, rejections are advisory signals for the ERE. Depending on the implementation, the ERE MAY or MAY NOT consider them.
+
+[NOTE]
+====
+An ERE implementation may choose to store rejections as evidence to inform future resolution behaviour. The contract does not prescribe how an ERE uses this signal. This note is non-normative.
+====
+
+=== Resolution Request with (possibly multiple) Proposals and Rejections
+
+A request MAY carry both proposed placements and rejections. Both MAY be used to improve the clustering by combining the behaviours described above. The ERE MAY also accumulate subsequent requests with proposed placements or rejections, considering the merge of all proposals coming from multiple messages.
+
+=== Update Responses
+
+The ERE MAY change the cluster assignment of entities based on its internal maintenance, periodic reviews of previously computed data, or full rebuilds (see <<(Non-Normative) Full cluster rebuild>>). When this happens, the ERE notifies all subscribing clients by pushing an `EntityMentionResolutionResponse` message on the responses channel. Since no request can be related to it, this response has an `ere_request_id` value with the special prefix `ereNotification:`.
+
+An alternative would be a distinct message type that is not a subclass of `EREResponse` (see the data model in the xref:ERS-ERE-Contract/supplement.adoc[contract supplement]). Reusing the response type that reacts to client requests keeps the ERE contract simpler.
+
+=== (Non-Normative) Full cluster rebuild
+
+The ERE MAY support internal reprocessing or rebuild operations that trigger re-evaluation of previously computed clustering outcomes. Such operations are entirely internal to the ERE and are not invoked through the asynchronous request channel defined in this contract.
+
+A rebuild MAY be scoped to one or more entity types. If no scope is specified, the operation MAY apply to all entity types managed by the ERE. The exact internal mechanics of rebuild depend on the specific ERE implementation and its resolution strategies. This contract does not prescribe how reprocessing is performed, how intermediate state is managed, or how clustering algorithms are re-executed.
+
+Reprocessing MAY be initiated manually by an operator or automatically by the ERE as part of maintenance, optimisation, or algorithm updates.
+
+=== (Normative) Communication of rebuild outcomes
+
+Although rebuild is not triggered via the asynchronous request channel, any change in clustering outcomes resulting from rebuild MUST be communicated through the standard responses channel using the same message structures defined for resolution outcomes.
+
+Rebuild-triggered clustering updates MUST follow the same correlation and idempotency rules as regular responses. In particular:
+
+* Updates MUST reference the entity mention identifier triad.
+* Duplicate or repeated updates MUST be processed idempotently.
+* The ERS MUST record the latest received clustering outcome per entity mention.
+
+This contract does not define rollback semantics, temporal state restoration, or lineage relationships between clusters. The ERE is not required to preserve historical cluster evolution or to expose previous cluster states.
+
+Rebuild operations MAY result in clustering changes being published concurrently with new resolution requests. Implementations MUST ensure that such interleaving does not violate idempotent processing guarantees or correlation rules.
+
+The purpose of this section is to clarify that reprocessing is an ERE responsibility, that its effects are propagated through standard outcome messages, and that no additional contract surface is introduced for rebuild control or state rollback.
+
+=== Error Response
+
+An ERE request of any type (resolution, rebuild) MAY fail, due to problems such as a malformed request or an internal malfunction. In this case, the ERE publishes a response object of type `EREErrorResponse`. An example:
+
+[source,json]
+----
+{
+  "type": "EREErrorResponse",
+  "ere_request_id": "324fs3r345vx",
+  "error_type": "ere.exceptions.MalformedRequestError",
+  "error_title": "The entity data is missing in the request",
+  "error_detail": "The 'entity' attribute is required in EntityResolutionRequest message",
+  "error_trace": "Traceback (most recent call last):\n  File \"/app/ere/service.py\",\n     line 45, in process_request\n..."  <1>
+}
+----
+<1> `error_trace` is optional and SHOULD NOT be included in production use.

@@ -1,0 +1,11 @@
+// Shared partial: system overview (3-component description).
+// Canonical home: ERSys/index.adoc (Overview). Other pages include this.
+
+ERSys is an open-source, scalable entity resolution platform with a pluggable architecture, designed to evolve alongside AI and machine learning technologies.
+It assigns and maintains stable canonical identifiers for entity mentions submitted by external systems, so that downstream consumers have a consistent, dereferenceable identity even as resolution quality improves over time.
+
+ERSys is composed of three main components:
+
+* *Entity Resolution Service (ERS)* — orchestrates resolution requests, enforces time budgets, persists assignment state, and exposes canonical identifiers through stable APIs.
+* *Entity Resolution Engine (ERE)* — the authoritative clustering component that decides whether two entity mentions refer to the same real-world entity. ERSys works with any conformant ERE implementation.
+* *Curation Web Application* — supports human-in-the-loop review and re-evaluation of resolution decisions, with a full audit trail.

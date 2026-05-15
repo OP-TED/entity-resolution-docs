@@ -1,16 +1,34 @@
 = User Management
 :description: How to create and manage user accounts in the Curation Web Application admin panel.
 
-The *Admin* page is accessible to superusers only.
-It provides a central view of all registered accounts and lets you control who can access the curation application and with what level of privilege.
+The *Admin* page is a central view of all registered accounts that lets you control who can access the curation application and with what level of privilege.
+
+IMPORTANT: Every task in this section requires a superuser account. The Admin page and all the actions below are available to superusers only.
 
 image::curation/admin-user-list.png[User management page showing the user table]
+
+== Active vs. Verified
+
+Two independent settings control whether and how a user can use the application. They are easy to confuse, so compare them before changing either:
+
+[cols="1,3",options="header"]
+|===
+| Setting | What it controls
+
+| *Active*
+| Whether the account can sign in at all. An inactive user cannot log in. Turning *Active* off is how you suspend or "deactivate" an account without deleting it.
+
+| *Verified*
+| Whether a signed-in user may use the curation features. An unverified user can sign in but is blocked from browsing decisions or history. Turning *Verified* off suspends curation access while still allowing the user to sign in.
+|===
+
+In short: *Active* is the door to the application; *Verified* is the door to curation work inside it.
 
 == The User Table
 
 Each row in the table represents one user account and shows:
 
-[cols="1,3"]
+[cols="1,3",options="header"]
 |===
 | Column | Meaning
 
@@ -36,11 +54,15 @@ The list is paginated. Use the pagination controls at the bottom to move between
 
 == Searching Users
 
+IMPORTANT: This task requires a superuser account.
+
 Type in the *Search by email* field to filter the list to accounts whose email address matches the text you enter.
 The list updates in real time as you type.
 Clear the field to return to the full list.
 
 == Adding a User
+
+IMPORTANT: This task requires a superuser account.
 
 . Click *Add User* in the top-right corner.
 . Fill in the form that appears:
@@ -57,10 +79,12 @@ image::curation/admin-add-user.png[Add User modal with email, password, and togg
 
 == Editing a User
 
+IMPORTANT: This task requires a superuser account.
+
 Click the *edit* icon on any row to open the edit form for that user.
 You can adjust the three status toggles:
 
-[cols="1,3"]
+[cols="1,3",options="header"]
 |===
 | Toggle | Effect when changed
 
@@ -82,25 +106,33 @@ image::curation/admin-edit-user.png[Edit User modal showing the Active, Superuse
 
 == Changing a User's Password
 
+IMPORTANT: This task requires a superuser account.
+
 If a user forgets their password and cannot sign in, an administrator can set a new password on their behalf.
 
 . Click the *edit* icon on the user's row to open the edit form.
 . Enter a new password in the *Password* field (at least 8 characters).
+. Confirm the new password if the form asks you to re-enter it. If the two entries do not match, or the password does not meet the minimum length, the form reports an error and the password is not changed — correct the entry and try again.
 . Click *OK* to apply the change.
 
 The user can sign in immediately with the new password.
 No notification is sent automatically — inform the user of their new credentials separately.
 
-image::curation/admin-edit-user-password.png[Edit User modal with the New Password field]
+image::curation/admin-edit-user-password.png[Edit User modal with the New Password field,70%]
 
-NOTE: The system prevents removing the last active administrator. If you attempt to deactivate or remove superuser status from the only remaining active superuser, the action will be rejected with an error.
+[WARNING]
+====
+The system prevents removing the last active administrator. If you attempt to deactivate the only remaining active superuser, or to remove its superuser status, the action is rejected with an error and the change is not applied.
+====
 
 == Deactivating a User
 
-Click the *deactivate* (delete) icon on any active user row.
+IMPORTANT: This task requires a superuser account.
+
+Click the *deactivate* icon on any active user row.
 A confirmation dialog will ask you to confirm before proceeding.
 
-image::curation/admin-deactivate-confirm.png[Deactivation confirmation dialog]
+image::curation/admin-deactivate-confirm.png[Deactivation confirmation dialog,80%]
 
 Deactivation sets the account to inactive — the user is immediately blocked from signing in.
 The account and all its history are preserved and can be reactivated at any time via the edit form.

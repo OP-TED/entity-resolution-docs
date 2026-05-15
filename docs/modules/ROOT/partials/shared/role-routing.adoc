@@ -1,0 +1,23 @@
+// Shared partial: role-routing table (entry points by user type).
+// Canonical home: ERSys/index.adoc (Overview). Other pages include this.
+
+[cols="1,2,2",options="header"]
+|===
+| User type | How they interact | Where to start
+
+| Curator
+| Reviews decisions in the web app, records feedback
+| xref:UserGuide/curation-guide-overview.adoc[Curation App User Guide]
+
+| Originator / external system
+| Submits entity mentions via the ERS REST API, looks up canonical identifiers
+| xref:api-docs/ers/index.adoc[ERS REST API Reference]
+
+| ERE implementer
+| Builds a compatible Entity Resolution Engine
+| xref:ERE/ere-dev-guide.adoc[ERE Developer Guide]
+
+| Administrator
+| Manages curator accounts and roles
+| xref:UserGuide/curation-guide-admin.adoc[User Management]
+|===

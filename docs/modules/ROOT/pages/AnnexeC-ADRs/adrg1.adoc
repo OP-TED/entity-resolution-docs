@@ -1,6 +1,12 @@
-== ADR-G1N — Observability and Telemetry
+[#adr-g1n]
+= ADR-G1N — Observability and Telemetry
 
-=== Context and Problem Statement
+[NOTE]
+====
+Status: Accepted
+====
+
+== Context and Problem Statement
 
 ERS operates in a distributed, asynchronous environment where:
 
@@ -9,15 +15,17 @@ ERS operates in a distributed, asynchronous environment where:
 * Cluster assignments may later change.
 * Delta updates are exposed via refreshBulk.
 
-Operational insight is required to understand request flow, timing behaviour, reassignment events, and integration outcomes. +
+Operational insight is required to understand request flow, timing behaviour, reassignment events, and integration outcomes.
+
 However, observability must not:
 
 * Influence clustering semantics.
 * Delay or block resolution flows.
 * Introduce a secondary source of authority over identity state.
+
 A clear separation is therefore required between functional behaviour and telemetry behaviour.
 
-=== Decision
+== Decision
 
 . *Best-Effort, Non-Blocking Telemetry*
 .. Telemetry emission is best-effort and non-blocking.
@@ -25,9 +33,9 @@ A clear separation is therefore required between functional behaviour and teleme
 . *Metadata-Only Semantics*
 .. Telemetry records contain metadata only.
 .. They may include (possible metadata):
-... mention identifier tuple (sourceId, requestId, entityType)
-... clusterId (where applicable)
-... actionType
+... mention identifier tuple (source_id, request_id, entity_type)
+... cluster_id (where applicable)
+... action_type
 ... Timestamps
 ... execution outcomes
 ... internal correlation identifiers
@@ -49,26 +57,31 @@ A clear separation is therefore required between functional behaviour and teleme
 .. Telemetry constitutes an operational trace.
 .. It does not imply regulatory-grade auditing, completeness guarantees, durability guarantees, or non-repudiation semantics.
 
-=== Scope and Applicability
+== Scope and Applicability
 
-This decision applies to telemetry emitted by ERS and its integration points with ERE. +
-It governs trace semantics, correlation rules, and the relationship between observability and functional behaviour. +
+This decision applies to telemetry emitted by ERS and its integration points with ERE.
+
+It governs trace semantics, correlation rules, and the relationship between observability and functional behaviour.
+
 Data retention policy, regulatory audit compliance, and security monitoring are out of scope.
 
-=== Considered Options
+== Considered Options
 
-. *Blocking Telemetry Model. *Make observability infrastructure mandatory for request processing, failing functional operations if telemetry fails.
-. *Full Payload Logging Model. *Capture complete request and response payloads for forensic reconstruction and debugging.
-. *Metadata-Only, Best-Effort Telemetry Model. *Emit non-blocking metadata sufficient for tracing identity lifecycle events while keeping authoritative state independent. _(Selected)_
+* *Blocking Telemetry Model.* Make observability infrastructure mandatory for request processing, failing functional operations if telemetry fails.
+* *Full Payload Logging Model.* Capture complete request and response payloads for forensic reconstruction and debugging.
+* *Metadata-Only, Best-Effort Telemetry Model.* Emit non-blocking metadata sufficient for tracing identity lifecycle events while keeping authoritative state independent. _(Selected)_
 
-=== Rationale
+== Rationale
 
-Non-blocking telemetry prevents coupling operational infrastructure to identity guarantees. +
-Metadata-only tracing reduces performance overhead and risk of sensitive data propagation. +
-Capturing identity lifecycle transitions supports troubleshooting and operational transparency without redefining canonical state semantics. +
+Non-blocking telemetry prevents coupling operational infrastructure to identity guarantees.
+
+Metadata-only tracing reduces performance overhead and risk of sensitive data propagation.
+
+Capturing identity lifecycle transitions supports troubleshooting and operational transparency without redefining canonical state semantics.
+
 This model preserves architectural clarity: ERE determines clusters, ERS mirrors outcomes, and telemetry observes behaviour without governing it.
 
-=== Consequences
+== Consequences
 
 * Telemetry gaps may occur and must be tolerated operationally.
 * Observability tooling can evolve independently of clustering and identity contracts.

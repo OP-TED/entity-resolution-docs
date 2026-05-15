@@ -1,8 +1,10 @@
 == 8. Behavioural spine flows
 
-This section defines the normative behavioural spines of the ERSys. Behavioural spines illustrate how the guarantees defined by the White-level Use Cases are realised through interaction between actors and application components, while respecting the architectural boundaries, authority allocation, and invariants established in earlier sections. +
+This section defines the normative behavioural spines of the ERSys. Behavioural spines illustrate how the guarantees defined by the White-level Use Cases are realised through interaction between actors and application components, while respecting the architectural boundaries, authority allocation, and invariants established in earlier sections.
+
 The spines are expressed using UML Sequence notation and use only application components and roles defined in the ArchiMate L1 and L2 views. They are not implementation specifications and do not prescribe internal algorithms, processing steps, data structures, or deployment choices. Instead, each spine captures a stable interaction pattern that is architecturally significant because it demonstrates responsibility transfer, authority enforcement, and the preservation of system guarantees.
-For each spine, this document includes a simplified sequence diagram sufficient to explain the architectural intent. More detailed sequence diagrams are maintained as separate Mermaid artefacts and provided in annexes. These detailed diagrams elaborate the same behaviour and do not introduce additional guarantees or obligations beyond those stated in the White Use Cases.
+
+For each spine, this section includes a simplified sequence diagram sufficient to explain the architectural intent. More detailed sequence diagrams are maintained as separate Mermaid artefacts and provided in annexes. These detailed diagrams elaborate the same behaviour and do not introduce additional guarantees or obligations beyond those stated in the White Use Cases.
 
 include::spine-0-e2e.adoc[]
 include::spine-a.adoc[]

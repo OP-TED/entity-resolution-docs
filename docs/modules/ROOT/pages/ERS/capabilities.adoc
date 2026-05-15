@@ -1,0 +1,69 @@
+= ERS Capabilities
+:description: Operational capabilities of the Entity Resolution Service and the guarantees it provides.
+
+The Entity Resolution Service (ERS) provides the following capabilities to originators, downstream consumers, and curators.
+For the normative behavioural specification of each capability, see xref:ERSArchitecture/core-capabilities.adoc[Architecture — Core Capabilities].
+For request and response signatures, see the xref:api-docs/ers/index.adoc[ERS REST API Reference] and the xref:api-docs/curation/index.adoc[Curation REST API Reference].
+
+The Entity Resolution Engine (ERE) is the pluggable component that performs the actual clustering; ERS orchestrates requests to it through a message queue and remains available independently of ERE availability.
+
+image::L1.png[ERSys business-level system context: external roles interacting with the externally visible ERS and Curation services, with the ERE behind a message queue.]
+
+[#entity-resolution]
+== Entity Resolution
+
+* *Single mention resolution* — accepts an entity mention identified by a `(source_id, request_id, entity_type)` triad and returns a canonical cluster identifier. The response is either `CANONICAL` (confirmed by the ERE) or `PROVISIONAL` (deterministically derived when the ERE does not respond within the time budget).
+
+* *Bulk mention resolution* — submits multiple entity mentions in a single request. Each mention is resolved independently; the response may contain a mix of `CANONICAL`, `PROVISIONAL`, and error outcomes.
+
+* *Idempotency and conflict protection* — identical submissions (same triad, same content) are processed at most once and return the same result. Submissions with the same triad but different content are rejected with an `IDEMPOTENCY_CONFLICT` error.
+
+[#mention-lookup-and-delta-synchronisation]
+== Mention Lookup and Delta Synchronisation
+
+* *Single mention lookup* — retrieves the current cluster assignment for a previously submitted mention, including the confidence score, similarity score, and assignment timestamp.
+
+* *Bulk mention lookup* — retrieves current assignments for a batch of mentions in a single request.
+
+* *Delta refresh* — returns all mentions for a given source whose cluster assignment changed since the last successful synchronisation. Delta computation is timestamp-based. The synchronisation cursor is advanced only on a successful response, which gives downstream consumers at-least-once delivery semantics.
+
+[#time-budgeted-asynchronous-orchestration]
+== Time-Budgeted Asynchronous Orchestration
+
+* *Dual time budgets* — ERS enforces two configurable time limits. The per-mention budget controls how long ERS waits for an ERE response before issuing a provisional identifier. The per-bulk-request budget limits the total time across all mentions in a bulk request. Both are configurable; see xref:ERS/configuration.adoc[Configuration Reference].
+
+* *Provisional identifier issuance* — when the ERE does not respond within the per-mention budget, ERS issues a deterministically derived provisional cluster identifier (SHA-256 of the mention triad). This identifier is valid at the time of issuance and is replaced by the authoritative ERE outcome when it arrives. Downstream processing can continue without blocking.
+
+* *Provisional-only mode* — setting both time budgets to `0` causes ERS to issue provisional identifiers immediately without contacting the ERE. This is useful for environments where ERE is not deployed, or where provisional identifiers are the intended steady-state output.
+
+* *Late ERE response integration* — ERE responses that arrive after a provisional identifier was issued are applied retroactively. The cluster assignment is updated and the change becomes visible via delta refresh.
+
+[#human-curation-integration]
+== Human Curation Integration
+
+* *Decision serving* — the Curation REST API exposes pending resolution decisions for curator review. Each decision presents the current cluster assignment, the ERE's confidence and similarity scores, and the alternative candidate clusters from the most recent ERE outcome.
+
+* *Curator action routing* — curator verdicts (accept, reject, or assign to an alternative cluster) are recorded in the User Action Log and forwarded to the ERE as re-evaluation recommendations carrying placement and exclusion signals. The ERE determines the resulting cluster assignment; curator actions are evidence, not commands.
+
+* *Bulk curation operations* — curators can accept or reject multiple decisions in a single request.
+
+* *Resolution statistics* — read-only, aggregated indicators of resolution and curation activity: pending decision counts, assignment change volumes, and curator action totals, optionally scoped by entity type.
+
+[#audit-and-traceability]
+== Audit and Traceability
+
+* *User Action Log* — every curator action is recorded with the actor identity, timestamp, and decision context. The log is append-only and supports both operational traceability and potential model training.
+
+* *Request Registry* — all submitted entity mentions and associated request metadata are stored immutably. The registry is the authoritative record of provenance for submitted artefacts.
+
+[#pluggable-ere-architecture]
+== Pluggable ERE Architecture
+
+* *Pluggable ERE implementations* — ERS is designed to work with any conformant ERE implementation. Different engines may use different resolution algorithms or be dedicated to specific entity types.
+
+* *Message-queue decoupling* — ERS communicates with ERE implementations through a shared Redis message queue. ERS does not call the ERE synchronously and does not depend on ERE availability to serve client requests. The ERE can be replaced or updated without modifying ERS.
+
+[#entity-type-management]
+== Entity Type Management
+
+* *Configurable entity types* — entity types are registered at startup via the `rdf_mention_config.yaml` configuration file. Each entry maps an RDF class to a set of named fields extracted via SPARQL property paths, and designates the field used as the human-readable label in the curation UI. Adding a new entity type requires editing the YAML file and restarting the service — no code changes are needed. See xref:ERS/configuration.adoc[Configuration Reference] and xref:ERSys/examples.adoc#ers-entity-type-configuration[Examples — ERS Entity Type Configuration].

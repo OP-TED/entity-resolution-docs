@@ -1,13 +1,17 @@
-== Introduction and Index
+= Introduction and Index
 
-This annex contains the Architecture Decision Records (ADRs) for the ERSys. An ADR is a decision artefact that captures a non-trivial architectural choice in a durable form. Its purpose is to ensure that intentional design decisions remain visible over time, especially when original context fades and behaviour risks being misinterpreted as accidental. +
-The ADRs define the binding architectural invariants of ERSys. They are not a feature catalogue and not a detailed design specification. Instead, they constrain how the system may be structured and evolved, particularly in areas involving asynchronous interaction, replaceable engines, long-lived identifiers, and distributed responsibility. +
-Taken together, the ADRs stabilise ERSys around a coherent model of identity, authority, interaction, and state separation. They provide a reference framework against which contracts, use cases, and implementation decisions can be evaluated.
+This annex contains the Architecture Decision Records (ADRs) for the ERSys. An ADR is a decision artefact that captures a non-trivial architectural choice in a durable form. Its purpose is to ensure that intentional design decisions remain visible over time, especially when original context fades and behaviour risks being misinterpreted as accidental.
 
-=== Conceptual Frame Assumed by the ADRs
+The ADRs define the binding architectural invariants of ERSys. They constrain how the system may be structured and evolved, particularly in areas involving asynchronous interaction, replaceable engines, long-lived identifiers, and distributed responsibility. They are not a feature catalogue and not a detailed design specification.
 
-All ADRs in this annex share a common conceptual framing. ERSys does not manage real-world entities directly. It governs identity through system-level constructs such as entity mentions, cluster assignments, and canonical identifiers. Canonical identity is equivalent to cluster membership in ERE. +
-Representations are descriptive artefacts. They do not define identity. Scores produced by engines are computational outputs. They do not constitute authoritative truth. Presentation-layer data is operational support and does not influence canonical identity. +
+Taken together, the ADRs stabilise ERSys around a coherent model of identity, authority, interaction, and state separation. They provide a reference framework against which contracts, use cases, and implementation decisions can be evaluated. They also extend xref:ERSArchitecture/decisions.adoc[the architectural baseline] with the full context and consequences behind each invariant.
+
+== Conceptual Frame Assumed by the ADRs
+
+All ADRs in this annex share a common conceptual framing. ERSys governs identity through system-level constructs such as entity mentions, cluster assignments, and canonical identifiers. ERSys does not manage real-world entities directly. Canonical identity is equivalent to cluster membership in ERE.
+
+Representations are descriptive artefacts. They do not define identity. Scores produced by engines are computational outputs. They do not constitute authoritative truth. Presentation-layer data is operational support and does not influence canonical identity.
+
 Across the ADR set:
 
 * Authority is separated from computation.
@@ -17,16 +21,16 @@ Across the ADR set:
 
 This framing prevents semantic drift, avoids hidden governance layers, and ensures that identity, authority, and operational concerns remain clearly separated.
 
-=== How the ADR set is systematised
+== How the ADR set is systematised
 
 The ADR set is organised as a compact catalogue of non-overlapping architectural invariants. Each ADR defines one binding rule that constrains contracts, diagrams, and implementation. The structure follows thematic series by concern rather than chronology.
 
-* A-Series - Identity: *Defines canonical identity semantics: clusterId is the canonical identifier, singleton IDs are deterministic, identifiers are never reused, and assignment may change.
-* B-Series - Authority: *Defines responsibility boundaries: ERE is authoritative for clustering; ERS is façade and projection layer; user actions are recommendations only. +
-* C-Series - Interaction: *Defines client and messaging behaviour: synchronous client contract, asynchronous ERS–ERE exchange, provisional identifiers, idempotent integration. +
-* D-Series - State & Synchronisation: *Defines authoritative stores and projection rules: ERE is source of truth; ERS stores latest placement only; refreshBulk exposes assignment deltas. +
-* E-Series - Corrective Processing: *Defines re-resolution and reclustering semantics and their uniform integration. +
-* F-Series - Representation Boundaries: *Separates identity from payload, preview, and pruning concerns. +
-* G-Series - Cross-Cutting: *Constrain observability and security without altering identity or authority semantics. +
+* *A-Series — Identity:* Defines canonical identity semantics: cluster_id is the canonical identifier, singleton IDs are deterministic, identifiers are never reused, and assignment may change.
+* *B-Series — Authority:* Defines responsibility boundaries: ERE is authoritative for clustering; ERS is façade and projection layer; user actions are recommendations only.
+* *C-Series — Interaction:* Defines client and messaging behaviour: synchronous client contract, asynchronous ERS–ERE exchange, provisional identifiers, idempotent integration.
+* *D-Series — State & Synchronisation:* Defines authoritative stores and projection rules: ERE is source of truth; ERS stores latest placement only; refreshBulk exposes assignment deltas.
+* *E-Series — Corrective Processing:* Defines re-resolution and reclustering semantics and their uniform integration.
+* *F-Series — Representation Boundaries:* Separates identity from payload, preview, and pruning concerns.
+* *G-Series — Cross-Cutting:* Constrains observability and security without altering identity or authority semantics.
 
 The organising principle is strict separation of identity, authority, interaction, state, and representation, ensuring a coherent engine-authoritative model without hidden governance layers.

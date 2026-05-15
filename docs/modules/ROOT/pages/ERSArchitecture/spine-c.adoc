@@ -1,11 +1,10 @@
 === 8.4 Spine C: Canonical assignment lookup (bulk-delta, read-only observation)
 
-Spine C defines the read-only interaction by which a downstream consumer synchronises placement changes in bulk, using the supported delta mechanism (*refreshBulk*). In the engine-authoritative model, mention-to-cluster assignment can evolve over time due to late outcomes, engine-initiated reclustering, or curator recommendations. This spine therefore makes explicit how clients obtain a bounded set of updates, without triggering resolution and without relying on push callbacks. +
-This spine is intentionally about *bounded read access and continuation*, not about lookup of a single mention. It is expressed in UML Sequence notation and focuses on responsibility transfer and state observation at the ERS boundary. +
+*Intent.* Spine C defines the read-only interaction by which a downstream consumer synchronises placement changes in bulk, using the supported delta mechanism (*refreshBulk*). In the engine-authoritative model, mention-to-cluster assignment can evolve over time due to late outcomes, engine-initiated reclustering, or curator recommendations. This spine makes explicit how clients obtain a bounded set of updates, without triggering resolution and without relying on push callbacks. It concerns *bounded read access and continuation*, not lookup of a single mention. It is expressed in UML Sequence notation and focuses on responsibility transfer and state observation at the ERS boundary.
 
 *Simplified sequence diagram (Spine C)*
 
-[mermaid]
+[mermaid, align=center]
 ----
 ---
 config:
@@ -17,8 +16,8 @@ config:
 ---
 sequenceDiagram
 %% Maps to EA diagram: UML Sequence (Spine C)
-%% Purpose: Bulk Refresh by sourceId (UC1.3)
-%% Focus: bounded delta response with continuationCursor, no resolution triggering
+%% Purpose: Bulk Refresh by source_id (UC-B1.3)
+%% Focus: bounded delta response with continuation_cursor, no resolution triggering
 %% Excludes: ERE and messaging, curation, rebuild, consumer System of Records persistence
 
 participant DownstreamConsumer as "Downstream Consumer"
@@ -29,59 +28,62 @@ box "Entity Resolution System (ERSys)"
     participant DecisionStore as "Resolution Decision Store"
 end
 
-%% Consumer obtains lastSeenTimestamp from its own System of Records (not shown)
-DownstreamConsumer ->> CanonicalLookup: Bulk refresh by sourceId<br/>(sourceId, lastSeenTimestamp, limit?)
+%% Consumer obtains last_seen_timestamp from its own System of Records (not shown)
+DownstreamConsumer ->> CanonicalLookup: Bulk refresh by source_id<br/>(source_id, last_seen_timestamp, limit?)
 CanonicalLookup ->> ERS: Validate request and resolve bulk refresh
 
-ERS ->> DecisionStore: Read changed assignments<br/>(sourceId, lastSeenTimestamp, effectiveLimit)
-DecisionStore -->> ERS: Bulk refresh slice<br/>(updates, hasMore, continuationCursor?)
+ERS ->> DecisionStore: Read changed assignments<br/>(source_id, last_seen_timestamp, effective_limit)
+DecisionStore -->> ERS: Bulk refresh slice<br/>(updates, has_more, continuation_cursor?)
 
-ERS -->> CanonicalLookup: Bulk refresh slice<br/>(updates, hasMore, continuationCursor?)
+ERS -->> CanonicalLookup: Bulk refresh slice<br/>(updates, has_more, continuation_cursor?)
 CanonicalLookup -->> DownstreamConsumer: 200 OK<br/>Bulk refresh slice + continuation
 
-alt hasMore is true
-    DownstreamConsumer ->> CanonicalLookup: Continue bulk refresh<br/>(continuationCursor)
+alt has_more is true
+    DownstreamConsumer ->> CanonicalLookup: Continue bulk refresh<br/>(continuation_cursor)
     CanonicalLookup ->> ERS: Resolve continuation
-    ERS ->> DecisionStore: Read next slice<br/>(continuationCursor)
-    DecisionStore -->> ERS: Bulk refresh slice<br/>(updates, hasMore, continuationCursor?)
-    ERS -->> CanonicalLookup: Bulk refresh slice<br/>(updates, hasMore, continuationCursor?)
+    ERS ->> DecisionStore: Read next slice<br/>(continuation_cursor)
+    DecisionStore -->> ERS: Bulk refresh slice<br/>(updates, has_more, continuation_cursor?)
+    ERS -->> CanonicalLookup: Bulk refresh slice<br/>(updates, has_more, continuation_cursor?)
     CanonicalLookup -->> DownstreamConsumer: 200 OK<br/>Next bulk refresh slice
 end
 
-%%note right of CanonicalLookup: Bulk refresh is read only and does not trigger resolution\nContinuationCursor is server minted to keep responses bounded\nAssignments may evolve over time and clients should tolerate duplicates
+Note right of CanonicalLookup: Bulk refresh is read-only and does not trigger resolution.<br/>The continuation_cursor is server-minted to keep responses bounded.<br/>Assignments may evolve over time and clients should tolerate duplicates.
 
 ----
 
-*Narrative aligned to the simplified diagram* +
+*Narrative aligned to the simplified diagram*
 
-*Submit refreshBulk request.* A downstream consumer calls refreshBulk for a given *originId* (the consumer identity used for delta tracking). The request may include an optional limit to bound the response size. +
-*Validate request.* ERS validates the request is well-formed and that the caller is authorised to access the given originId scope. +
-*Compute the delta slice from ERS state.* ERS reads from its Decision Store the set of mentions whose recorded placement changed since the last successful exposure for that originId. The delta rule is conceptually:
+*Submit refreshBulk request.* A downstream consumer calls refreshBulk for a given `source_id` (the consumer scope used for delta tracking). The request may include an optional `limit` to bound the response size.
 
-* *lastNotificationDate < lastUpdateDate*
-The returned update items include, at minimum, the mention correlation identifiers and the current *clusterId (canonical identifier)*, plus correlation metadata such as contextId as defined by the API contract. +
-*Return a bounded slice, with continuation if needed.* If the result set is large, ERS returns a bounded slice and a server-minted *continuationCursor* indicating that more results are available. The consumer may call refreshBulk again with that continuationCursor to obtain the next slice. +
-*Continue until complete.* The consumer repeats the continuation call until the response indicates there is no more data. +
-refreshBulk is strictly read-only with respect to identity and clustering: it does not trigger resolution, re-resolution, curation, or any form of rebuild. Its only permissible state effect is advancing the exposure watermark for that originId when a slice is successfully produced, so that the same updates are not repeatedly returned as “new”. +
+*Validate request.* ERS validates the request is well-formed and that the caller is authorised to access the given `source_id` scope.
+
+*Compute the delta slice from ERS state.* ERS reads from its Decision Store the set of mentions whose recorded placement changed since the last successful exposure for that `source_id`. The delta rule is conceptually `last_notification_date` < `last_update_date`. The returned update items include, at minimum, the mention correlation identifiers and the current *`cluster_id` (canonical identifier)*, plus correlation metadata such as `context_id` as defined by the API contract.
+
+*Return a bounded slice, with continuation if needed.* If the result set is large, ERS returns a bounded slice and a server-minted `continuation_cursor` indicating that more results are available. The consumer may call refreshBulk again with that `continuation_cursor` to obtain the next slice.
+
+*Continue until complete.* The consumer repeats the continuation call until the response indicates there is no more data.
+
+refreshBulk is strictly read-only with respect to identity and clustering: it does not trigger resolution, re-resolution, curation, or any form of rebuild. Its only permissible state effect is advancing the exposure watermark for that `source_id` when a slice is successfully produced, so that the same updates are not repeatedly returned as new.
 
 *Key behavioural commitments shown*
 
 * refreshBulk is the primary synchronisation mechanism for downstream systems under mutable assignment semantics.
 * The operation is *read-only* with respect to placement decisions. It does not trigger engine work.
-* Responses are *bounded* and can be paged safely using a server-minted continuationCursor.
+* Responses are *bounded* and can be paged safely using a server-minted `continuation_cursor`.
 * The exposed canonical identity for each mention is the *latest authoritative cluster assignment* recorded by ERS.
 * Consumers must tolerate duplicates and re-ordering across calls, because upstream messaging is at-least-once and placements can change again while a bulk sync is in progress.
 
 *Authoritative state touched*
 
 * *Decision Store* (read): provides the current recorded placement per mention and the timestamps needed for delta computation.
-* *Delta tracking state (per originId)*: maintains the exposure watermark (lastNotificationDate) and is updated only on successful response production.
-No Canonical Entity Registry exists in ERS. The bulk response is derived directly from the latest decision records per mention. +
+* *Delta tracking state (per `source_id`)*: maintains the exposure watermark (`last_notification_date`) and is updated only on successful response production.
+
+No Canonical Entity Registry exists in ERS. The bulk response is derived directly from the latest decision records per mention.
 
 *Traceability*
 
-* *White Use Case(s):* UC-W3.
-* *Blue Use Case(s):* UC-B-1.3.
+* *White Use Case(s):* xref:AnnexeB-UseCases/ucw3.adoc#uc-w3[UC-W3].
+* *Blue Use Case(s):* xref:AnnexeB-UseCases/ucb13.adoc#uc-b1-3[UC-B1.3].
 * *ADRs:* ADR-A1N, ADR-A2N, ADR-C1N (identifier semantics, latest decision per mention, delta exposure, bounded responses).
 * *Contracts:* ERS refreshBulk API (owner: ERS, REST, normative).
 * *Detailed diagram artefact:* spine-C-refreshBulk.mmd (associated Mermaid artefact).

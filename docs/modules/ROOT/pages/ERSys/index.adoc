@@ -1,0 +1,80 @@
+= ERSys Overview
+:description: The Entity Resolution System (ERSys) assigns and maintains stable canonical identifiers for entity mentions, with a pluggable engine and human-in-the-loop curation.
+
+include::partial$shared/system-overview.adoc[leveloffset=+0]
+
+== System at a Glance
+
+An originator (an external system that submits entity descriptions) sends entity mentions through the main REST API.
+ERS coordinates resolution with the ERE over an asynchronous message queue, while curators interact through a separate curation REST API and curation web application.
+
+[mermaid]
+....
+flowchart LR
+    user([User / Originator])
+    curationApp[Curation Web Application]
+    curationApi[Curation REST API]
+    mainApi[Main REST API]
+    ers[ERS]
+    queue[(Message Queue)]
+    ere[ERE]
+
+    user --> curationApp
+    curationApp --> curationApi
+    curationApi --> ers
+    user --> mainApi
+    mainApi --> ers
+    ers --> queue
+    queue --> ere
+    ere --> queue
+....
+
+== How ERSys Works
+
+An *originator* — an external system that submits entity descriptions — sends *entity mentions* (RDF descriptions of real-world entities such as organisations or procurement procedures), and ERSys returns a stable canonical cluster identifier for each one.
+Mentions that describe the same real-world entity are assigned to the same cluster; the `cluster_id` is the durable reference downstream systems use.
+See the xref:AnnexeA-Glossary/index.adoc[Glossary] for the normative definitions of _originator_ and _entity mention_.
+
+Resolution is performed by an Entity Resolution Engine (ERE), a pluggable component that groups incoming mentions using similarity algorithms or machine learning.
+Each ERE may apply different algorithms or support different entity types.
+Communication between ERS and any ERE is asynchronous: requests and responses flow through a shared message queue (Redis), which decouples the two components and allows the ERE to operate independently of ERS request timelines.
+
+ERS orchestrates the interaction, enforces response time budgets, and persists the latest assignment per mention.
+
+Entity descriptions are submitted as RDF, the initial representation format; the system is designed to be extended to other formats as needed.
+
+Cluster identifiers are stable — once created, a `cluster_id` is never reused for a different cluster.
+Assignment, however, can change: if resolution quality improves or a curator recommends a different grouping, a mention may be reassigned to a better-fitting cluster.
+This keeps downstream references durable while allowing the system to improve over time.
+
+When the ERE does not respond within the configured time budget, ERS issues a deterministically derived provisional identifier immediately so that downstream processing can continue without blocking.
+The mention is queued for asynchronous resolution; the provisional assignment is replaced once the ERE responds.
+
+== Authority Model
+
+The ERE is the sole authority for clustering.
+Curator actions (accept, reject, assign) are recorded and forwarded to the ERE as recommendations — they are evidence, not commands.
+The ERE determines the final cluster assignment, and ERS projects and exposes the latest authoritative outcome returned by the ERE.
+
+See xref:ERSArchitecture/decisions.adoc[Architectural Decisions] for the normative statements on the ERS/ERE authority boundary.
+
+== Scope & Boundaries
+
+ERSys assigns and maintains canonical identifiers for entity mentions. Its responsibilities stop at the following boundaries:
+
+* Identity assignment only — it does not produce golden records or merge attribute values across mentions.
+* Resolution of submitted data as-is — it does not clean, normalise, or enrich incoming entity data.
+* Identifier stewardship — it does not maintain an authoritative entity registry.
+* Role separation for curation — it does not provide advanced RBAC beyond the role separation required by the curation use cases.
+* Orchestration of the ERE — it does not manage the machine learning or model lifecycle inside an ERE.
+
+== Where to Start
+
+include::partial$shared/role-routing.adoc[leveloffset=+0]
+
+== Related Documentation
+
+* xref:ERSArchitecture/index.adoc[ERS Architecture] — system scope, actors, core capabilities, behaviour spines
+* xref:ERSArchitecture/conceptual-model.adoc[Conceptual Model] — information objects, identity rules, authority boundaries
+* xref:AnnexeA-Glossary/index.adoc[Glossary] — normative term definitions
+* xref:ERSys/getting-started.adoc[Getting Started] — step-by-step first resolution request and curation workflow
