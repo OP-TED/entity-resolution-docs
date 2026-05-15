@@ -26,12 +26,12 @@
 ** xref:api-docs/curation/index.adoc[Curation REST API]
 
 * Entity Resolution Engine (ERE)
-** xref:ERS-ERE-Contract/index.adoc[Entity Resolution Service–Engine Technical Contract (ERS–ERE)]
+** xref:ERS-ERE-Contract/index.adoc[ERS-ERE Technical Contract]
 *** xref:ERS-ERE-Contract/introduction.adoc[Introduction]
 *** xref:ERS-ERE-Contract/interface.adoc[Interface Specification]
 *** xref:ERS-ERE-Contract/supplement.adoc[Supplement]
 ** xref:ERE/ere-dev-guide.adoc[Developer Guide]
-** xref:ERE/ere-reference-impl.adoc[Basic Entity Resolution Engine Reference Implementation]
+** xref:ERE/ere-reference-impl.adoc[Basic ERE Reference Implementation]
 
 * xref:UserGuide/curation-guide-overview.adoc[Curation App (User Guide)]
 ** xref:UserGuide/curation-guide-decisions.adoc[Decisions Review]
