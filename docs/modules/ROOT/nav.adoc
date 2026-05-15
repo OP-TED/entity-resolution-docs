@@ -3,30 +3,32 @@
 * ERSys
 ** xref:ERSys/index.adoc[Overview]
 ** xref:ERSys/getting-started.adoc[Getting Started]
-
-* xref:ERSArchitecture/index.adoc[ERS Architecture]
-
-* ERS
+** xref:ERSys/examples.adoc[Examples]
 ** xref:ERSArchitecture/index.adoc[Architecture]
 *** xref:ERSArchitecture/introduction.adoc[Introduction]
 *** xref:ERSArchitecture/scope.adoc[Scope]
 *** xref:ERSArchitecture/actors.adoc[Actors]
-*** xref:ERSArchitecture/decissions.adoc[Decisions]
+*** xref:ERSArchitecture/decisions.adoc[Decisions]
 *** xref:ERSArchitecture/core-capabilities.adoc[Core Capabilities]
 *** xref:ERSArchitecture/behaviour-spines.adoc[Behaviour Spines]
 *** xref:ERSArchitecture/conceptual-model.adoc[Conceptual Model]
 *** xref:ERSArchitecture/system-context.adoc[System Context]
+*** xref:ERSArchitecture/dependecy-inventory.adoc[Dependency Inventory]
 *** xref:ERSArchitecture/deployment-architecture.adoc[Deployment Architecture]
 ** xref:AnnexeB-UseCases/index.adoc[Use Cases]
-** API Reference
-*** xref:api-docs/ers/index.adoc[ERS REST API]
-*** xref:api-docs/curation/index.adoc[Curation REST API]
+
+* ERS
+** xref:ERS/capabilities.adoc[Capabilities]
+** xref:ERS/configuration.adoc[Configuration Reference]
+** xref:api-docs/api-integration-guide.adoc[API Integration Guide]
+** xref:api-docs/ers/index.adoc[ERS REST API]
+** xref:api-docs/curation/index.adoc[Curation REST API]
 
 * ERE
-** xref:ERS-ERE-Contarct/index.adoc[ERS-ERE Technical Contract]
-*** xref:ERS-ERE-Contarct/introduction.adoc[Introduction]
-*** xref:ERS-ERE-Contarct/interface.adoc[Interface Specification]
-*** xref:ERS-ERE-Contarct/suppliment.adoc[Supplement]
+** xref:ERS-ERE-Contract/index.adoc[ERS-ERE Technical Contract]
+*** xref:ERS-ERE-Contract/introduction.adoc[Introduction]
+*** xref:ERS-ERE-Contract/interface.adoc[Interface Specification]
+*** xref:ERS-ERE-Contract/suppliment.adoc[Supplement]
 ** xref:ERE/ere-dev-guide.adoc[Developer Guide]
 ** xref:ERE/ere-reference-impl.adoc[Basic ERE Reference Implementation]
 

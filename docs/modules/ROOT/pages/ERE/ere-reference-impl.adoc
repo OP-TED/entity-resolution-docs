@@ -2,7 +2,7 @@
 :description: A reference implementation of the ERE that conforms to the ERS–ERE Technical Contract.
 
 This page describes the *Basic Entity Resolution Engine* — a reference implementation of the
-xref:ERS-ERE-Contarct/index.adoc[ERS–ERE Technical Contract]. It is provided as a concrete,
+xref:ERS-ERE-Contract/index.adoc[ERS–ERE Technical Contract]. It is provided as a concrete,
 deployable example that shows one way to build a conformant ERE.
 
 
@@ -10,7 +10,7 @@ deployable example that shows one way to build a conformant ERE.
 ====
 This page is *non-normative*. It describes one implementation, not the only
 possible implementation. The sole authoritative specification is the
-xref:ERS-ERE-Contarct/index.adoc[ERS–ERE Technical Contract].
+xref:ERS-ERE-Contract/index.adoc[ERS–ERE Technical Contract].
 ====
 
 The source code is available in the
@@ -230,9 +230,9 @@ Runs in-memory during development; file-backed in production.
 
 == See Also
 
-* xref:ERS-ERE-Contarct/index.adoc[ERS–ERE Technical Contract] — normative specification of
+* xref:ERS-ERE-Contract/index.adoc[ERS–ERE Technical Contract] — normative specification of
   messages, idempotency, and canonical identifier derivation.
-* xref:ERS-ERE-Contarct/interface.adoc[Interface Specification] — channel names and message
+* xref:ERS-ERE-Contract/interface.adoc[Interface Specification] — channel names and message
   formats (`EntityMentionResolutionRequest`, `EntityMentionResolutionResponse`, `EREErrorResponse`).
 * xref:ERE/ere-dev-guide.adoc[ERE Developer Guide] — practical guidance for implementers building
   their own ERE.

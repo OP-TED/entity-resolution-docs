@@ -63,7 +63,7 @@ The deployment makes network segmentation explicit. The external network exposes
 Persistence services and message infrastructure are not directly reachable from the external network. ERE has no externally exposed control surface. All clustering communication occurs through asynchronous messaging. +
 This segmentation enforces a clean trust model at runtime. Clients interact with projection. Engines perform clustering. Infrastructure mediates transport without altering authority.
 
-=== 11.3 Deployment variability and evolution
+=== 11.4 Deployment variability and evolution
 
 The deployment architecture described in this section is intended as a *reference baseline*. It supports reproducibility, clear responsibility boundaries, and traceable behaviour across interfaces. As operational requirements evolve, this deployment may be complemented by additional profiles, such as multi-node deployments, high-availability configurations, or cloud-native orchestrations using managed services. +
 In particular, the deployment of the Entity Resolution Engine is expected to vary across implementations. ERSys does not impose constraints on the internal deployment model of ERE components beyond adherence to the defined asynchronous interface and message semantics. +

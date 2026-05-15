@@ -6,12 +6,12 @@ This document specifies the technical contract governing the integration between
 |===
 | Section | Purpose
 
-| xref:ROOT:ERS-ERE-Contarct/introduction.adoc[Introduction]
+| xref:ROOT:ERS-ERE-Contract/introduction.adoc[Introduction]
 | Purpose, scope, ERE responsibilities, and engine replaceability rules.
 
-| xref:ROOT:ERS-ERE-Contarct/interface.adoc[Interface Specification]
+| xref:ROOT:ERS-ERE-Contract/interface.adoc[Interface Specification]
 | Messaging channels, request types, and their delivery semantics.
 
-| xref:ROOT:ERS-ERE-Contarct/suppliment.adoc[Supplement]
+| xref:ROOT:ERS-ERE-Contract/suppliment.adoc[Supplement]
 | Formal LinkML data model for all message types, with generated PlantUML schema diagram.
 |===

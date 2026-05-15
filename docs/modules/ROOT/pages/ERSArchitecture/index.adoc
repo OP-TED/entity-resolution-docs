@@ -15,7 +15,7 @@ This document establishes the baseline architecture of the Entity Resolution Sys
 | xref:ROOT:ERSArchitecture/actors.adoc[Actors]
 | External actors, roles, and their responsibility boundaries.
 
-| xref:ROOT:ERSArchitecture/decissions.adoc[Decisions]
+| xref:ROOT:ERSArchitecture/decisions.adoc[Decisions]
 | Binding architectural principles and invariants that constrain all implementations.
 
 | xref:ROOT:ERSArchitecture/business-context.adoc[Business Context]

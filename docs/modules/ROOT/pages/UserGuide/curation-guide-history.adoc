@@ -56,7 +56,7 @@ Each item shows the action type (colour-coded badge), the entity name, and when 
 
 Select any item to load its detail in the right panel.
 
-image::curation/action-list.png[Action list with type badges]
+image::curation/action-list.png[Action list with type badges,50%]
 
 == Action Detail
 

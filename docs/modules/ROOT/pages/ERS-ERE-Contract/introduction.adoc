@@ -70,7 +70,7 @@ else Accepted request (schema valid)
   ERS ->> ERS: Update governed resolution decision<br/>and canonical projection (idempotent)
 end
 
-%% Note: ERE outputs are proposals only; ERS remains the sole authority for canonical status via decisions.
+%% Note: ERE is the sole authority for clustering outcomes; ERS records and exposes the latest authoritative result.
 
 ----
 

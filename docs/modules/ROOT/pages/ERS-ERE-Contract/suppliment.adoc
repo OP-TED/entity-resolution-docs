@@ -9,11 +9,11 @@ image::EreServiceSchema.png[]
 
 === LinkML Code
 
-The LinkML source files is https://github.com/OP-TED/entity-resolution-spec/blob/0.2.0-rc.2/resources/schemas/ere-service-schema-v0.1.0.yaml[on github]. From this, we auto-generate:
+The LinkML source files is https://github.com/OP-TED/entity-resolution-spec/blob/1.0.0-rc.1/resources/schemas/ere-service-schema-v0.1.0.yaml[on github]. From this, we auto-generate:
 
-* https://github.com/OP-TED/entity-resolution-spec/blob/0.2.0-rc.2/docs/schema/README.md[Navigable docs]
-* https://github.com/OP-TED/entity-resolution-spec/blob/0.2.0-rc.2/resources/schemas/er-schema-v0.1.0.json[JSON schema], which we plan to use in tasks like defining REST APIs (i.e., import in OpenAPI schemas)
-* https://github.com/OP-TED/entity-resolution-spec/blob/0.2.0-rc.2/src/erspec/models/ere.py[Python/Pydantic definitions], which we plan to use to define the ERE service interfaces and implementations.
+* https://github.com/OP-TED/entity-resolution-spec/blob/1.0.0-rc.1/docs/schema/README.md[Navigable docs]
+* https://github.com/OP-TED/entity-resolution-spec/blob/1.0.0-rc.1/resources/schemas/er-schema-v0.1.0.json[JSON schema], which we plan to use in tasks like defining REST APIs (i.e., import in OpenAPI schemas)
+* https://github.com/OP-TED/entity-resolution-spec/blob/1.0.0-rc.1/src/erspec/models/ere.py[Python/Pydantic definitions], which we plan to use to define the ERE service interfaces and implementations.
 == Functional requirement coverage matrix
 
 The following table provides a bigger picture by showing how the designed contract between the ERS and the ERE satisfies the functional requirements specified for the entire system in the Product Requirements Document. It allows the tracing of requirement fulfilment and shows how they are handled in the ERS–ERE communication context.
@@ -35,7 +35,7 @@ The following table provides a bigger picture by showing how the designed contra
 
 == Examples and Tests
 
-Examples of ERE message exchanges https://github.com/OP-TED/entity-resolution-spec/blob/0.2.0-rc.2/test/test_data/analysis/ere-test-cases.md[are provided in the ERS GitHub repository]. These are mock-up cases based on https://github.com/OP-TED/entity-resolution-spec/blob/0.2.0-rc.2/test/test_data[collected real data]. +
+Examples of ERE message exchanges https://github.com/OP-TED/entity-resolution-spec/blob/1.0.0-rc.1/test/test_data/analysis/ere-test-cases.md[are provided in the ERS GitHub repository]. These are mock-up cases based on https://github.com/OP-TED/entity-resolution-spec/blob/1.0.0-rc.1/test/test_data[collected real data]. +
 A summary of the available examples:
 
 * Example 1: Simple resolution case -- Organisations with Minor detail variations

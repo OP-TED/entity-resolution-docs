@@ -7,18 +7,22 @@ so that downstream consumers have a consistent identity even as resolution quali
 
 == How ERSys Works
 
-ERSys separates three distinct layers that are often conflated in data integration projects:
+Originators submit entity mentions — RDF descriptions of real-world entities such as organisations or procurement procedures — and ERSys returns a stable canonical cluster identifier for each one.
+Mentions that describe the same real-world entity are assigned to the same cluster; the `clusterId` is the durable reference downstream systems use.
 
-* *Real-world entities* — organisations, procedures, and other domain objects that exist independently of ERSys.
-  ERSys does not store them, version them, or model them. It processes descriptions of them.
-* *Entity mentions* — immutable information artefacts submitted by originators, each identified by a `(sourceId, requestId, entityType)` tuple.
-  A mention describes an entity; it does not decide equivalence.
-* *Clusters* — the identity constructs managed inside the Entity Resolution Engine (ERE).
-  A `clusterId` is the canonical identifier exposed to clients. Cluster IDs are stable — once created they are never reused — but assignment can change as resolution quality improves.
+Resolution is performed by an Entity Resolution Engine (ERE), a pluggable component that groups incoming mentions using similarity algorithms or machine learning.
+Different ERE implementations can be used, each potentially applying different resolution algorithms or handling different entity types.
+Communication between ERS and any ERE is asynchronous: requests and responses flow through a shared message queue (Redis), which decouples the two components and allows the ERE to operate independently of ERS request timelines.
 
-ERS follows an *engine-authoritative model*: the ERE determines all clustering outcomes.
-ERS orchestrates interaction, enforces time budgets, maintains the projection of the latest cluster assignment per mention, and exposes canonical identifiers through stable APIs.
-When the ERE does not respond within the configured time window, ERS issues a deterministically derived provisional `clusterId` so that downstream processing can continue.
+ERS orchestrates the interaction, enforces response time budgets, and persists the latest assignment per mention.
+The ERE is the sole authority for clustering: curator feedback is forwarded to the ERE as a recommendation, not applied directly.
+
+Cluster identifiers are stable — once created, a `clusterId` is never reused for a different cluster.
+Assignment, however, can change: if resolution quality improves or a curator recommends a different grouping, a mention may be reassigned to a better-fitting cluster.
+This keeps downstream references durable while allowing the system to improve over time.
+
+When the ERE does not respond within the configured time budget, ERS issues a deterministically derived provisional identifier immediately so that downstream processing can continue without blocking.
+The mention is queued for asynchronous resolution; the provisional assignment is replaced once the ERE responds.
 
 == What ERSys Does NOT Do
 
@@ -37,7 +41,7 @@ Curator actions (accept, reject, assign) are recorded and forwarded to the ERE a
 The ERE determines the final cluster assignment.
 ERS projects and exposes the latest authoritative outcome returned by the ERE.
 
-See xref:ERSArchitecture/decissions.adoc[Architectural Decisions] (ADR-B1N, B2N, C1N) for the normative statements.
+See xref:ERSArchitecture/decisions.adoc[Architectural Decisions] (ADR-B1N, B2N, C1N) for the normative statements.
 
 == Where to Start
 

@@ -19,26 +19,47 @@ ERSys is composed of three main components:
 * *Entity Resolution Engine (ERE)* — the authoritative clustering component that decides whether two entity mentions refer to the same real-world entity. ERSys is designed to work with any conformant ERE implementation.
 * *Curation Web Application* — supports human-in-the-loop review and re-evaluation of resolution decisions, with a full audit trail.
 
-The following sections describe each documentation area in detail.
+== ERSys
 
-== New to ERSys?
-
-xref:ERSys/index.adoc[Overview] — the identity model, ERS vs ERE responsibilities, and role-based entry points. +
-xref:ERSys/getting-started.adoc[Getting Started] — prerequisites, minimal configuration, two API workflow walkthroughs, and the full-cycle demo script.
-
-== ERS
-
-Documentation of the Entity Resolution Service — its architecture, supported use cases, and REST API.
+Platform-level documentation: concepts, onboarding, architecture, and use cases.
 
 [cols="2,4"]
 |===
 | Section | Purpose
+
+| xref:ERSys/index.adoc[Overview]
+| Identity model, ERS vs ERE responsibility split, and role-based entry points.
+
+| xref:ERSys/getting-started.adoc[Getting Started]
+| Prerequisites, minimal configuration, two API workflow walkthroughs, and the full-cycle demo script.
+
+| xref:ERSys/examples.adoc[Examples]
+| Worked request and response examples for the ERS REST API, Curation REST API, and entity type configuration.
 
 | xref:ERSArchitecture/index.adoc[Architecture]
 | System scope, actors, core capabilities, behaviour spines, conceptual model, and deployment architecture.
 
 | xref:AnnexeB-UseCases/index.adoc[Use Cases]
 | Catalogue of business use cases covering worker and back-office workflows.
+
+|===
+
+== ERS
+
+Documentation for the Entity Resolution Service — what it does, how it is configured, and its REST APIs.
+
+[cols="2,4"]
+|===
+| Section | Purpose
+
+| xref:ERS/capabilities.adoc[Capabilities]
+| Full list of ERS operational capabilities: resolution, lookup, delta sync, time budgets, curation integration, audit, and pluggable ERE architecture.
+
+| xref:ERS/configuration.adoc[Configuration Reference]
+| Overview of ERS configuration areas (runtime variables, entity type mapping, ERE configuration) and pointers to the full references.
+
+| xref:api-docs/api-integration-guide.adoc[API Integration Guide]
+| Versioning policy, authentication, pagination, and error handling conventions that apply across both REST APIs.
 
 | xref:api-docs/ers/index.adoc[ERS REST API]
 | Auto-generated reference for the Entity Resolution Service REST API — resolution, lookup, and refresh endpoints.
@@ -56,7 +77,7 @@ Documentation for developers implementing an Entity Resolution Engine (ERE) and 
 |===
 | Section | Purpose
 
-| xref:ERS-ERE-Contarct/index.adoc[ERS-ERE Technical Contract]
+| xref:ERS-ERE-Contract/index.adoc[ERS-ERE Technical Contract]
 | Message-based interfaces, idempotent processing rules, and canonical identifier semantics for ERS–ERE communication.
 
 | xref:ERE/ere-dev-guide.adoc[Developer Guide]

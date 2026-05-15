@@ -21,7 +21,7 @@ Each item shows the entity name, its confidence and similarity scores (colour-co
 
 Select any item to load its detail in the right panel.
 
-image::curation/decision-list.png[Decision list with score badges]
+image::curation/decision-list.png[Decision list with score badges,50%]
 
 Score colour coding:
 
@@ -78,11 +78,11 @@ Options: _Created At (Newest/Oldest)_, _Updated At (Newest/Oldest)_, _Confidence
 Four toggles in the user pop-up let you suppress the confirmation dialogs for Accept, Reject, and Assign actions, or disable all of them at once.
 When a toggle is on, clicking the action button (or pressing the keyboard shortcut) applies the action immediately, without a confirmation step.
 
-image::curation/skip-confirmation-toggles.png[Skip-confirmation toggles]
+image::curation/skip-confirmation-toggles.png[Skip-confirmation toggles,90%]
 
 The preferences can be also set during an action by checking the *Don't show again* box in the confirmation dialog.
 
-image::curation/confirmation-dialog.png[Skip-confirmation in confirmation dialog]
+image::curation/confirmation-dialog.png[Skip-confirmation in confirmation dialog,80%]
 
 The preferences are only active during the current session.
 

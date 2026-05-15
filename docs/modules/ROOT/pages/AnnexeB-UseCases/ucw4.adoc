@@ -15,7 +15,7 @@ The statistics provide high-level indicators derived from the current operationa
 Statistics may include, per entity type and optionally per time window:
 
 * total number of Entity Mentions,
-* total number of canonical clusters (cluster identifiers) in the decissions store,
+* total number of canonical clusters (cluster identifiers) in the decisions store,
 * number of recent resolution requests (e.g last day),
 
 All statistics are aggregated counts. No individual Entity Mention, cluster, or decision details are exposed through this use case. +

@@ -75,11 +75,11 @@ The following is an example from the LinkML code (see ‘#heading=h.zc69jntu6wnj
     "content_type": "text/turtle"
   },
   "timestamp": "2026-01-14T12:34:56Z",
-  // As said, we need this internal ID and it can be auto-generated (eg, with UUIDs)
-  "ere_request_id": "324fs3r345vx:01"
+  "ere_request_id": "324fs3r345vx:01"  <1>
 }
-
 ----
+<1> `ere_request_id` disambiguates multiple requests for the same entity mention; auto-generate with a UUID.
+
 As you can see, the request contains an entity mention, which in turn, has a composite identifier. +
 Note on +ere_request_id+: this is an ERE-specific field, which the ERE needs to match responses to requests. In fact, we might have two requests containing the same entity mention and hence, this disambiguation field is needed too. +
 For the purposes of idempotent handling, a resolution request is correlated by its entity mention identifier together with any applicable recommended placements (such as rejected canonical identifiers).
@@ -148,15 +148,14 @@ This is an example of such request: +
     "content": "epd:ent005 a org:Organization; ...   cccev:telephone \"+44 1924306780\" .",
     "content_type": "text/turtle"
   },
-  proposed_cluster_ids: [
+  "proposed_cluster_ids": [
     "324fs3r345vx-aa32wa", "324fs3r345vx-bb45we"
-  ]
+  ],
   "timestamp": "2026-01-14T12:34:56Z",
-  // As said, we need this internal ID and it can be auto-generated (eg, with UUIDs)
-  "ere_request_id": "324fs3r345vx:01"
+  "ere_request_id": "324fs3r345vx:01"  <1>
 }
-
 ----
+<1> `ere_request_id` disambiguates multiple requests for the same entity mention; auto-generate with a UUID.
 Whether the order of elements in +proposed_cluster_ids +is relevant or not depends on the ERE implementation (i.e., it might decide to give more importance to the top elements).
 
 === ERE timeouts and singleton proposals
@@ -167,9 +166,9 @@ An ERE client might place just one element in +proposed_cluster_ids+ and that mi
 === Resolution Request with Rejections
 
 An entity resolution request can include the parameter +excludedClusterIds+, to indicate that a previous proposed clustering is not deemed valid and alternative resolutions are requested. One use case for this operation is to account for a negative curator’s decision on an automatic alignment. +
-This is an example of request with rejections: +
-{ +
+This is an example of request with rejections:
 ----
+{
   "type": "EntityMentionResolutionRequest",
   "entity_mention": {
     "identifier": {
@@ -230,8 +229,7 @@ An ERE request of any type (resolution, rebuild) might fail, due to problems lik
   "errorType": "ere.exceptions.MalformedRequestError",
   "errorTitle": "The entity data is missing in the request",
   "errorDetail": "The 'entity' attribute is required in EntityResolutionRequest message",
-  // Optional and not recommended for production use
-  "errorTrace": "Traceback (most recent call last):\n  File \"/app/ere/service.py\",
-     line 45, in process_request\n..."
+  "errorTrace": "Traceback (most recent call last):\n  File \"/app/ere/service.py\",\n     line 45, in process_request\n..."  <1>
 }
 ----
+<1> `errorTrace` is optional and should not be included in production use.

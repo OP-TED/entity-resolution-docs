@@ -1,3 +1,6 @@
+= ERSys Architecture
+:description: Normative baseline architecture for the Entity Resolution System.
+
 == 1. Introduction and reading guide
 
 === 1.1 Purpose of this document

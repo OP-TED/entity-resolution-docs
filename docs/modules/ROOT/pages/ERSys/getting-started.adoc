@@ -7,27 +7,23 @@ This guide walks through a first resolution request via the REST API and a curat
 
 === Run the full stack
 
-ERSys requires three services running together: ERS, ERE, and the Curation Web App.
-Each repository contains installation and startup instructions in its README:
+ERSys requires three services running together: ERS, an ERE such as the Basic ERE, and the Entity Resolution Curation web application.
+Each repository contains installation, startup and service management instructions in its README:
 
-* https://github.com/OP-TED/entity-resolution-service[entity-resolution-service] — ERS API + Curation API + data stores
-* https://github.com/OP-TED/entity-resolution-engine-basic[entity-resolution-engine-basic] — reference ERE implementation
+* https://github.com/OP-TED/entity-resolution-service[entity-resolution-service] — ERS core, Resolution and Curation APIs
+* https://github.com/OP-TED/entity-resolution-engine-basic[entity-resolution-engine-basic] — Basic ERE implementation
 * https://github.com/OP-TED/entity-resolution-service-webapp[entity-resolution-service-webapp] — Curation Web App
 
-=== Minimal configuration
 
-The environment variable reference is maintained in the ERS repository:
-https://github.com/OP-TED/entity-resolution-service/blob/develop/docs/configuration.md[docs/configuration.md].
-
-Local development defaults:
+By default, locally run services are available at the following URLs:
 
 [cols="1,2"]
 |===
-| Variable | Default
+| Service | Default
 
-| `ERS_API_URL` | `http://localhost:8001`
-| `CURATION_API_URL` | `http://localhost:8000`
-| `REDIS_HOST` | `localhost`
+| ERS API | `http://localhost:8001`
+| Curation API | `http://localhost:8000`
+| Curation web app | `http://localhost:8080`
 |===
 
 == Workflow 1 — Submit a Mention and Retrieve Its Cluster Identifier
@@ -43,8 +39,8 @@ If the ERE has not yet processed the mention, this may be a provisional identifi
 
 . *Poll for the confirmed identifier* — `+GET http://localhost:8001/api/v1/lookup?source_id={source_id}&request_id={request_id}&entity_type=ORGANISATION+`
 +
-Poll until `cluster_reference.cluster_id` is populated.
-Once it is, the cluster identifier is authoritative — assigned by the ERE.
+Poll until the response `status` is `CANONICAL`.
+A `PROVISIONAL` identifier is returned immediately and is valid for downstream use, but will be superseded once the ERE responds.
 
 NOTE: A cluster identifier is stable (never reused for a different cluster)
 but cluster *assignment* can change if resolution quality improves or a curator intervenes.
@@ -119,7 +115,7 @@ poetry run python test/demo/demo_full_cycle.py --skip-curation
 The README in that directory describes expected output and how to reset ERE state between runs.
 
 NOTE: The curation step of the demo script requires the `inject_ere_response.py` helper located in
-https://github.com/meaningfy-ws/entity-resolution-service/tree/develop/src/scripts[src/scripts] of the ERS repository.
+https://github.com/OP-TED/entity-resolution-service/tree/develop/src/scripts[src/scripts] of the ERS repository.
 Use `--skip-curation` to bypass this step.
 
 == Where to Go Next
