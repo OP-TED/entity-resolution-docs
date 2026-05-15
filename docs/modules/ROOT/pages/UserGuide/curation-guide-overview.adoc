@@ -1,44 +1,78 @@
 = Curation Web Application — User Guide
-:description: User guide for the Entity Resolution curation web application.
+:description: User guide for curators and administrators using the Entity Resolution curation web application.
 
-This document provides an overview of the Curation Web Application and serves as a guide for curators and administrators to understand its purpose, navigate its pages, and use its features.
+This guide is the curator's manual for the Curation Web Application: a graphical interface for reviewing entity resolution decisions and recording your feedback on them.
 
-The Curation Web Application offers a graphical user interface which curators use to review entity resolution decisions produced by the Entity Resolution Engine (ERE) and record their feedback.
+The application is where you, as a curator, inspect the matches proposed by the system, decide whether each one is correct, and record your verdict. Your feedback guides the automatic resolution process — a human-in-the-loop step that improves the quality of future decisions.
+
+== Start Here
+
+If you are new to the application, read the sections in this order:
+
+. *Logging In* — get into the application (below).
+. xref:UserGuide/curation-guide-decisions.adoc[Decisions Queue] — your main workspace: review pending matches and record feedback.
+. xref:UserGuide/curation-guide-history.adoc[Action History] — look back at past curatorial actions.
+. xref:UserGuide/curation-guide-admin.adoc[User Management] — manage accounts (superusers only).
+
+== Logging In
+
+Access to the application requires a verified account that an administrator has created for you.
+
+// TODO: add screenshot — image::curation/login.png[Curation application login screen with email and password fields] — asset to be supplied.
+
+To log in:
+
+. Navigate to the application URL provided by your administrator.
+. Enter your *email* and *password*.
+. Click *Sign In*.
+. On success you are taken to the Decisions Queue.
+
+=== If You Cannot Log In
+
+Sign-in can fail for two distinct reasons:
+
+[cols="1,3",options="header"]
+|===
+| Situation | What to do
+
+| *Wrong credentials*
+| The email or password you entered does not match an account. Check for typos and try again. If you have forgotten your password, ask an administrator to set a new one for you.
+
+| *Account not yet verified*
+| Your credentials are correct but the page returns you to the login screen. Your account exists but has not been verified for curation access. Contact your administrator to have your account verified.
+|===
+
+See also xref:UserGuide/curation-guide-overview.adoc#troubleshooting[Troubleshooting] below.
 
 == Purpose
 
-The application plays an important role in the Entity Resolution System, allowing curators to inspect and evaluate automatic entity resolution decisions.
-It enables a human-in-the-loop approach and guides the automatic resolution process.
+The application gives curators a way to inspect and evaluate the automatic entity resolution decisions produced by the resolution engine. It supports a human-in-the-loop approach: curator feedback is fed back into the system to guide future automatic resolution.
 
 == Capabilities
 
-The application provides the following capabilities:
+The application lets you:
 
 * Browse and review pending decisions produced by the resolution engine.
 * Record curator feedback on proposed matches.
 * View the history of past curatorial actions.
-* Display simple statistics about the curation process.
-* Manage user accounts and permissions (admin only).
+* See queue counters in the top bar (the number of decisions waiting and reviewed).
+* Manage user accounts and permissions (superusers only).
 
-== Workflow
+== How a Review Cycle Works
 
-The curation cycle begins when the resolution engine produces a decision and ends when a curator records their verdict.
-The following steps describe a typical review cycle:
+From your point of view as a curator, a review cycle runs as follows:
 
-. The resolution engine proposes a cluster match for an entity mention and attaches *confidence* and *similarity scores* reflecting its certainty.
-. All decisions are surfaced in the Decisions Queue for manual review.
-. The curator examines the proposed match — comparing the entity mention against the candidate cluster — and records their feedback:
-  * *Accept* the top candidate,
-  * *Select* an alternative cluster, or
-  * *Reject* all candidates.
-. The recorded feedback is stored and used by the engine when re-evaluating future decisions.
-. The curator may also browse the Action History to review past decisions and their outcomes.
+. A decision waiting for review appears in the Decisions Queue. Each decision is a proposed cluster match for an entity mention, with *confidence* and *similarity* scores reflecting the engine's certainty.
+. You open a decision and compare the entity mention against the proposed cluster.
+. You record your verdict — *Accept* the top candidate, *Select* an alternative cluster, or *Reject* all candidates.
+. Your feedback is stored and forwarded to the engine, which uses it when re-evaluating future decisions.
+. At any time you can open the Action History to review past decisions and their outcomes.
 
 == Application Pages
 
-The application consists of the following pages that are described in detail in the linked sections.
+The application consists of the following pages, each described in its own section.
 
-[cols="1,3"]
+[cols="1,3",options="header"]
 |===
 | Page | Purpose
 
@@ -57,30 +91,20 @@ Available to superusers only.
 
 == Top Application Bar
 
-The top bar is visible on all pages and provides global navigation. It consists of three main areas:
+The top bar is visible on all pages and provides global navigation. It has three areas:
 
-* *Left* — navigation menu with links to the main sections of the application (Decisions, History; Admin for superusers only).
-* *Center* — simple statistics about the current decision queue.
-* *Right* — user icon with dropdown menu for accessing the user profile and logging out.
+* *Left* — navigation menu with links to the main sections (Decisions, History; Admin for superusers only).
+* *Center* — counters for the current decision queue (how many decisions are waiting and reviewed).
+* *Right* — user icon with a dropdown for the user profile and logout.
 
 image::curation/application-bar.png[Application top bar]
 
-
-== Authentication
-
-Access to the application requires a verified account provisioned by an administrator. To log in:
-
-. Navigate to the application URL.
-. Enter your *email* and *password* and click *Sign In*.
-. On success you are redirected to the Decisions Queue.
-. If the page redirects back to login, contact your administrator — your account may not be verified yet.
-
 == Keyboard Shortcuts
 
-The application supports keyboard shortcuts to facilitate efficient navigation and decision review.
-Keyboard shortcuts are available on the *Decisions* page only.
+The application supports keyboard shortcuts for faster navigation and review.
+Shortcuts are available on the *Decisions* page only.
 
-[cols="1,3"]
+[cols="1,3",options="header"]
 |===
 | Key | Action
 
@@ -97,4 +121,32 @@ Keyboard shortcuts are available on the *Decisions* page only.
 | Reject the currently displayed decision.
 |===
 
-NOTE: Shortcuts are disabled when keyboard focus is inside a text input or text area (e.g., the Search box).
+NOTE: Shortcuts are disabled when keyboard focus is inside a text input or text area (for example, the Search box).
+
+[#troubleshooting]
+== Troubleshooting
+
+Common situations curators meet, and what to do about them:
+
+[cols="1,3",options="header"]
+|===
+| Situation | What it means and what to do
+
+| Login fails with wrong credentials
+| The email or password is incorrect. Re-check and retry; ask an administrator to reset your password if needed.
+
+| Login returns to the login screen
+| Your account is not yet verified for curation access. Contact your administrator to have it verified.
+
+| The decision queue is empty
+| There are no decisions matching the active filters. Clear or widen the filters; if the list is still empty, there is nothing pending to review right now.
+
+| An action cannot be recorded
+| Another user may have already reviewed the same decision, or it is no longer pending. Refresh the list and continue with the next decision.
+
+| You cannot reach Decisions or History
+| Your account may be verified but not active, or not verified at all. Contact your administrator.
+
+| An administrator action is rejected
+| The system protects the last active administrator. See xref:UserGuide/curation-guide-admin.adoc[User Management].
+|===

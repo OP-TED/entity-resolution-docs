@@ -1,10 +1,30 @@
 = Action History
 :description: How to browse and inspect past curatorial actions in the Curation Web Application.
 
-The *History* page provides a read-only audit trail of all curatorial actions taken by all users.
-Use it to verify past feedback, investigate discrepancies, or review a colleague's work. This page has a similar layout to the Decisions page.
+The *History* page is a read-only audit trail of all curatorial actions taken by all users.
+Use it to verify past feedback, investigate discrepancies, or review a colleague's work.
+
+The page is laid out like the xref:UserGuide/curation-guide-decisions.adoc[Decisions Queue]: a filterable list on the left and a detail area on the right. Nothing on this page can be changed — it only displays what has already happened.
 
 image::curation/history-page.png[Full History page]
+
+== Common Tasks
+
+=== Verify Past Feedback
+
+To check how a particular decision was reviewed:
+
+. Use the *Search* and *Action* / *User* filters to narrow the list.
+. Select the action you want to inspect.
+. Read the Action Detail to see the entity mention, the cluster the curator selected, and all candidates that were presented at the time.
+
+=== Investigate a Discrepancy
+
+To look into a result that seems wrong:
+
+. Filter by *User* and/or *Action* to focus on the relevant actions.
+. Select each candidate action in turn.
+. In the Action Detail, compare the selected cluster against the other candidates that were available at the time, and confirm which feedback was recorded.
 
 == User Interface Overview
 
@@ -19,7 +39,7 @@ The page is divided into three main sections:
 The filter bar lets you narrow down the reviewed decision list by curator action, user, and sort order.
 All filters can be combined and take effect instantly.
 
-[cols="1,3"]
+[cols="1,3",options="header"]
 |===
 | Filter | Description
 
@@ -40,18 +60,18 @@ image::curation/history-filter-bar.png[History filter bar with Action type and U
 The left panel lists all actions matching the active filters. Each item represents a reviewed decision and the feedback recorded by the curator.
 Each item shows the action type (colour-coded badge), the entity name, and when the action was recorded.
 
-[cols="1,1"]
+[cols="1,1",options="header"]
 |===
 | Action type | Badge colour
 
 | Accept Top
-| 🟢 Green
+| Green
 
 | Accept Alternative
-| 🔵 Blue
+| Blue
 
 | Reject All
-| 🔴 Red
+| Red
 |===
 
 Select any item to load its detail in the right panel.
@@ -63,6 +83,8 @@ image::curation/action-list.png[Action list with type badges,50%]
 Selecting an action shows its full context.
 
 The header displays the entity name, the action type badge, the curator's email, and the timestamp.
+
+NOTE: The Action Detail is read-only. It shows a past action exactly as it was recorded; you cannot change or undo it from here. To record new feedback, use the xref:UserGuide/curation-guide-decisions.adoc[Decisions Queue].
 
 === Entity and Selected Cluster
 

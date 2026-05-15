@@ -23,20 +23,23 @@ Select any item to load its detail in the right panel.
 
 image::curation/decision-list.png[Decision list with score badges,50%]
 
-Score colour coding:
+Scores are colour-coded so you can judge them at a glance:
 
-[cols="1,1"]
+[cols="1,1,2",options="header"]
 |===
-| Range | Colour
+| Range | Colour | Reading
 
 | 0.00 – 0.39 (Low)
-| 🔴 Red
+| Red
+| The engine is least certain — review carefully.
 
 | 0.40 – 0.69 (Medium)
-| 🟡 Orange/yellow
+| Orange/yellow
+| Moderate certainty.
 
 | 0.70 – 1.00 (High)
-| 🟢 Green
+| Green
+| The engine is most certain.
 |===
 
 
@@ -75,21 +78,20 @@ Options: _Created At (Newest/Oldest)_, _Updated At (Newest/Oldest)_, _Confidence
 
 === Confirmation Preferences
 
-Four toggles in the user pop-up let you suppress the confirmation dialogs for Accept, Reject, and Assign actions, or disable all of them at once.
-When a toggle is on, clicking the action button (or pressing the keyboard shortcut) applies the action immediately, without a confirmation step.
+The user pop-up provides toggles that suppress the confirmation dialog for individual actions — one each for *Accept*, *Reject*, and *Assign* — plus a single toggle that disables all confirmations at once.
+When a toggle is on, clicking the action button (or pressing its keyboard shortcut) applies the action immediately, without a confirmation step.
 
 image::curation/skip-confirmation-toggles.png[Skip-confirmation toggles,90%]
 
-The preferences can be also set during an action by checking the *Don't show again* box in the confirmation dialog.
+You can also set a preference during an action by checking the *Don't show again* box in the confirmation dialog.
 
 image::curation/confirmation-dialog.png[Skip-confirmation in confirmation dialog,80%]
 
-The preferences are only active during the current session.
-
+These preferences are only active during the current session.
 
 [WARNING]
 ====
-Curatorial actions are final and cannot be undone. The toggles are disabled by default to provide an extra safety check before recording feedback. Use them with caution.
+Curatorial actions are final and cannot be undone. Confirmation is enabled by default to provide a safety check before feedback is recorded. Turn it off only if you are confident, and use the option with caution.
 ====
 
 
@@ -100,7 +102,7 @@ It is also where the curator records their feedback.
 
 image::curation/decision-area.png[Decision area with comparison panel and alternative clusters]
 
-[[alternative-clusters]]
+[#alternative-clusters]
 === Alternative Clusters
 
 Below the comparison cards, the page lists the other candidate clusters that the engine considered — ranked from best to worst after the top proposal.
@@ -112,41 +114,7 @@ image::curation/alternative-clusters.png[Alternative clusters section with expan
 
 == Actions
 
-This section provides details on available curation actions and explains how to perform them using the user interface.
-
-=== Reviewing a Decision
-The first step in the curation workflow is to review the proposed match for a given entity mention.
-
-Selecting a decision from the Decision List opens the comparison view in the Decision Area.
-
-In this view, you can inspect the details of the entity mention and the proposed cluster together with its member entities to determine if they are a correct match.
-
-The main area is a comparison panel that highlights the differences between the entity mention and an entity in the proposed cluster.
-It shows two cards side by side:
-
-* *Left* — the entity mention being resolved, with its field values.
-* *Right* — entities of the proposed cluster, with fields that differ from the current entity highlighted.
-
-Use the *Previous* / *Next* controls on the right card to browse other entities within the proposed cluster.
-
-The comparison panel shows three types of differences between the entity mention and the currently selected cluster entity:
-
-* *Added* (green highlight) — field values that are present in the cluster entity but not in the entity mention.
-* *Removed* (red highlight) — field values that are present in the entity mention but not in the cluster entity.
-* *Changed* (yellow highlight) — field values that are present in both the entity mention and the cluster entity but have different values.
-
-The confidence (*C:*) and similarity (*S:*) scores for this decision are shown in the header area.
-
-image::curation/comparison-panel.png[Comparison panel with entity cards and diff highlighting]
-
-=== Accepting a Decision
-
-Accepting a decision registers your feedback that the proposed cluster is a correct match for this entity mention.
-
-. Select the decision in the list.
-. Click the green *✓* button, **or** press kbd:[A].
-. Confirm the action in the dialog that appears.
-. The decision is removed from the queue and your feedback is recorded in the action history.
+This section explains the curation actions and how to perform each one in the interface.
 
 [WARNING]
 ====
@@ -154,23 +122,65 @@ Curatorial actions are final and cannot be undone.
 Past actions remain visible in the xref:UserGuide/curation-guide-history.adoc[Action History].
 ====
 
-NOTE: Your feedback is recorded as a recommendation and forwarded to the engine for re-evaluation. The engine remains the authority for the resulting cluster assignment, which may be updated asynchronously after the recommendation is processed.
+NOTE: Your feedback is recorded as a recommendation and forwarded to the engine for re-evaluation. The engine remains the authority for the resulting cluster assignment, which may be updated asynchronously after the recommendation is processed. This applies to every action below.
 
+=== Reviewing a Decision
+
+Reviewing the proposed match is the first step before you accept, reject, or select an alternative.
+
+To review a decision:
+
+. Select a decision from the Decision List. The comparison view opens in the Decision Area.
+. Read the two cards shown side by side:
++
+* *Left* — the entity mention being resolved, with its field values.
+* *Right* — an entity of the proposed cluster, with the fields that differ from the entity mention highlighted.
+. Use the *Previous* / *Next* controls on the right card to browse the other entities in the proposed cluster.
+. Check the confidence (*C:*) and similarity (*S:*) scores shown in the header area.
+. Decide whether the entity mention and the proposed cluster are the same real-world entity.
+
+image::curation/comparison-panel.png[Comparison panel with entity cards and diff highlighting]
+
+The highlight colours show *where each field value appears* — they do not represent edits or a before/after history. There are three cases:
+
+[cols="1,1,2",options="header"]
+|===
+| Highlight | Meaning | Reading
+
+| Green
+| Only in the cluster
+| The field value is present in the cluster entity but not in the entity mention.
+
+| Red
+| Only in the mention
+| The field value is present in the entity mention but not in the cluster entity.
+
+| Yellow
+| Different in each
+| The field is present in both, but the values differ.
+|===
+
+=== Accepting a Decision
+
+Accepting a decision registers your feedback that the proposed cluster is a correct match for this entity mention.
+
+. Select the decision in the list.
+. Click the green check (*Accept*) button, *or* press kbd:[A].
+. Confirm the action in the dialog that appears.
+. The decision is removed from the queue and your feedback is recorded in the action history.
 
 === Rejecting a Decision
 
 Rejecting a decision registers your feedback that none of the proposed candidates is an acceptable match.
 
 . Select the decision in the list.
-. Click the red *✗* button, **or** press kbd:[R].
+. Click the red cross (*Reject*) button, *or* press kbd:[R].
 . Confirm the action in the dialog that appears.
 . The decision is removed from the queue and your feedback is recorded in the action history.
 
-NOTE: Your feedback is recorded as a recommendation and forwarded to the engine for re-evaluation. The engine remains the authority for the resulting cluster assignment, which may be updated asynchronously after the recommendation is processed.
-
 === Selecting an Alternative Cluster
 
-Access the alternative clusters in the lower portion of the Decision Area as described in <<alternative-clusters>>.
+Access the alternative clusters in the lower portion of the Decision Area as described in <<alternative-clusters,Alternative Clusters>>.
 
 If one of the alternatives is a better match than the top proposal:
 
@@ -180,4 +190,14 @@ If one of the alternatives is a better match than the top proposal:
 . The decision is removed from the queue and your feedback is recorded in the action history.
 
 Click *Load More* to fetch additional alternative clusters beyond those initially shown.
+
+== Routine States
+
+The following are normal situations, not errors. They are described generically because the exact on-screen wording is not covered here.
+
+* *Empty queue* — if no decisions match the active filters, the Decision List is empty. Clear or widen the filters; if it is still empty, there is nothing pending to review right now.
+* *An action does not take effect* — if recording feedback does not succeed, the decision may no longer be pending (for example, another curator reviewed the same decision first). Refresh the list and move on to the next decision.
+* *Concurrent edits* — more than one curator can browse the queue at the same time. A decision already reviewed by someone else will not stay available for you to act on. Work from the current list and skip any decision that is no longer pending.
+
+See also xref:UserGuide/curation-guide-overview.adoc#troubleshooting[Troubleshooting] in the overview.
 
