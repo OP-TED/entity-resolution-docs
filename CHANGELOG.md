@@ -5,6 +5,27 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [unreleased]
 
+## [1.1.0] - 2026-05-15
+### Added
+* ERSys top-level section covering system scope and the role of each component
+* User-facing sections and navigation structure for the ERSys documentation area
+* Bulk actions section with annotated screenshots added to the curation decisions guide
+* Documentation remediation specification capturing known issues and planned corrections
+
+### Changed
+* Home page renamed to Introduction throughout the navigation
+* Acronyms expanded in top-level navigation labels; kept abbreviated in submenu entries
+* Navigation restructured: ADR menu entry added, misnamed pages corrected
+* Glossary consolidated onto a single page with shared Antora partials
+* Architecture section revised for accuracy and consistency
+* Architecture Decision Records revised and updated
+* ERE developer guide and ERS-ERE technical contract revised
+* Curation web application user guide revised
+* Use case catalogue revised and realigned with the architecture
+* ERS service documentation revised for correctness
+* Antora playbook updated to source component content from the meaningfy fork
+* Path templates escaped in the generated Curation API spec
+
 ## [1.0.0-rc.1] - 2026-04-21
 
 ### Added
