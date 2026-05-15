@@ -1,0 +1,152 @@
+= Getting Started with ERSys
+:description: Prerequisites, minimal configuration, and two end-to-end workflow walkthroughs — API submission and UI-based curation review.
+:ers-api-base: http://localhost:8001
+
+This guide walks through a first resolution request via the REST API and a curation review workflow using the Curation Web App.
+
+[IMPORTANT]
+====
+A running full stack is a prerequisite for this guide *and* for the xref:ERSys/examples.adoc[Examples].
+Complete the *Prerequisites* section before attempting either workflow.
+====
+
+== Prerequisites
+
+You need the following installed locally before starting:
+
+[cols="2,4",options="header"]
+|===
+| Requirement | Notes
+
+| Docker
+| Container runtime for the ERSys services.
+
+| Docker Compose
+| Orchestrates the multi-service stack.
+
+| Make
+| Runs the `make up` startup target in each repository.
+
+| git
+| Clones the three source repositories.
+
+| Disk and memory
+| Approximately 5 GB free disk and 8 GB RAM for the full stack.
+|===
+
+== Run the Full Stack
+
+The goal of this section is a running full stack: ERS, an ERE such as the Basic ERE, and the Curation Web App, all reachable locally.
+
+. *Clone the three repositories.*
++
+[source,bash]
+----
+git clone https://github.com/OP-TED/entity-resolution-service.git
+git clone https://github.com/OP-TED/entity-resolution-engine-basic.git
+git clone https://github.com/OP-TED/entity-resolution-service-webapp.git
+----
+
+. *Set environment variables.* Each repository ships an example environment file; copy it and adjust values as described in that repository's README.
+
+. *Start each service* with `make up` in its repository directory. Each README contains the authoritative installation, startup, and service-management instructions.
+
+By default, locally run services are available at:
+
+[cols="1,2",options="header"]
+|===
+| Service | Default URL
+
+| ERS API | `{ers-api-base}`
+| Curation API | `http://localhost:8000`
+| Curation web app | `http://localhost:8080`
+|===
+
+[start=4]
+. *Verify the stack is up.* The ERS health endpoint should return HTTP 200:
++
+[source,bash]
+----
+curl -i {ers-api-base}/health
+----
++
+A `200 OK` response confirms ERS is running and ready to accept resolution requests.
+
+== Workflow 1 — Submit a Mention and Retrieve Its Cluster Identifier
+
+Submit a single entity mention and poll until the ERE returns a canonical cluster identifier.
+
+. *Submit the mention.*
++
+[source,bash]
+----
+curl -i -X POST {ers-api-base}/api/v1/resolve \
+  -H "Content-Type: application/json" \
+  -d '{
+    "mention": {
+      "identified_by": {
+        "source_id": "demo-source-001",
+        "request_id": "org-regensburg-001",
+        "entity_type": "ORGANISATION"
+      },
+      "content_type": "text/turtle",
+      "content": "@prefix org: <http://www.w3.org/ns/org#> .\n@prefix epo: <http://data.europa.eu/a4g/ontology#> .\nepd:entorg-regensburg-001 a org:Organization ; epo:hasLegalName \"Landratsamt Regensburg\" ."
+    }
+  }'
+----
++
+The response returns a `cluster_id` immediately.
+If the ERE has not yet processed the mention, the `status` is `PROVISIONAL` and the identifier is a provisional one; otherwise the `status` is `CANONICAL`.
+
+. *Poll for the confirmed identifier.*
++
+[source,bash]
+----
+curl -i "{ers-api-base}/api/v1/lookup?source_id=demo-source-001&request_id=org-regensburg-001&entity_type=ORGANISATION"
+----
++
+Poll until the response `status` is `CANONICAL`.
+A `PROVISIONAL` identifier is returned immediately and is valid for downstream use; it is superseded once the ERE responds, typically within the configured response time budget (a few seconds in a default local setup).
+If the identifier is still provisional after that budget, see the xref:ERS/configuration.adoc[Configuration Reference] for the time-budget setting and the xref:api-docs/api-integration-guide.adoc[API Integration Guide] for error handling.
+
+NOTE: A cluster identifier is stable (never reused for a different cluster), but cluster *assignment* can change if resolution quality improves or a curator intervenes.
+
+For a complete set of tested scenarios (idempotency, batch resolution, refresh-bulk, edge cases), see the manual HTTP test files in
+https://github.com/OP-TED/entity-resolution-service/tree/develop/test/ersys/manual/full_cycle[test/ersys/manual/full_cycle].
+
+== Workflow 2 — Review a Resolution Decision in the Curation Web App
+
+Once an entity is resolved automatically, a curator can review whether the match is correct. The full narrative walkthrough lives in the xref:UserGuide/curation-guide-overview.adoc[Curation App User Guide]; the skeleton is:
+
+. *Log in* to the Curation Web App and land on the Decisions Queue.
+. *Find the entity* in the Decision List, using the *Search* box or the *Confidence* and *Similarity* filters, then click an item to open it.
+. *Inspect the proposal* in the comparison panel — the entity mention on the left, a proposed cluster entity on the right, with differing fields colour-coded.
+. *Record your verdict* — *Accept*, *Reject*, or *Select an alternative* (see xref:UserGuide/curation-guide-decisions.adoc#alternative-clusters[Selecting an Alternative Cluster]). Each action asks for confirmation.
+
+NOTE: Curatorial actions are final and cannot be undone.
+Feedback is stored and forwarded to the ERE as a recommendation for re-evaluation; the ERE determines the final cluster assignment.
+
+== Full-Cycle Demo Script
+
+For an automated walkthrough — health check, bulk submission, clustering summary, curation loop, and bulk refresh — run the demo script included in the ERS repository:
+
+https://github.com/OP-TED/entity-resolution-service/tree/develop/test/demo[test/demo on GitHub]
+
+[source,bash]
+----
+# Default run (6 synthetic mentions, 60 s timeout)
+poetry run python test/demo/demo_full_cycle.py
+
+# Skip the curation loop (faster smoke run, no external dependencies)
+poetry run python test/demo/demo_full_cycle.py --skip-curation
+----
+
+The README in that directory describes expected output and how to reset ERE state between runs.
+
+NOTE: The curation step of the demo script requires the `inject_ere_response.py` helper located in
+https://github.com/OP-TED/entity-resolution-service/tree/develop/src/scripts[src/scripts] of the ERS repository.
+Use `--skip-curation` to bypass this step.
+
+== Where to Go Next
+
+include::partial$shared/next-steps.adoc[leveloffset=+0]

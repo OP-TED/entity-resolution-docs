@@ -1,0 +1,274 @@
+= API Integration Guide
+:description: Versioning policy, authentication, pagination, and error handling for the ERS REST API and Curation REST API.
+
+This guide covers the conventions that apply across the two ERSys APIs.
+It is intended for developers integrating an originator system via the ERS REST API, building tooling on top of the Curation API, or administering the system.
+
+Endpoint references:
+
+* xref:api-docs/ers/index.adoc[ERS REST API Reference]
+* xref:api-docs/curation/index.adoc[Curation REST API Reference]
+
+Worked request/response examples are in xref:ERSys/examples.adoc[Examples].
+
+== Versioning
+
+Both APIs use URI path-based versioning. The current version is `v1`:
+
+----
+/api/v1/{resource}
+----
+
+The version only changes when a breaking change is introduced.
+
+[cols="2,1,3",options="header"]
+|===
+| Change type | Version impact | Examples
+
+| Breaking change — modified or removed behaviour
+| Major version bump (`v1` → `v2`)
+| Changing a required field, removing an endpoint, altering error semantics
+
+| New endpoints or optional fields
+| No version change
+| Adding a new query parameter, adding a new optional response field
+
+| Bug fixes
+| No version change
+| Correcting incorrect status codes, fixing response serialisation
+
+|===
+
+There is currently only one version. Until a `v2` exists, clients can rely on `v1` contracts being stable; no migration is required.
+
+== Authentication
+
+*Curation REST API* endpoints require a JWT Bearer Token, signed using HMAC with SHA-256.
+
+*ERS REST API* endpoints are open: they do not require authentication. The unauthenticated health endpoint (`GET /health`) is described in the <<health-endpoint,Health Endpoint>> section.
+
+The token lifetimes are not fixed by contract; they are deployment-configured. See xref:ERS/configuration.adoc[Configuration Reference].
+
+=== Obtaining a Token
+
+Submit credentials to `POST /api/v1/auth/login`:
+
+[source,json]
+----
+{ "email": "curator@example.org", "password": "..." }
+----
+
+The response contains both an access token and a refresh token:
+
+[source,json]
+----
+{ "access_token": "...", "refresh_token": "..." }
+----
+
+=== Using the Token
+
+Include the access token in every request to an authenticated endpoint:
+
+----
+Authorization: Bearer <access_token>
+----
+
+=== Token Lifecycle
+
+[cols="1,3"]
+|===
+| Token | Description
+
+| Access token
+| Short-lived. Included in every request to authenticated endpoints.
+
+| Refresh token
+| Single-use. Exchange for a new access/refresh pair via `POST /api/v1/auth/refresh` when the access token expires.
+
+|===
+
+=== User Roles
+
+[cols="1,3",options="header"]
+|===
+| Role | Permissions
+
+| `admin`
+| Full access: user management and all curation actions.
+
+| `curator`
+| Review decisions; accept, reject, and assign actions.
+
+|===
+
+== Pagination
+
+The Curation API uses two pagination styles depending on the endpoint.
+
+=== Cursor Pagination (decisions, user actions)
+
+Used by `/api/v1/curation/decisions` and `/api/v1/user-actions`.
+Cursor pagination does not expose a total count; use it for forward-only navigation through large, frequently-updated result sets.
+
+Query parameters:
+
+[cols="1,1,1,2"]
+|===
+| Parameter | Type | Default | Description
+
+| `cursor`
+| string
+| —
+| Opaque cursor from the previous response. Omit on the first request.
+
+| `limit`
+| integer
+| 20
+| Items per page. Maximum: 50.
+
+|===
+
+Response envelope:
+
+[source,json]
+----
+{
+  "count": 12,
+  "results": [ ... ],
+  "next_cursor": "eyJza2lwIjogMjB9"
+}
+----
+
+Pass `next_cursor` as the `cursor` parameter in the next request.
+When `next_cursor` is `null`, there are no more pages.
+
+=== Page-Based Pagination (users)
+
+Used by `/api/v1/users`.
+
+Query parameters:
+
+[cols="1,1,1,2"]
+|===
+| Parameter | Type | Default | Description
+
+| `page`
+| integer
+| 1
+| Page number (1-indexed).
+
+| `per_page`
+| integer
+| 20
+| Items per page. Maximum: 50.
+
+|===
+
+Response envelope:
+
+[source,json]
+----
+{
+  "count": 150,
+  "next": 3,
+  "previous": 1,
+  "results": [ ... ]
+}
+----
+
+[#error-reference]
+== Error Handling
+
+All error responses use a JSON body with an `error_code` field (machine-readable) and a `message` field (human-readable explanation):
+
+[source,json]
+----
+{
+  "error_code": "MENTION_NOT_FOUND",
+  "message": "No mention found for the supplied triad."
+}
+----
+
+See xref:ERSys/examples.adoc#error-response[Examples — Error Response] for additional error response examples.
+
+=== ERS REST API Error Codes
+
+[cols="2,3"]
+|===
+| Code | Meaning
+
+| `VALIDATION_ERROR`
+| The request body or query parameters failed schema validation.
+Check required fields, field types, and enum values.
+
+| `IDEMPOTENCY_CONFLICT`
+| A previous request submitted the same mention triad `(source_id, request_id, entity_type)` with different content.
+ERS does not overwrite existing mention data; reuse the original content or choose a different triad.
+
+| `PARSING_FAILED`
+| The entity mention `content` could not be parsed according to the declared `content_type`.
+Verify that the RDF/Turtle (or other format) is well-formed and matches the expected entity type structure.
+
+| `MENTION_NOT_FOUND`
+| No mention matching the requested triad was found.
+The mention has not been submitted yet, or the triad values do not match exactly.
+
+| `SOURCE_NOT_FOUND`
+| The `source_id` supplied to `/refresh-bulk` is not known to ERS.
+No mentions from that source have been submitted.
+
+| `SERVICE_ERROR`
+| An unexpected internal error occurred.
+Retry with exponential back-off; if the problem persists, contact the service operator.
+
+| `SERVICE_TIMEOUT`
+| The ERE did not respond within the configured time budget.
+A provisional identifier was issued for the affected mention.
+The mention will be re-evaluated when the ERE becomes available.
+
+|===
+
+=== Curation REST API Error Codes
+
+[cols="2,3"]
+|===
+| Code | Meaning
+
+| `VALIDATION_ERROR`
+| The request body or query parameters failed schema validation.
+
+| `NOT_FOUND`
+| The requested resource (decision, user, or cluster) does not exist.
+
+| `AUTHENTICATION_ERROR`
+| Authentication failed: invalid credentials, missing or expired access token.
+
+| `AUTHORIZATION_ERROR`
+| The authenticated user does not have permission to perform the requested action.
+
+| `CONFLICT`
+| The request conflicts with existing state — for example, actioning a decision that has already been actioned.
+
+| `APPLICATION_ERROR`
+| An unexpected internal error occurred.
+
+| `SERVICE_UNAVAILABLE`
+| A required backing service (database) is not available.
+
+|===
+
+[#health-endpoint]
+== Health Endpoint
+
+`GET /health` performs a liveness check and does not require authentication.
+
+[source,json]
+----
+{
+  "status": "ok",
+  "supported_entity_types": [
+    { "name": "ORGANISATION", "rdf_type": "http://www.w3.org/ns/org#Organization" },
+    { "name": "PROCEDURE",    "rdf_type": "http://data.europa.eu/a4g/ontology#Procedure" }
+  ]
+}
+----

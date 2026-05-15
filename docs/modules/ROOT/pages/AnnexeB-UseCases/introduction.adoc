@@ -1,19 +1,82 @@
-== Introduction and reading guide
+= Introduction and Reading Guide
 
-This Use Case Catalogue defines the behavioural contract of the Entity Resolution System (ERSys): what the system guarantees to its actors, under which conditions, and with which explicit limitations. It follows the principles of Alistair Cockburn’s Writing Effective Use Cases, separating value-oriented system behaviour from internal behavioural refinement, while deliberately avoiding implementation detail. +
-The catalogue is authoritative on externally observable behaviour, including canonical identity exposure, idempotent request handling, bounded originator interaction, user-initiated re-evaluation, integration of authoritative engine outcomes, and synchronisation semantics. +
-ERSys follows an engine-authoritative clustering model. Cluster identifiers managed by the Entity Resolution Engine (ERE) constitute canonical identity. ERSys exposes and tracks the latest Cluster Assignment per Entity Mention but does not independently govern identity semantics. +
-This document is not an API specification, data schema, or implementation guide; those concerns are addressed in dedicated contract and architecture artefacts.
+This Use Case Catalogue is the authoritative specification of the externally observable behaviour of the Entity Resolution System (ERSys): what the system guarantees to its actors, under which conditions, and with which explicit limitations. It follows the principles of Alistair Cockburn's _Writing Effective Use Cases_, separating value-oriented system behaviour from internal behavioural refinement while deliberately avoiding implementation detail.
 
-=== White and Blue use cases
+The catalogue is authoritative on externally observable behaviour, including canonical identity exposure, idempotent request handling, bounded originator interaction, user-initiated re-evaluation, integration of authoritative engine outcomes, and synchronisation semantics. It is a behavioural contract — not an API specification, data schema, or implementation guide; those concerns are addressed in dedicated contract and architecture artefacts.
 
-Two use case levels are used consistently:
+ERSys follows an engine-authoritative clustering model. Cluster identifiers managed by the Entity Resolution Engine (ERE) constitute canonical identity. ERSys exposes and tracks the latest Cluster Assignment per Entity Mention but does not independently govern identity semantics.
 
-* White use cases (Summary level) describe the value ERSys provides to an actor and the guarantees that always hold, including under degraded conditions. They define stable behavioural expectations and system boundaries and are the primary reference for reviewers and stakeholders.
-* Blue use cases (User-goal level) refine a White use case into how the system fulfils that value through interactions between ERS responsibilities and supporting components. They remain technology-agnostic but make responsibility boundaries, idempotency rules, and failure paths explicit for implementers.
+== White and Blue use cases
 
-White use cases define the contract; Blue use cases explain its realisation.
+This catalogue uses two Cockburn altitude levels consistently. In Cockburn's metaphor, altitude describes how far the use case sits from the sea: White (cloud / Summary level) looks down on the system from above and states the value and guarantees; Blue (sea level / User-goal level) sits at the waterline and describes how an actor's goal is fulfilled through concrete system interactions.
 
-=== How to read this document
+* *White use cases* (Summary level) describe the value ERSys provides to an actor and the guarantees that always hold, including under degraded conditions. They define stable behavioural expectations and system boundaries and are the primary reference for reviewers and stakeholders.
+* *Blue use cases* (User-goal level) refine a White use case into how the system fulfils that value through interactions between ERS responsibilities and supporting components. They remain technology-agnostic but make responsibility boundaries, idempotency rules, and failure paths explicit for implementers.
 
-Readers interested in guarantees and scope should start with the White use cases. Readers responsible for implementation, integration, or review should then consult the corresponding Blue use cases together with the relevant Architecture Decision Records. Terminology is used consistently according to the Business Glossary. Any apparent conflict must be resolved by aligning with the authoritative artefact hierarchy defined for the ERSys documentation set.
+White use cases state the contract; Blue use cases describe its realisation. Where a Blue use case refines a White one, it states only the realisation specifics and cross-references the White use case for the shared contract rather than restating it.
+
+== Canonical use case skeleton
+
+Every use case page in this catalogue conforms to the single skeleton below: the same section names, the same order, and the same heading levels. Each page has one `=` doctitle (the use case name, matching the catalogue index link exactly) followed by `==` section headings. A `[#uc-<id>]` anchor on each page allows the glossary and architecture pages to link individual use cases.
+
+A metadata block opens each page (bold inline lines):
+
+* *Use Case Level:* White (Summary) or Blue (User-goal).
+* *Primary Actor:* the actor pursuing the goal.
+* *Supporting Actors:* Blue use cases only — the internal components participating in the realisation.
+* *Scope:* the system or boundary under design.
+
+Section headings then appear in this fixed order (a section is present only when the use case has content for it; when present it always uses this name and this position):
+
+[cols="1,3",options="header"]
+|===
+| Section | Content
+
+| Stakeholders and Interests
+| The parties affected and what each requires.
+
+| Brief Description
+| The goal, value, and narrative of the behaviour, including any system-of-interest scoping.
+
+| Preconditions
+| What must hold before the use case begins.
+
+| Trigger
+| The event that initiates the use case.
+
+| Success Guarantee (Postconditions)
+| What is guaranteed when the use case completes successfully.
+
+| Minimal Guarantees (On Failure)
+| What is guaranteed even when the use case does not complete successfully.
+
+| Main Success Scenario
+| The primary numbered flow.
+
+| Alternate Scenarios
+| Named alternative flows.
+
+| Extensions
+| Step-keyed exception and variation handling.
+
+| Out of Scope
+| Explicitly excluded behaviour.
+
+| Special Requirements
+| Cross-cutting constraints (idempotency, authority, lineage).
+
+| Notes and Business Rules
+| Standing rules that qualify interpretation of the use case.
+
+| Technology and Data Variations
+| Deployment- or format-dependent variation points.
+
+| Frequency of Occurrence
+| Expected invocation rate.
+|===
+
+Actor names follow the Business Glossary preferred terms ("Originator", "Curator"). The system may legitimately appear as the primary actor where one large use case is split into parts.
+
+== How to read this section
+
+Readers interested in guarantees and scope should start with the White use cases. Readers responsible for implementation, integration, or review should then consult the corresponding Blue use cases together with the relevant Architecture Decision Records. Terminology follows the xref:AnnexeA-Glossary/index.adoc[Business Glossary] and is used consistently; any apparent conflict is resolved by aligning with the glossary.

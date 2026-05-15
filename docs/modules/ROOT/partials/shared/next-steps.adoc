@@ -1,0 +1,10 @@
+// Shared partial: recurring "where to go next" links.
+
+* xref:ERSys/getting-started.adoc[Getting Started] — step-by-step first resolution request and curation workflow
+* xref:ERSys/examples.adoc[Examples] — worked request and response examples for both REST APIs
+* xref:api-docs/ers/index.adoc[ERS REST API Reference] — full endpoint reference with request/response schemas
+* xref:api-docs/curation/index.adoc[Curation REST API Reference] — authentication, decisions, bulk operations
+* xref:api-docs/api-integration-guide.adoc[API Integration Guide] — versioning, authentication, pagination, and error handling
+* xref:UserGuide/curation-guide-overview.adoc[Curation App User Guide] — GUI walkthrough for curators
+* xref:ERSArchitecture/index.adoc[Architecture] — system design, behaviour spines, and deployment
+* xref:AnnexeA-Glossary/index.adoc[Glossary] — authoritative term definitions

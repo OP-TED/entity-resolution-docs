@@ -1,6 +1,6 @@
-== 11 Deployment Architecture
+= Deployment Architecture
 
-This section describes the *reference deployment architecture* for ERSys and its companion components. It defines how the system is intended to be deployed and operated in a container-based environment for development, integration, and early operational use. The deployment described here is normative in terms of architectural boundaries, interface exposure, and responsibility allocation, but it is not prescriptive with respect to infrastructure scale, hosting provider, or cloud platform. +
+This section describes the *reference deployment architecture* for ERSys and its companion components. It defines how the system is intended to be deployed and operated in a container-based environment for development, integration, and early operational use. The deployment described here is normative in terms of architectural boundaries, interface exposure, and responsibility allocation, but it is not prescriptive with respect to infrastructure scale, hosting provider, or cloud platform.
 
 The primary purpose of this section is to make explicit:
 
@@ -11,26 +11,28 @@ The primary purpose of this section is to make explicit:
 
 This section intentionally does not specify a production-grade cloud-native deployment, orchestration platform, or operational hardening profile. Concerns such as Kubernetes-based deployments, horizontal auto-scaling strategies, multi-region redundancy, managed cloud services, infrastructure-as-code pipelines, and platform-specific security controls are considered out of scope for this architecture document. Future deployment variants, including cloud-native or managed-service configurations, are expected to evolve as the system matures and may be addressed in dedicated deployment, operations, or cloud architecture documents, without altering the core architectural responsibilities, interfaces, or governance model defined here.
 
-=== 11.1 Runtime topology and container grouping
+== Runtime topology and container grouping
 
-In the reference deployment, all software elements execute as separate Docker containers on a single logical host node. Containers are grouped into three logical stacks reflecting application responsibility boundaries: *Link Curation stack, ERS stack, and ERE stack*. +
-This grouping reflects authority boundaries established earlier:
+In the reference deployment, all software elements execute as separate Docker containers on a single logical host node. Containers are grouped into three logical stacks reflecting application responsibility boundaries: the Link Curation stack, the ERS stack, and the ERE stack. This grouping reflects authority boundaries established earlier:
 
-* ERE is authoritative for clustering and canonical identity (clusterId).
+* ERE is authoritative for clustering and canonical identity (`cluster_id`).
 * ERS is authoritative for intake records, projection of clustering outcomes, user action trace, and delta exposure tracking.
 * The Link Curation application is a consumer of projection state and a producer of structured recommendations.
 
+image::Technology deployment.png[Technology deployment view: Link Curation, ERS, and ERE container stacks on a single host node with network segmentation]
+// TODO: rename asset to hyphenated slug (current file: "Technology deployment.png")
 
-image::ROOT:Technology deployment.png[]
+=== Link Curation stack
 
-*Link Curation stack* +
+The Link Curation stack contains the runtime components required for human interaction: HTTP User Interface, Link Curation Frontend, Link Curation Backend, and Zitadel as the external identity provider.
 
-The Link Curation stack contains the runtime components required for human interaction: HTTP User Interface, Link Curation Frontend, Link Curation Backend, and Zitadel as the external identity provider. +
-These components are deployed as independent containers. They do not host resolution persistence or clustering logic. All state-changing operations are executed through ERS REST interfaces. Authentication and single sign-on are externalised to Zitadel, keeping identity management concerns separate from resolution semantics. +
-Only the HTTP ingress surface is externally reachable. Internal service communication flows through explicitly defined REST endpoints. +
+These components are deployed as independent containers. They do not host resolution persistence or clustering logic. All state-changing operations are executed through ERS REST interfaces. Authentication and single sign-on are externalised to Zitadel, keeping identity management concerns separate from resolution semantics.
 
-*ERS stack* +
-The ERS stack represents the runtime realisation of the projection and orchestration layer. It includes the Main ERS REST API HTTP, the LinkCuration-ERS REST API HTTP, the Entity Resolution Service Orchestrator (ERS), the ERS MQ interface, FerretDB for persistence, Redis for messaging infrastructure, and Jaeger for telemetry. +
+Only the HTTP ingress surface is externally reachable. Internal service communication flows through explicitly defined REST endpoints.
+
+=== ERS stack
+
+The ERS stack represents the runtime realisation of the projection and orchestration layer. It includes the Main ERS REST API HTTP, the LinkCuration-ERS REST API HTTP, the Entity Resolution Service Orchestrator (ERS), the ERS MQ interface, FerretDB for persistence, Redis for messaging infrastructure, and Jaeger for telemetry.
 
 At runtime, ERS performs the following bounded responsibilities:
 
@@ -38,39 +40,48 @@ At runtime, ERS performs the following bounded responsibilities:
 * Publish asynchronous resolution requests to ERE via the message queue.
 * Integrate EntityMentionResolutionResponse messages idempotently.
 * Replace the current Decision projection per mention.
-* Expose the latest recorded clusterId via REST.
+* Expose the latest recorded `cluster_id` via REST.
 
-FerretDB serves as the document-oriented persistence layer for intake and projection records. It stores EntityMention and Decision projection data but does not redefine clustering semantics and does not constitute an independent canonical registry. +
-Redis provides asynchronous messaging transport between ERS and ERE. It is infrastructure, not authority. Jaeger provides distributed tracing across synchronous and asynchronous flows; observability remains orthogonal to identity semantics. +
-ERS containers operate inside the ER system network. Only declared REST endpoints are exposed via ingress routing. +
+FerretDB serves as the document-oriented persistence layer for intake and projection records. It stores EntityMention and Decision projection data but does not redefine clustering semantics and does not constitute an independent canonical registry.
 
-*ERE stack* +
-The ERE stack contains the ERE MQ interface, the Basic Entity Resolution Engine (ERE), and DuckDB as reference persistence. +
-ERE containers are reachable exclusively via the message queue interface. There is no external REST surface for clustering operations. DuckDB represents a reference implementation choice for clustering state persistence. Alternative storage mechanisms may be used provided that the asynchronous message contract remains unchanged. +
+Redis provides asynchronous messaging transport between ERS and ERE. It is infrastructure, not authority. Jaeger provides distributed tracing across synchronous and asynchronous flows; observability remains orthogonal to identity semantics.
+
+ERS containers operate inside the ER system network. Only declared REST endpoints are exposed via ingress routing.
+
+=== ERE stack
+
+The ERE stack contains the ERE MQ interface, the Basic Entity Resolution Engine (ERE), and DuckDB as reference persistence.
+
+ERE containers are reachable exclusively via the message queue interface. There is no external REST surface for clustering operations. DuckDB represents a reference implementation choice for clustering state persistence. Alternative storage mechanisms may be used provided that the asynchronous message contract remains unchanged.
 
 The ERE stack is isolated within the ER system network and communicates with ERS only through asynchronous messaging.
 
-=== 11.2 Infrastructure roles and concrete technologies
+== Infrastructure roles and concrete technologies
 
-The reference deployment maps abstract infrastructure roles to concrete technologies in order to provide a runnable baseline: Docker Engine as container runtime, docker-compose for service wiring, Traefik for HTTP ingress and routing, Redis for asynchronous messaging, FerretDB as ERS document store, DuckDB for ERE persistence, Zitadel for identity management and SSO, and Jaeger as telemetry collector. +
+The reference deployment maps abstract infrastructure roles to concrete technologies in order to provide a runnable baseline: Docker Engine as container runtime, docker-compose for service wiring, Traefik for HTTP ingress and routing, Redis for asynchronous messaging, FerretDB as ERS document store, DuckDB for ERE persistence, Zitadel for identity management and SSO, and Jaeger as telemetry collector.
+
 These mappings are illustrative rather than mandatory. Equivalent technologies may replace them provided that exposed interfaces remain unchanged, authority boundaries remain intact, asynchronous integration semantics are preserved, and projection replacement behaviour is unaffected.
 
-image::ROOT:Technology choices.png[]
+image::Technology choices.png[Mapping of abstract infrastructure roles to concrete technologies in the reference deployment]
+// TODO: rename asset to hyphenated slug (current file: "Technology choices.png")
 
-=== 11.3 Network segmentation and trust zones
+== Network segmentation and trust zones
 
-The deployment makes network segmentation explicit. The external network exposes only ingress endpoints intended for clients and the Link Curation application. The ER system network isolates internal communication between ERS, ERE, message queue, and persistence services. The host node executes all containers but does not collapse logical trust zones. +
-Persistence services and message infrastructure are not directly reachable from the external network. ERE has no externally exposed control surface. All clustering communication occurs through asynchronous messaging. +
+The deployment makes network segmentation explicit. The external network exposes only ingress endpoints intended for clients and the Link Curation application. The ER system network isolates internal communication between ERS, ERE, message queue, and persistence services. The host node executes all containers but does not collapse logical trust zones.
+
+Persistence services and message infrastructure are not directly reachable from the external network. ERE has no externally exposed control surface. All clustering communication occurs through asynchronous messaging.
+
 This segmentation enforces a clean trust model at runtime. Clients interact with projection. Engines perform clustering. Infrastructure mediates transport without altering authority.
 
-=== 11.3 Deployment variability and evolution
+== Deployment variability and evolution
 
-The deployment architecture described in this section is intended as a *reference baseline*. It supports reproducibility, clear responsibility boundaries, and traceable behaviour across interfaces. As operational requirements evolve, this deployment may be complemented by additional profiles, such as multi-node deployments, high-availability configurations, or cloud-native orchestrations using managed services. +
-In particular, the deployment of the Entity Resolution Engine is expected to vary across implementations. ERSys does not impose constraints on the internal deployment model of ERE components beyond adherence to the defined asynchronous interface and message semantics. +
+The deployment architecture described in this section is intended as a *reference baseline*. It supports reproducibility, clear responsibility boundaries, and traceable behaviour across interfaces. As operational requirements evolve, this deployment may be complemented by additional profiles, such as multi-node deployments, high-availability configurations, or cloud-native orchestrations using managed services.
+
+In particular, the deployment of the Entity Resolution Engine is expected to vary across implementations. ERSys does not impose constraints on the internal deployment model of ERE components beyond adherence to the defined asynchronous interface and message semantics.
 
 Such evolution must preserve the architectural invariants defined in earlier sections:
 
-* clusterId remains the canonical identifier produced by ERE;
+* `cluster_id` remains the canonical identifier produced by ERE;
 * ERS remains projection-centric and exposure-disciplined;
 * EntityMention remains immutable and triad-identified;
 * asynchronous messaging remains the sole integration boundary.

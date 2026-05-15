@@ -1,16 +1,24 @@
-== ADR-B1N — Authority and Responsibilities: ERS Façade, ERE Authoritative
+[#adr-b1n]
+= ADR-B1N — Authority and Responsibilities: ERS Façade, ERE Authoritative
 
-=== Context and Problem Statement
+[NOTE]
+====
+Status: Accepted
+====
 
-The system integrates a single ERE that may vary in implementation and be replaced over time. +
-Canonical identity is expressed through clusters, and cluster identifiers are the canonical identifiers exposed to clients. +
-In a distributed setting with asynchronous processing, the architecture must avoid conflicting sources of truth for cluster assignment, because even small ambiguity about “who decides” immediately produces divergent states, brittle integration contracts, and non-reproducible identity outcomes. +
+== Context and Problem Statement
+
+The system integrates a single ERE that may vary in implementation and be replaced over time.
+
+Canonical identity is expressed through clusters, and cluster identifiers are the canonical identifiers exposed to clients.
+
+In a distributed setting with asynchronous processing, the architecture must avoid conflicting sources of truth for cluster assignment, because even small ambiguity about "who decides" immediately produces divergent states, brittle integration contracts, and non-reproducible identity outcomes.
+
 A single component must therefore be authoritative for clustering outcomes and cluster assignment, while the other component must focus on interface stability, bounded client-facing behaviour, correlation, persistence of the latest assignment, and observability.
 
-=== Decision
+== Decision
 
-The ERE is the sole authority for clustering outcomes. +
-The ERS acts as a façade and coordinator and is not an authority over clustering semantics. +
+The ERE is the sole authority for clustering outcomes. The ERS acts as a façade and coordinator and is not an authority over clustering semantics.
 
 The following rules are binding:
 
@@ -36,7 +44,7 @@ The following rules are binding:
 .. Enforce request correlation and idempotency at the API boundary.
 .. Implement client-facing timeout handling, including issuance of provisional singleton placements when required.
 .. Forward resolution and recommendation requests to ERE using the agreed message contract.
-.. Persist the latest known placement per mention (clusterId) as an access-optimised projection.
+.. Persist the latest known placement per mention (cluster_id) as an access-optimised projection.
 .. Persist the top-N alternatives returned by ERE as a bounded snapshot of the latest outcome.
 .. Maintain delta tracking for refreshBulk.
 .. Maintain a user action log for traceability and training purposes.
@@ -46,24 +54,27 @@ The following rules are binding:
 .. Evaluate recommendations (provisional placements, user placements, exclusions) and return a new clustering outcome.
 .. Ensure cluster identifier management prevents improper reuse.
 
-=== Scope and Applicability
+== Scope and Applicability
 
-This decision applies to all ERS–ERE interactions and contracts, including resolution requests, recommendation requests, reclustering, and any asynchronous update mechanism through which ERE returns clustering outcomes. +
+This decision applies to all ERS–ERE interactions and contracts, including resolution requests, recommendation requests, reclustering, and any asynchronous update mechanism through which ERE returns clustering outcomes.
+
 This decision governs authority boundaries and ownership of identity semantics. It does not prescribe engine algorithms, scoring models, storage technology, or internal optimisation strategies.
 
-=== Considered Options
+== Considered Options
 
 * ERS authoritative for identity and governance, ERE advisory.
 * Shared authority with coordinated governance semantics.
 * ERE authoritative for clustering and canonical identity; ERS façade and coordinator. _(Selected)_
 
-=== Rationale
+== Rationale
 
-Making the ERE authoritative for clustering establishes a single semantic source of truth for identity, which removes the need for cross-component reconciliation and prevents silent divergence between “computed clusters” and “served canonical identifiers”. +
-Constraining ERS to a façade role keeps external contracts stable and implementable: ERS can focus on bounded client-facing behaviour, correlation, persistence of the latest assignment, and operational traceability, without encoding engine-dependent governance semantics. +
+Making the ERE authoritative for clustering establishes a single semantic source of truth for identity, which removes the need for cross-component reconciliation and prevents silent divergence between "computed clusters" and "served canonical identifiers".
+
+Constraining ERS to a façade role keeps external contracts stable and implementable: ERS can focus on bounded client-facing behaviour, correlation, persistence of the latest assignment, and operational traceability, without encoding engine-dependent governance semantics.
+
 Treating both provisional placements and user actions as recommendations preserves a uniform interaction pattern while ensuring that the authoritative clustering model remains consistent and engine-controlled.
 
-=== Consequences
+== Consequences
 
 * Canonical identifiers exposed by ERS may change for a given mention over time, as the ERE returns updated clustering outcomes.
 * ERS must persist and serve the latest placement projection, not an independently governed canonical state.

@@ -2,7 +2,7 @@
 :description: A reference implementation of the ERE that conforms to the ERS–ERE Technical Contract.
 
 This page describes the *Basic Entity Resolution Engine* — a reference implementation of the
-xref:ERS-ERE-Contarct/index.adoc[ERS–ERE Technical Contract]. It is provided as a concrete,
+xref:ERS-ERE-Contract/index.adoc[ERS–ERE Technical Contract]. It is provided as a concrete,
 deployable example that shows one way to build a conformant ERE.
 
 
@@ -10,7 +10,7 @@ deployable example that shows one way to build a conformant ERE.
 ====
 This page is *non-normative*. It describes one implementation, not the only
 possible implementation. The sole authoritative specification is the
-xref:ERS-ERE-Contarct/index.adoc[ERS–ERE Technical Contract].
+xref:ERS-ERE-Contract/index.adoc[ERS–ERE Technical Contract].
 ====
 
 The source code is available in the
@@ -91,21 +91,46 @@ Once similarity scores are available, the service applies a *greedy* assignment 
 . If no candidate meets the threshold, create a new *singleton cluster* whose identifier
   is derived deterministically from the new mention's identifier.
 
+[NOTE]
+====
+The reference default for the clustering threshold is `0.20`, whereas the
+xref:ERS-ERE-Contract/supplement.adoc#configuration[contract supplement] recommends
+keeping `confidence_threshold` near zero (or unused) so that resolution responses are
+not returned empty, leaving long-tail pruning to ERS. These two positions are in
+tension: the reference implementation favours a non-trivial default for demonstration
+purposes, while the contract guidance favours a near-zero value in production
+deployments. Operators integrating with ERS should follow the contract guidance and
+lower the threshold accordingly.
+====
+
 This is an *online* algorithm: decisions are made one mention at a time, in arrival
 order. There is no retrospective re-clustering when new evidence arrives. This makes
 the algorithm fast and predictable, at the cost of order-sensitivity.
 
 ==== Canonical Identifier Derivation
 
-Cluster identifiers are derived deterministically using the rule defined in the contract:
+Cluster identifiers are derived deterministically using the rule defined in
+xref:ERS-ERE-Contract/introduction.adoc#canonical-identifier-derivation[Canonical Identifier Derivation and Stability]:
 
 ----
 SHA256(concat(source_id, request_id, entity_type))
 ----
 
-Because the cluster identifier of a singleton cluster equals the mention identifier
-of its founding member, and that identifier is computed by the same rule, all cluster
-identifiers are stable and reproducible across replays and re-submissions.
+A singleton cluster's identifier equals the canonical identifier derived from its
+single member's mention identifier triad, and that identifier is computed by the
+same rule, so all singleton cluster identifiers are stable and reproducible across
+replays and re-submissions.
+
+// TODO: The contract derives a cluster identifier from a single mention identifier
+// triad, but does not specify which member's triad seeds the identifier of a
+// multi-member cluster. The basic ERE assigns the new mention to the matched
+// candidate's existing cluster (Step 4), so a multi-member cluster retains the
+// identifier it had when it was first created as a singleton. This behaviour is
+// not stated normatively in the contract; flag upstream so the contract can make
+// the founding-member rule explicit. Wording kept conservative until resolved.
+For a multi-member cluster, the basic ERE keeps the identifier the cluster was
+assigned when it was first created (see <<Step 4 — Cluster Assignment>>); merging a
+new mention into an existing cluster does not recompute the cluster identifier.
 
 === Step 5 — Candidate Generation
 
@@ -230,9 +255,9 @@ Runs in-memory during development; file-backed in production.
 
 == See Also
 
-* xref:ERS-ERE-Contarct/index.adoc[ERS–ERE Technical Contract] — normative specification of
+* xref:ERS-ERE-Contract/index.adoc[ERS–ERE Technical Contract] — normative specification of
   messages, idempotency, and canonical identifier derivation.
-* xref:ERS-ERE-Contarct/interface.adoc[Interface Specification] — channel names and message
+* xref:ERS-ERE-Contract/interface.adoc[Interface Specification] — channel names and message
   formats (`EntityMentionResolutionRequest`, `EntityMentionResolutionResponse`, `EREErrorResponse`).
 * xref:ERE/ere-dev-guide.adoc[ERE Developer Guide] — practical guidance for implementers building
   their own ERE.

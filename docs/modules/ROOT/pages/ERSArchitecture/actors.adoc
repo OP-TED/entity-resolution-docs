@@ -1,28 +1,33 @@
-== 3. Actors, roles, and responsibility boundaries
+= Actors, Roles, and Responsibility Boundaries
 
-This section defines the external actors that interact with ERSys and clarifies the responsibility and authority boundaries that govern those interactions. The objective is not to describe organisational structures or deployment realities, but to define interaction authority and responsibility semantics at the system boundary. Every request, response, or operation is evaluated according to the role assumed at that moment. +
-The diagram below illustrates the conceptual landscape of actors around ERSys. It distinguishes systems from human actors and makes explicit which architectural role they assume when interacting with ERSys. The diagram is conceptual. It does not prescribe physical deployment, network topology, or ownership.
+This section defines the external actors that interact with ERSys and clarifies the responsibility and authority boundaries that govern those interactions. The objective is to define interaction authority and responsibility semantics at the system boundary, rather than to describe organisational structures or deployment realities. Every request, response, or operation is evaluated according to the role assumed at that moment.
 
-image::L0.png[]
+The diagram below shows the conceptual landscape of actors around ERSys, distinguishing systems from human actors and making explicit which architectural role they assume when interacting with ERSys. It is conceptual and does not prescribe physical deployment, network topology, or ownership.
 
-A key principle is that roles are contextual. A single external system may act as an Originator when submitting entity mentions and later act as a Downstream Consumer when retrieving canonical identifiers. Similarly, a person interacting through a user interface may assume either a Curator role or a System Administrator role depending on the operation performed. Authority derives from the role, not from the identity of the organisation or individual.
+image::L0.png[Conceptual actor landscape around ERSys: external systems and human actors mapped to their architectural roles]
 
-=== 3.1 Originator
+Roles are contextual. A single external system may act as an Originator when submitting entity mentions and later act as a Downstream Consumer when retrieving canonical identifiers. Similarly, a person interacting through a user interface may assume either a Curator role or a System Administrator role depending on the operation performed. Authority derives from the role, not from the identity of the organisation or individual.
 
-The Originator is an external system that submits entity mentions to ERSys for resolution. It provides descriptive artefacts together with the required correlation identifiers and expects a canonical identifier in return within the defined (in ERS configurations) client-facing time budget, acknowledging that the identifier may be provisional and subject to later replacement following authoritative ERE evaluation. +
+== Originator
+
+The Originator is an external system that submits entity mentions to ERSys for resolution. It provides descriptive artefacts together with the required correlation identifiers and expects a canonical identifier in return within the defined (in ERS configurations) client-facing time budget, acknowledging that the identifier may be provisional and subject to later replacement following authoritative ERE evaluation.
+
 The Originator has no authority over clustering outcomes. It may supply contextual metadata, but it cannot determine, override, or constrain canonical identity outside the defined recommendation mechanism. Its responsibility is limited to correct submission according to the input contract.
 
-=== 3.2 Downstream Consumer
+== Downstream Consumer
 
-The Downstream Consumer is an external system that retrieves canonical identifiers and assignment updates from ERSys. It relies on the non-reuse guarantee of canonical identifiers and on the refresh mechanisms that expose assignment changes over time. +
+The Downstream Consumer is an external system that retrieves canonical identifiers and assignment updates from ERSys. It relies on the non-reuse guarantee of canonical identifiers and on the refresh mechanisms that expose assignment changes over time.
+
 The Downstream Consumer does not influence resolution outcomes. It consumes identity references and reacts to changes according to its own internal logic, which lies outside the ERSys boundary.
 
-=== 3.3 Curator
+== Curator
 
-The Curator is a human actor interacting with ERSys through the Link Curation Web Application. The Curator may request re-evaluation of a mention’s current cluster assignment by submitting placement recommendations or exclusion constraints, which are transmitted to the ERE as evidence inputs under the defined contract. +
+The Curator is a human actor interacting with ERSys through the Link Curation Web Application. The Curator may request re-evaluation of a mention's current cluster assignment by submitting placement recommendations or exclusion constraints, which are transmitted to the ERE as evidence inputs under the defined contract.
+
 The Curator does not directly modify canonical identity. All human interventions are forwarded to the ERE as recommendations. The authoritative outcome remains the result of engine evaluation. Human input influences resolution by providing additional evidence, not by overriding clustering authority.
 
-=== 3.4 System Administrator
+== System Administrator
 
-The System Administrator is responsible for operational and configuration-level interactions with ERSys. This role may include managing entity type configuration and supervising operational procedures defined in the architecture, user management, but does not include authority to initiate independent canonical rebuild, replay, or identity override operations within ERS. +
+The System Administrator is responsible for operational and configuration-level interactions with ERSys. This role may include managing entity type configuration, user management, and supervising operational procedures defined in the architecture. It does not include authority to initiate independent canonical rebuild, replay, or identity override operations within ERS.
+
 The System Administrator does not alter canonical identity semantics. Administrative actions may affect configuration or operational parameters, but clustering authority remains with the ERE.
