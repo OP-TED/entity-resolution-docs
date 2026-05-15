@@ -1,14 +1,14 @@
 === 8.2 Spine A: Resolution intake and canonical identifier issuance
 
-Spine A defines the client-facing *Resolve* interaction in which an Originator submits a single Entity Mention and receives an identifier within the client-facing time budget. This spine exists to make three things unambiguous at the ERS boundary:
+*Intent.* Spine A defines the client-facing *Resolve* interaction in which an Originator submits a single Entity Mention and receives an identifier within the client-facing time budget. This spine makes three things unambiguous at the ERS boundary:
 
-* *Idempotent intake* correlated by the triad _(sourceId, requestId, entityType)_.
-* *Dual time budgets*, where the ERS ↔ ERE execution window is shorter than the client ↔ ERS timeout budget.
+* *Idempotent intake* correlated by the triad _(source_id, request_id, entity_type)_.
+* *Dual time budgets*, where the ERS–ERE execution window is shorter than the client–ERS timeout budget.
 * *Identifier availability semantics*, including the provisional singleton lifecycle when the engine does not respond in time.
 
-*Simplified sequence diagram (Spine A)* +
+*Simplified sequence diagram (Spine A)*
 
-[mermaid, align=center, width=100%]
+[mermaid, align=center]
 ----
 ---
 config:
@@ -33,7 +33,7 @@ end
 
 participant MessagingMiddleware as "Messaging Middleware"
 
-Originator ->> ERIntake: Resolve Entity Mention<br/>(sourceId, requestId, entityType,<br> EntityMention, context)
+Originator ->> ERIntake: Resolve Entity Mention<br/>(source_id, request_id, entity_type,<br/> EntityMention, context)
 ERIntake ->> ERS: Validate and handle idempotency<br/>(register request if new)
 
 alt Request rejected
@@ -43,60 +43,65 @@ else Request is an idempotent repeat
     ERS -->> ERIntake: Previously returned identifier
     ERIntake -->> Originator: 200 OK<br/>(identifier)
 else Request accepted
-    ERS ->> MessagingMiddleware: Publish resolution request (async)<br/>(sourceId, requestId, entityType, EntityMention)
+    ERS ->> MessagingMiddleware: Publish resolution request (async)<br/>(source_id, request_id, entity_type, EntityMention)
 
     alt ERE result received within ERS to ERE execution window
-        MessagingMiddleware -->> ERS: Deliver resolution result (async)<br/>(canonical clusterId + top alternative clusterIds)
+        MessagingMiddleware -->> ERS: Deliver resolution result (async)<br/>(canonical cluster_id + top alternative cluster_id values)
         ERS ->> ERS: Persist resolution decision and update lookup projection
-        ERS -->> ERIntake: Canonical clusterId
-        ERIntake -->> Originator: 200 OK<br/>Canonical clusterId
+        ERS -->> ERIntake: Canonical cluster_id
+        ERIntake -->> Originator: 200 OK<br/>Canonical cluster_id
     else ERE result not received within ERS to ERE execution window
         ERS ->> ERS: Create provisional singleton and persist decision
-        ERS ->> MessagingMiddleware: Publish placement instruction (async)<br/>(assign mention to singleton clusterId)
-        ERS -->> ERIntake: Provisional clusterId
-        ERIntake -->> Originator: 200 OK<br/>Provisional clusterId
+        ERS ->> MessagingMiddleware: Publish placement instruction (async)<br/>(assign mention to singleton cluster_id)
+        ERS -->> ERIntake: Provisional cluster_id
+        ERIntake -->> Originator: 200 OK<br/>Provisional cluster_id
     else Client timeout budget exceeded
         ERS -->> ERIntake: Error
         ERIntake -->> Originator: 5xx or timeout
     end
 end
 
-%% note right of ERS: Late or duplicate engine results may update the stored decision and lookup projection\nCompleted client responses are not retroactively changed
+Note right of ERS: Late or duplicate engine results may update the stored<br/>decision and lookup projection. Completed client<br/>responses are not retroactively changed.
 
 ----
 
-*Narrative aligned to the simplified diagram* +
+*Narrative aligned to the simplified diagram*
 
-*Submit resolve request.* The Originator submits a resolve request containing the triad _(sourceId, requestId, entityType)_ and a single Entity Mention payload to the ERS intake interface. +
-*Validate and enforce idempotency.* ERS validates the request and enforces idempotency based on the triad. Replays are handled deterministically. Conflicting submissions, such as reuse of the same triad with a different payload under the same contract rules, are rejected. +
-*Reject invalid or non-processable requests.* If the request violates mandatory validation rules, triggers an idempotency conflict, or cannot be processed due to mandatory dependency unavailability, ERS returns an explicit error outcome. +
-*Initiate resolution via the async contract.* For an accepted request, ERS publishes a resolution request asynchronously via the messaging middleware. Publication is part of the synchronous interaction, but it does not make the client call “asynchronous”. The client still observes a bounded response. +
-*Return within the client budget.* ERS waits up to the *ERS ↔ ERE execution window* for an authoritative engine outcome.
+*Submit resolve request.* The Originator submits a resolve request containing the triad _(source_id, request_id, entity_type)_ and a single Entity Mention payload to the ERS intake interface.
 
-* If an engine outcome is received within the execution window, ERS records the latest decision for the mention and returns the *clusterId (canonical identifier)* produced by the ERE.
-* If no engine outcome is received within the execution window, ERS issues a *provisional singleton clusterId*, records it as the current placement for the mention, returns it to the client within the client budget, and forwards the provisional placement to ERE as a standard resolution request variant using *recommendedPlacement*.
-* If the *client ↔ ERS timeout budget* is exceeded before ERS can produce a compliant response, ERS returns an explicit timeout or error outcome.
-*Late and duplicate outcomes.* Engine outcomes may arrive late or duplicated. ERS processes them idempotently and updates its stored *latest decision record per mention*. Completed client responses are not retroactively changed, but the canonical identifier exposed by ERS for subsequent lookups and bulk delta synchronisation reflects the latest authoritative assignment recorded. +
+*Validate and enforce idempotency.* ERS validates the request and enforces idempotency based on the triad. Replays are handled deterministically. Conflicting submissions, such as reuse of the same triad with a different payload under the same contract rules, are rejected.
+
+*Reject invalid or non-processable requests.* If the request violates mandatory validation rules, triggers an idempotency conflict, or cannot be processed due to mandatory dependency unavailability, ERS returns an explicit error outcome.
+
+*Initiate resolution via the async contract.* For an accepted request, ERS publishes a resolution request asynchronously via the messaging middleware. Publication is part of the synchronous interaction; it does not make the client call asynchronous. The client still observes a bounded response.
+
+*Return within the client budget.* ERS waits up to the *ERS–ERE execution window* for an authoritative engine outcome.
+
+* If an engine outcome is received within the execution window, ERS records the latest decision for the mention and returns the *`cluster_id` (canonical identifier)* produced by the ERE.
+* If no engine outcome is received within the execution window, ERS issues a *provisional singleton `cluster_id`*, records it as the current placement for the mention, returns it to the client within the client budget, and forwards the provisional placement to ERE as a standard resolution request variant carrying the optional `proposed_cluster_ids` field defined in the xref:ERS-ERE-Contract/interface.adoc[ERS–ERE contract].
+* If the *client–ERS timeout budget* is exceeded before ERS can produce a compliant response, ERS returns an explicit timeout or error outcome.
+
+*Late and duplicate outcomes.* Engine outcomes may arrive late or duplicated. ERS processes them idempotently and updates its stored *latest decision record per mention*. Completed client responses are not retroactively changed, but the canonical identifier exposed by ERS for subsequent lookups and bulk delta synchronisation reflects the latest authoritative assignment recorded.
 
 *Key behavioural commitments shown*
 
-* Each resolve request is correlated by _(sourceId, requestId, entityType)_ and processes exactly one Entity Mention.
+* Each resolve request is correlated by _(source_id, request_id, entity_type)_ and processes exactly one Entity Mention.
 * ERS enforces idempotency at intake: deterministic handling of identical replays; explicit rejection of contract-relevant conflicts.
 * The engine boundary is asynchronous and tolerant to at-least-once delivery; duplicates and late arrivals are normalised by idempotent processing.
 * An identifier is returned within the client-facing budget when possible:
-** authoritative *clusterId* if the engine responds within the ERS ↔ ERE execution window,
-** otherwise a *provisional singleton clusterId*, treated as the current canonical placement until replaced by a later authoritative outcome.
+** authoritative *`cluster_id`* if the engine responds within the ERS–ERE execution window,
+** otherwise a *provisional singleton `cluster_id`*, treated as the current canonical placement until replaced by a later authoritative outcome.
 
 *Authoritative state touched*
 
-* *Request Registry* (intake and correlation): stores request records keyed by _(sourceId, requestId, entityType)_ sufficient to detect replays, reject idempotency conflicts, and support deterministic processing.
-* *Decision Store* (latest decision per mention): stores the latest recorded placement (*clusterId*), top N alternatives when provided by the ERE, the contextId used for correlation, and relevant timestamps.
-* *Delta tracking fields* (per originId exposure): updated when the recorded placement changes, enabling refreshBulk to expose changes consistently.
+* *Request Registry* (intake and correlation): stores request records keyed by _(source_id, request_id, entity_type)_ sufficient to detect replays, reject idempotency conflicts, and support deterministic processing.
+* *Decision Store* (latest decision per mention): stores the latest recorded placement (*`cluster_id`*), top N alternatives when provided by the ERE, the `context_id` used for correlation, and relevant timestamps.
+* *Delta tracking fields* (per `source_id` exposure): updated when the recorded placement changes, enabling refreshBulk to expose changes consistently.
 
 *Traceability*
 
-* *White Use Case(s):* UC-W1.
-* *Blue Use Case(s):* UC-B-1.1.
+* *White Use Case(s):* xref:AnnexeB-UseCases/ucw1.adoc#uc-w1[UC-W1].
+* *Blue Use Case(s):* xref:AnnexeB-UseCases/ucb11.adoc#uc-b1-1[UC-B1.1].
 * *ADRs:* ADR-A1N, ADR-A2N, ADR-C1N (identifier semantics, timeout and provisional lifecycle, idempotency and messaging tolerance).
 * *Contracts:* ERS Resolution API (owner: ERS, REST, normative); ERS–ERE Technical Contract (asynchronous, normative).
 * *Detailed diagram artefact:* spine-A-Resolve-EntityMention.mmd (associated Mermaid artefact).
