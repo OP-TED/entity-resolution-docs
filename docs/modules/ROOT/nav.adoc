@@ -13,8 +13,9 @@
 *** xref:ERSArchitecture/behaviour-spines.adoc[Behaviour Spines]
 *** xref:ERSArchitecture/conceptual-model.adoc[Conceptual Model]
 *** xref:ERSArchitecture/system-context.adoc[System Context]
-*** xref:ERSArchitecture/dependecy-inventory.adoc[Dependency Inventory]
+*** xref:ERSArchitecture/dependency-inventory.adoc[Dependency Inventory]
 *** xref:ERSArchitecture/deployment-architecture.adoc[Deployment Architecture]
+*** xref:AnnexeC-ADRs/index.adoc[Architecture Decision Records]
 ** xref:AnnexeB-UseCases/index.adoc[Use Cases]
 
 * ERS
@@ -28,7 +29,7 @@
 ** xref:ERS-ERE-Contract/index.adoc[ERS-ERE Technical Contract]
 *** xref:ERS-ERE-Contract/introduction.adoc[Introduction]
 *** xref:ERS-ERE-Contract/interface.adoc[Interface Specification]
-*** xref:ERS-ERE-Contract/suppliment.adoc[Supplement]
+*** xref:ERS-ERE-Contract/supplement.adoc[Supplement]
 ** xref:ERE/ere-dev-guide.adoc[Developer Guide]
 ** xref:ERE/ere-reference-impl.adoc[Basic ERE Reference Implementation]
 
