@@ -1,36 +1,31 @@
-== UC-W5  Manage Curator Access
+[#uc-w5]
+= UC-W5: Manage Curator Access
 
 *Use Case Level:* White (Summary) +
 *Primary Actor:* Admin (application role) +
-*Scope:* Link Curation Application +
+*Scope:* Link Curation Application
 
-*Stakeholders and Interests*
+== Stakeholders and Interests
 
 * Admins require a simple and reliable mechanism to control who can access curator functionality within the Link Curation application.
 * Curators require predictable access behaviour, including timely provisioning and immediate suspension when access is revoked.
 * Originators and downstream consumers indirectly depend on controlled curator access to ensure that re-evaluation actions are performed only by authorised users.
 
-*Goal / Value* +
-Provide minimal and controlled curator user management so that access to curation functionality can be granted, modified, suspended, reactivated, or retired in a consistent and reversible way, independently of the underlying authentication mechanism. +
+== Brief Description
 
-*Scope (System-of-Interest)* +
-The Link Curation application, limited to:
+This use case describes how an Admin manages curator access within the Link Curation application.
+
+The value is to provide minimal and controlled curator user management so that access to curation functionality can be granted, modified, suspended, reactivated, or retired in a consistent and reversible way, independently of the underlying authentication mechanism.
+
+The system-of-interest is the Link Curation application, limited to:
 
 * maintaining a registry of users permitted to act as Curators or Admins,
 * associating authenticated user identities with application roles,
 * activating and deactivating curator access.
-How user identities are authenticated (for example via Single Sign-On, external identity provider, or locally managed credentials) is outside the scope of this use case. +
 
-*Out of Scope*
+How user identities are authenticated (for example via Single Sign-On, external identity provider, or locally managed credentials) is outside the scope of this use case.
 
-* Credential storage and password management.
-* Configuration of external identity providers or SSO infrastructure.
-* Advanced identity governance workflows (approvals, recertification, role mining).
-* Fine-grained authorisation beyond the defined application roles.
-
-*Brief Description* +
-This use case describes how an Admin manages curator access within the Link Curation application. +
-User management is role-based and lightweight. The system recognises authenticated users and determines whether they are allowed to perform curator actions based on their assigned role. +
+User management is role-based and lightweight. The system recognises authenticated users and determines whether they are allowed to perform curator actions based on their assigned role.
 
 The Admin may:
 
@@ -40,25 +35,42 @@ The Admin may:
 . Reactivate previously suspended access.
 . Retire access permanently while retaining historical references to the user for traceability of past actions.
 
-Suspension or retirement of access takes effect immediately. +
-Curator access management does not modify Cluster Assignments, Decision Store content, or any canonical identity state. +
+Suspension or retirement of access takes effect immediately. Curator access management does not modify Cluster Assignments, Decision Store content, or any canonical identity state.
 
-*Success Guarantees (Postconditions)*
+== Trigger
+
+The Admin initiates a curator access management action (grant, modify, suspend, reactivate, or retire) for an identified user.
+
+== Main Success Scenario
+
+. The Admin selects an identified user and chooses an access management action.
+. The system applies the requested role change to the user registry.
+. The change is reflected in subsequent access checks, taking effect immediately for suspension or retirement.
+
+== Success Guarantee (Postconditions)
 
 * The requested role change is applied consistently and reflected in subsequent access checks.
 * Suspended or retired users cannot perform curator actions.
 * Historical references to user identifiers remain available for traceability of past re-evaluation actions.
 
-*Minimal Guarantees (On Failure)*
+== Minimal Guarantees (On Failure)
 
 * If an access management operation fails, no partial or ambiguous access state is exposed.
 * The system reports the failure to the Admin and does not grant unintended access.
 
-*Special Requirements*
+== Out of Scope
+
+* Credential storage and password management.
+* Configuration of external identity providers or SSO infrastructure.
+* Advanced identity governance workflows (approvals, recertification, role mining).
+* Fine-grained authorisation beyond the defined application roles.
+
+== Special Requirements
 
 * Access control is role-based and limited to defined application roles (e.g. Admin and Curator).
 * Access management is independent of clustering logic, resolution processing, and canonical identity semantics.
 * The design must remain compatible with both externally managed authentication (e.g. SSO) and locally managed authentication.
 
-*Frequency of Occurrence* +
+== Frequency of Occurrence
+
 Low; invoked when onboarding, modifying, or removing curator access.
