@@ -1,6 +1,6 @@
-* xref:index.adoc[Home]
+* xref:index.adoc[Introduction]
 
-* ERSys
+* Entity Resolution System (ERSys)
 ** xref:ERSys/index.adoc[Overview]
 ** xref:ERSys/getting-started.adoc[Getting Started]
 ** xref:ERSys/examples.adoc[Examples]
@@ -18,20 +18,20 @@
 *** xref:AnnexeC-ADRs/index.adoc[Architecture Decision Records]
 ** xref:AnnexeB-UseCases/index.adoc[Use Cases]
 
-* ERS
+* Entity Resolution Service (ERS)
 ** xref:ERS/capabilities.adoc[Capabilities]
 ** xref:ERS/configuration.adoc[Configuration Reference]
 ** xref:api-docs/api-integration-guide.adoc[API Integration Guide]
 ** xref:api-docs/ers/index.adoc[ERS REST API]
 ** xref:api-docs/curation/index.adoc[Curation REST API]
 
-* ERE
-** xref:ERS-ERE-Contract/index.adoc[ERS-ERE Technical Contract]
+* Entity Resolution Engine (ERE)
+** xref:ERS-ERE-Contract/index.adoc[Entity Resolution Service–Engine Technical Contract (ERS–ERE)]
 *** xref:ERS-ERE-Contract/introduction.adoc[Introduction]
 *** xref:ERS-ERE-Contract/interface.adoc[Interface Specification]
 *** xref:ERS-ERE-Contract/supplement.adoc[Supplement]
 ** xref:ERE/ere-dev-guide.adoc[Developer Guide]
-** xref:ERE/ere-reference-impl.adoc[Basic ERE Reference Implementation]
+** xref:ERE/ere-reference-impl.adoc[Basic Entity Resolution Engine Reference Implementation]
 
 * xref:UserGuide/curation-guide-overview.adoc[Curation App (User Guide)]
 ** xref:UserGuide/curation-guide-decisions.adoc[Decisions Review]
