@@ -1,6 +1,6 @@
 # AI Coding Setup Guide
 
-**Audience:** Meaningfy developers setting up Claude Code on a new project repository.
+**Audience:** Developers setting up Claude Code on a new project repository.
 
 **Purpose:** This guide explains the file structure, configuration, and how to
 replicate the AI-assisted coding setup across project repositories.
@@ -12,7 +12,7 @@ For the methodology and workflow, see the companion
 
 ## 1. File Structure Overview
 
-Every Meaningfy project repository follows this structure for AI coding support:
+Every project repository follows this structure for AI coding support:
 
 ```
 repo-root/
@@ -96,7 +96,7 @@ in every session. It must:
 See the actual `CLAUDE.md` in this repository as the reference implementation.
 
 **Note:** The project-level `CLAUDE.md` complements the global `~/.claude/CLAUDE.md`
-which contains Meaningfy-wide coding practices (Clean Code, SOLID, Cosmic Python,
+which contains shared, organization-wide coding practices (Clean Code, SOLID, Cosmic Python,
 testing strategy). Both are loaded into every conversation.
 
 ### 2.1 settings.local.json

@@ -1,6 +1,6 @@
 # AI-Assisted Coding Runbook
 
-**Audience:** Meaningfy developers using Claude Code for AI-assisted development.
+**Audience:** Developers using Claude Code for AI-assisted development.
 
 **Purpose:** This runbook defines *how we work* with AI coding agents — the phases,
 the agents, the memory conventions, and the quality gates. Follow this document as
