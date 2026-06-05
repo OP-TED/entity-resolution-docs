@@ -23,7 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 * Curation web application user guide revised
 * Use case catalogue revised and realigned with the architecture
 * ERS service documentation revised for correctness
-* Antora playbook updated to source component content from the meaningfy fork
+* Antora playbook updated to source component content from the project repository fork
 * Path templates escaped in the generated Curation API spec
 
 ## [1.0.0-rc.1] - 2026-04-21
