@@ -9,7 +9,7 @@ The documentation establishes the architectural foundation, integration contract
 
 ## 📖 Documentation
 
-**Live documentation:** https://meaningfy-ws.github.io/entity-resolution-docs/
+**Live documentation:** https://OP-TED.github.io/entity-resolution-docs/
 
 ## Contents
 
