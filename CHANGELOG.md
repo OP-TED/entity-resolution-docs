@@ -5,7 +5,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [unreleased]
 
-## [1.1.0] - 2026-05-15
+## [1.1.0-rc.3] - 2026-06-10
+
+### Added
+* Curation user guide: "Needs re-review" flow in the review cycle overview
+* Curation user guide: review status indicators in the Decision List
+* Curation user guide: review status filter and cluster size sort option in the filter bar
+* Curation user guide: "Why review needed" banner and entity metadata (ⓘ button) documentation
+* Curation user guide: Previously Reviewed Decisions subsection with notification texts
+* Curation user guide: updated and new screenshots (metadata, needs-rereview-notification)
+
+### Changed
+* Curation API reference updated to match the latest API version
+* Curation user guide: clarified that inactive and unverified users cannot use the application
+* AI-coding documentation de-branded; Meaningfy attributions removed
+* Live documentation URL updated in README
+
+## [1.1.0-rc.2] - 2026-05-15
 ### Added
 * ERSys top-level section covering system scope and the role of each component
 * User-facing sections and navigation structure for the ERSys documentation area
