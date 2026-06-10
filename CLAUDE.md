@@ -5,13 +5,13 @@ project. It uses Antora (AsciiDoc) for technical documentation and serves as the
 planning hub for AI-assisted development.
 
 - **Main branch:** `develop` (PR target)
-- **Global instructions:** The user-level `~/.claude/CLAUDE.md` contains Meaningfy-wide
-  coding practices (Clean Code, SOLID, Cosmic Python, testing strategy). It
+- **Global instructions:** The user-level `~/.claude/CLAUDE.md` contains shared,
+  organization-wide coding practices (Clean Code, SOLID, Cosmic Python, testing strategy). It
   complements this project-level file and is loaded into every conversation.
 
 ## Methodology
 
-This project follows the **Meaningfy AI-Assisted Coding** methodology:
+This project follows the **AI-Assisted Coding** methodology:
 - **Runbook:** `docs/ai-coding/ai-coding-runbook.md`
 - **Setup guide:** `docs/ai-coding/ai-coding-setup-guide.md`
 

@@ -1,6 +1,6 @@
-# Meaningfy AI-Assisted Coding Methodology
+# AI-Assisted Coding Methodology
 
-**Audience:** Developers and technical leads adopting AI-assisted development at Meaningfy.
+**Audience:** Developers and technical leads adopting AI-assisted development.
 
 **Purpose:** This document describes the methodology — the *why* and *what*. For the
 operational *how*, see the companion documents:
@@ -212,7 +212,7 @@ For the detailed file format and rules, see [AI Coding Runbook §3.2](ai-coding-
 
 ### 5.1 Repository Structure
 
-Every Meaningfy project repository follows this structure for AI coding support:
+Every project repository follows this structure for AI coding support:
 
 ```
 repo-root/
@@ -234,7 +234,7 @@ repo-root/
 
 | Level | File | Scope | Contains |
 |-------|------|-------|----------|
-| **Global** | `~/.claude/CLAUDE.md` | All Meaningfy projects | Clean Code, SOLID, Cosmic Python, testing strategy, tooling |
+| **Global** | `~/.claude/CLAUDE.md` | All projects | Clean Code, SOLID, Cosmic Python, testing strategy, tooling |
 | **Project** | `./CLAUDE.md` | This repository | Agent behaviour rules, file references, memory conventions, project-specific rules |
 
 Both are loaded into every conversation. The project-level file complements
