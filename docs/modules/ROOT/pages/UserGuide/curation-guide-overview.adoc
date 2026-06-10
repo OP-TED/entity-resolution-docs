@@ -66,6 +66,7 @@ From your point of view as a curator, a review cycle runs as follows:
 . You open a decision and compare the entity mention against the proposed cluster.
 . You record your verdict — *Accept* the top candidate, *Select* an alternative cluster, or *Reject* all candidates.
 . Your feedback is stored and forwarded to the engine, which uses it when re-evaluating future decisions.
+. Once the engine acts on your feedback and updates a previously reviewed decision, that decision may re-appear in the queue, annotated as *Needs re-review*, indicating it requires another look.
 . At any time you can open the Action History to review past decisions and their outcomes.
 
 == Application Pages
