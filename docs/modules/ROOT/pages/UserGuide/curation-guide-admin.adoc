@@ -24,6 +24,9 @@ Two independent settings control whether and how a user can use the application.
 
 In short: *Active* is the door to the application; *Verified* is the door to curation work inside it.
 
+NOTE: Neither an inactive nor an unverified user can use the application.
+
+
 == The User Table
 
 Each row in the table represents one user account and shows:
