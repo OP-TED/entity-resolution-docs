@@ -42,6 +42,11 @@ Scores are colour-coded so you can judge them at a glance:
 | The engine is most certain.
 |===
 
+Each entry may also display a visual indicator of its review status:
+
+* *Reviewed* — the decision has already been reviewed by a curator.
+* *Needs re-review* — the decision was previously reviewed but has been returned to the queue for re-evaluation after a backend update.
+
 
 === Filtering and Ordering Bar
 
@@ -67,9 +72,14 @@ By default the list shows all pending decisions; use this filter to focus on the
 | Restrict by similarity score range.
 Select a predefined band or set custom min/max values.
 
+| *Review status*
+| Filter decisions by their review state.
+Options: _Never reviewed_ (decisions that have not yet been curated), _Reviewed_ (decisions that have already been curated), _Needs re-review_ (decisions that were previously reviewed but have been returned to the queue after a backend update).
+Leave the filter set to _All Statuses_ to see all decisions regardless of review state.
+
 | *Sort by*
 | Order the decision list.
-Options: _Created At (Newest/Oldest)_, _Updated At (Newest/Oldest)_, _Confidence (Low to High / High to Low)_.
+Options: _Created At (Newest/Oldest)_, _Updated At (Newest/Oldest)_, _Confidence (Low to High / High to Low)_, _Cluster size (Smallest)_, _Cluster size (Largest)_.
 
 | *Search*
 | Full-text search across entity mention field data (name, identifiers, and other parsed attributes).
@@ -101,6 +111,15 @@ The Decision Area displays the full details of a selected decision: the entity m
 It is also where the curator records their feedback.
 
 image::curation/decision-area.png[Decision area with comparison panel and alternative clusters]
+
+A *Why review needed* banner at the top of the Decision Area explains why this specific decision was flagged for manual curation.
+The message is tailored to the decision and may describe factors such as: high similarity combined with low confidence, the presence of alternative candidate clusters, a singleton cluster (a cluster containing only a single entity), or differences in specific entity property values.
+The banner also shows the cluster size and when the decision was last updated.
+
+Each entity card in the comparison view — both the current entity mention and each member of the proposed cluster — has an *ⓘ* button in the top-right corner.
+Clicking it opens a metadata panel with the provenance details for that entity, including its *Source ID*, *Request ID*, and *Entity Type*.
+
+image::curation/metadata.png[Entity mention metadata panel showing Source ID, Request ID, and Entity Type,60%]
 
 [#alternative-clusters]
 === Alternative Clusters
@@ -140,7 +159,6 @@ To review a decision:
 . Decide whether the entity mention and the proposed cluster are the same real-world entity.
 
 image::curation/comparison-panel.png[Comparison panel with entity cards and diff highlighting]
-
 The highlight colours show *where each field value appears* — they do not represent edits or a before/after history. There are three cases:
 
 [cols="1,1,2",options="header"]
@@ -159,6 +177,22 @@ The highlight colours show *where each field value appears* — they do not repr
 | Different in each
 | The field is present in both, but the values differ.
 |===
+
+==== Previously Reviewed Decisions
+
+The Decisions Queue may include decisions that were already reviewed or that have been returned for a second look.
+When a decision falls into one of these states, the Decision Area displays a notification banner:
+
+* *Reviewed* — the decision has already been recorded by a curator.
+  The banner reads: _"This decision has already been reviewed by a curator."_
+* *Needs re-review* — the decision was previously reviewed but has been returned to the queue after a backend update.
+  The banner reads: _"A curator reviewed this decision previously, but it was returned for curation after a backend update and needs a re-review."_
+
+image::curation/needs-rereview-notification.png[Needs re-review notification banner]
+
+These notifications are informational — you can still inspect the decision and record updated feedback if needed.
+
+
 
 === Accepting a Decision
 
