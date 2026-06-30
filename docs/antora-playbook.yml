@@ -4,9 +4,9 @@ site:
 
 content:
   sources:
-    - url: https://github.com/meaningfy-ws/entity-resolution-docs.git
+    - url: https://github.com/OP-TED/entity-resolution-docs.git
       start_path: docs
-      branches: [develop]
+      branches: [release/1.1.0]
       tags: []
       edit_url: false
 
