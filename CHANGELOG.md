@@ -5,6 +5,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [unreleased]
 
+
+## [1.0.0-rc.2] - 2026-06-30
+
+### Changed
+* Minor documentation improvements (TEDSWS-520)
+* Meaningfy-specific references removed from the source code repositories (TEDSWS-528)
+
+
 ## [1.1.0-rc.3] - 2026-06-10
 
 ### Added
