@@ -1,0 +1,12 @@
+= Annexe A: Glossary
+:description: Normative definitions of the domain and system terms used throughout ERSys documentation.
+
+This glossary provides the normative definitions of the domain and system terms used throughout ERSys documentation. Definitions herein take precedence over colloquial or external interpretations and are binding on all implementations and discussions.
+
+The three subsections below — purpose and conceptual framing, information-oriented concepts, and system-oriented concepts — are presented on this single page so that every definition is visible without further navigation.
+
+include::partial$glossary/intro-purpose-scope.adoc[leveloffset=+0]
+
+include::partial$glossary/glossary-1.adoc[leveloffset=+0]
+
+include::partial$glossary/glossary-2.adoc[leveloffset=+0]

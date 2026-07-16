@@ -1,0 +1,95 @@
+= ERS–ERE Contract Supplement
+:spec-ref: 1.0.0-rc.1
+
+This supplement collects the formal data model, the functional requirement traceability matrix, message examples, and the configuration surface that accompany the xref:ERS-ERE-Contract/introduction.adoc[ERS–ERE Technical Contract].
+
+== The ERE Data Model
+
+The data types used for the operations described in the xref:ERS-ERE-Contract/interface.adoc[interface specification] are formally defined using the https://linkml.io[LinkML schema language]. The diagram below is a PlantUML illustration of the model classes, automatically generated from the LinkML code (see the links below).
+
+image::EreServiceSchema.png[PlantUML class diagram of the ERE service LinkML data model]
+
+=== LinkML Code
+
+The LinkML source file is https://github.com/OP-TED/entity-resolution-spec/blob/{spec-ref}/resources/schemas/ere-service-schema-v0.1.0.yaml[on GitHub]. From it, the following artefacts are auto-generated:
+
+* https://github.com/OP-TED/entity-resolution-spec/blob/{spec-ref}/docs/schema/README.md[Navigable docs]
+* https://github.com/OP-TED/entity-resolution-spec/blob/{spec-ref}/resources/schemas/er-schema-v0.1.0.json[JSON schema], used in tasks such as defining REST APIs (for example, importing into OpenAPI schemas)
+* https://github.com/OP-TED/entity-resolution-spec/blob/{spec-ref}/src/erspec/models/ere.py[Python/Pydantic definitions], used to define the ERE service interfaces and implementations.
+
+== Functional requirement coverage matrix
+
+The following table provides a bigger picture by showing how the designed contract between the ERS and the ERE satisfies the functional requirements specified for the entire system in the Product Requirements Document. It allows the tracing of requirement fulfilment and shows how they are handled in the ERS–ERE communication context.
+
+[cols="2,3,3",options="header"]
+|===
+| Functional requirement | How it affects the ERS–ERE contract (required operations) | How it is handled by the ERE / the contract
+
+| Entity resolution (single and bulk resolution)
+| An entity resolution request is submitted.
+| An `EntityMentionResolutionRequest` is published to the `ere_requests` channel.
+
+| Entity resolution with proposed placement
+| An entity resolution is submitted by the ERS.
+| The ERE may decide to accept the singleton creation or not.
+
+| Bulk refresh
+| Handled by ERS; the ERE is not affected.
+| N/A
+
+| Retrieval of entity data (for Link Curation app)
+| The ERE is not affected; data is provided by ERS from its store.
+| N/A
+
+| Re-resolve a selected entity mention (refresh)
+| See _Manual curation: acceptance / rejection of proposed alignments_.
+| See _Manual curation: acceptance / rejection of proposed alignments_.
+
+| Recalculate the whole ERE cluster structure
+| The operation is internal to the ERE; it does not affect the contract.
+| The exact meaning of the operation depends on the ERE implementation.
+
+| Manual curation: acceptance / rejection of proposed alignments (Link Curation app)
+| Manual curation decisions are recorded by the ERS and passed to the ERE as suggestions.
+| The user feedback is propagated to the ERE through the usual resolution flow, using either `proposed_cluster_ids` or `excluded_cluster_ids` (see the _Entity resolution with proposed placement_ row).
+
+| Manual curation: acceptance of alternative alignment (Link Curation app)
+| The ERE is not affected; same as default acceptance.
+| N/A
+
+| Manual curation: presentation of resolution statistics
+| The ERE is not affected.
+| N/A
+
+| Manual curation: user management
+| The ERE is not affected.
+| N/A
+|===
+
+== Examples and Tests
+
+Examples of ERE message exchanges https://github.com/OP-TED/entity-resolution-spec/blob/{spec-ref}/test/test_data/analysis/ere-test-cases.md[are provided in the ERS GitHub repository]. These are mock-up cases based on https://github.com/OP-TED/entity-resolution-spec/blob/{spec-ref}/test/test_data[collected real data].
+
+A summary of the available examples:
+
+* Example 1: Simple resolution case -- organisations with minor detail variations
+** Same legal name, address, and contact details (Bulgarian Commission on Protection of Competition)
+* Example 2: Negative example of resolution -- different procedure numbers
+** Similar descriptions (both nursing services), but different procedure numbers in the titles
+** The ERE creates a new cluster identifier (rejected candidate at 0.68)
+* Example 3: Resolution with exclusions -- organisations with minor detail variations
+** Submission of a resolution request with two URIs previously provided by the ERE marked as excluded
+** The ERE creates a new canonical identifier
+
+Additionally, https://www.functionize.com/blog/what-is-gherkin-how-do-you-write-gherkin-tests[Gherkin tests] are available https://github.com/OP-TED/entity-resolution-spec/tree/feature/ERS1-96-gherkin-v2/test/features[on GitHub] to clarify the behaviour explained in this section.
+
+[#configuration]
+== Configuration
+
+The ERE is configured via YAML, possibly with mechanisms to https://dev.to/mkaranasou/python-yaml-configuration-with-environment-variables-parsing-2ha6[inject environment variables] in YAML files. The configuration options below are those any ERE needs to support to tune the interface described in the previous sections. Further configuration may be needed depending on the specific ERE implementation (for example, Redis connection coordinates).
+
+`entity_types`:: URI list of CETs, that is, the entity types that the ERE supports for resolution. In the initial basic ERE, these are likely organisations and procedures.
+
+`resolution_timeout` (integer, seconds):: Maximum time the ERE should spend trying to resolve an entity before being interrupted with a failure. Multiple time duration formats may optionally be supported, for example accepting values like "1m 5s".
+
+`confidence_threshold` (float, range 0–1):: Minimal value of the similarity score needed for an entity mention to be associated with a canonical entity through a canonical identifier. The recommendation is not to use this parameter, or to keep it near zero, to prevent returning empty resolution responses. The long-tail problem is handled by the ERS pruning to top-N options.

@@ -1,0 +1,107 @@
+= Entity Resolution System Documentation
+
+The Publications Office of the European Union processes thousands of procurement notices daily through the TED ecosystem.
+These notices reference real-world entities — organisations, procedures, lots — that may be described differently across submissions yet refer to the same thing.
+The Entity Resolution System (ERSys) automatically identifies when different entity representations refer to the same real-world entity and assigns each a stable canonical identifier, so downstream consumers always have a consistent identity even as resolution quality improves over time.
+
+ERSys is a platform of three cooperating components — the Entity Resolution Service (ERS), a pluggable Entity Resolution Engine (ERE), and a Curation Web Application.
+For the full capability and authority model, see the xref:ERSys/index.adoc[ERSys Overview].
+
+[TIP]
+====
+New to ERSys? Start with xref:ERSys/getting-started.adoc[Getting Started] — prerequisites, minimal configuration, and two end-to-end workflow walkthroughs.
+====
+
+== Entity Resolution System (ERSys)
+
+Platform-level documentation: concepts, onboarding, architecture, and use cases.
+
+[cols="2,4",options="header"]
+|===
+| Section | Purpose
+
+| xref:ERSys/index.adoc[Overview]
+| Identity model, ERS vs ERE responsibility split, and role-based entry points.
+
+| xref:ERSys/getting-started.adoc[Getting Started]
+| Prerequisites, minimal configuration, two API workflow walkthroughs, and the full-cycle demo script.
+
+| xref:ERSys/examples.adoc[Examples]
+| Worked request and response examples for the ERS REST API, Curation REST API, and entity type configuration.
+
+| xref:ERSArchitecture/index.adoc[Architecture]
+| System scope, actors, core capabilities, behaviour spines, conceptual model, and deployment architecture.
+
+| xref:AnnexeB-UseCases/index.adoc[Use Cases]
+| Catalogue of business use cases covering worker and back-office workflows.
+
+|===
+
+== Entity Resolution Service (ERS)
+
+Documentation for the Entity Resolution Service — what it does, how it is configured, and its REST APIs.
+
+[cols="2,4",options="header"]
+|===
+| Section | Purpose
+
+| xref:ERS/capabilities.adoc[Capabilities]
+| Full list of ERS operational capabilities: resolution, lookup, delta sync, time budgets, curation integration, audit, and pluggable ERE architecture.
+
+| xref:ERS/configuration.adoc[Configuration Reference]
+| Overview of ERS configuration areas (runtime variables, entity type mapping, ERE configuration) and pointers to the full references.
+
+| xref:api-docs/api-integration-guide.adoc[API Integration Guide]
+| Versioning policy, authentication, pagination, and error handling conventions that apply across both REST APIs.
+
+| xref:api-docs/ers/index.adoc[ERS REST API]
+| Auto-generated reference for the Entity Resolution Service REST API — resolution, lookup, and refresh endpoints.
+
+| xref:api-docs/curation/index.adoc[Curation REST API]
+| Auto-generated reference for the Curation application REST API — authentication, decisions, actions, and user management endpoints.
+
+|===
+
+== Entity Resolution Engine (ERE)
+
+Documentation for developers implementing an Entity Resolution Engine (ERE) and the technical contract it must fulfil.
+
+[cols="2,4",options="header"]
+|===
+| Section | Purpose
+
+| xref:ERS-ERE-Contract/index.adoc[ERS-ERE Technical Contract]
+| Message-based interfaces, idempotent processing rules, and canonical identifier semantics for ERS–ERE communication.
+
+| xref:ERE/ere-dev-guide.adoc[Developer Guide]
+| Guidance for developers implementing an ERE compatible with ERS.
+
+| xref:ERE/ere-reference-impl.adoc[Basic ERE Reference Implementation]
+| A reference implementation of the ERS–ERE contract showing online greedy clustering, Redis messaging, and configurable RDF parsing.
+
+|===
+
+== Curation App (User Guide)
+
+Step-by-step guide for curators who review entity resolution decisions, record feedback, and manage user accounts in the Curation Web Application.
+See the xref:UserGuide/curation-guide-overview.adoc[Curation App User Guide] for the full walkthrough.
+
+[cols="2,4",options="header"]
+|===
+| Section | Purpose
+
+| xref:UserGuide/curation-guide-decisions.adoc[Decisions Review]
+| How to review, accept, or reject automatic entity resolution proposals.
+
+| xref:UserGuide/curation-guide-history.adoc[Action History]
+| Browsing and searching the audit trail of past curation actions.
+
+| xref:UserGuide/curation-guide-admin.adoc[User Management]
+| Managing curator accounts and roles.
+
+|===
+
+== Glossary
+
+Definitions of domain terms, abbreviations, and concepts used throughout the documentation.
+See the xref:AnnexeA-Glossary/index.adoc[Glossary].

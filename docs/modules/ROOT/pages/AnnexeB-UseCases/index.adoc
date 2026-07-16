@@ -1,0 +1,41 @@
+= Annexe B: Use Case Catalogue
+
+This catalogue is the authoritative specification of all externally observable use cases for ERSys, organised at White (business) and Blue (system) levels using the Cockburn format. White-level use cases define business value; Blue-level use cases detail system interactions.
+
+[cols="2,4",options="header"]
+|===
+| Section | Purpose
+
+| xref:AnnexeB-UseCases/introduction.adoc[Introduction and Reading Guide]
+| Catalogue structure, Cockburn levels, and the engine-authoritative clustering model.
+
+| xref:AnnexeB-UseCases/ucw1.adoc#uc-w1[UC-W1: Resolve Entity Mention]
+| White-level: Originator submits an entity mention and receives a canonical identifier within the agreed timeout budget.
+
+| xref:AnnexeB-UseCases/ucb11.adoc#uc-b1-1[UC-B1.1: Resolve via ERS API]
+| Blue-level: step-by-step description of intake, ERE forwarding, and canonical identifier return.
+
+| xref:AnnexeB-UseCases/ucb12.adoc#uc-b1-2[UC-B1.2: Integrate ERE Outcomes]
+| Blue-level: asynchronous ERE outcome consumption and Decision Store updates; engine-outcome integration realisation under the async path of UC-W1.
+
+| xref:AnnexeB-UseCases/ucb13.adoc#uc-b1-3[UC-B1.3: Cluster Assignment Lookup]
+| Blue-level: bulk-delta read-only synchronisation for downstream consumers; Blue realisation of UC-W3.
+
+| xref:AnnexeB-UseCases/ucw2.adoc[UC-W2: Recommend Resolution Update (Curation)]
+| White-level: Curator requests re-evaluation of a mention's cluster assignment; engine authority is preserved.
+
+| xref:AnnexeB-UseCases/ucb21.adoc#uc-b2-1[UC-B2.1: Submit Re-evaluation Request]
+| Blue-level: single-mention re-evaluation submission through the Link Curation Application.
+
+| xref:AnnexeB-UseCases/ucb22.adoc#uc-b2-2[UC-B2.2: Submit Bulk Re-evaluation]
+| Blue-level: bulk re-evaluation submission by a Curator.
+
+| xref:AnnexeB-UseCases/ucw3.adoc#uc-w3[UC-W3: Synchronise Resolution Updates]
+| White-level: API Client retrieves Cluster Assignment changes since its last synchronisation point via refreshBulk; engine reclustering outcomes are reflected through the same delta mechanism.
+
+| xref:AnnexeB-UseCases/ucw4.adoc#uc-w4[UC-W4: Consult Resolution Statistics]
+| White-level: Curator retrieves aggregated, read-only statistics to prioritise review workload.
+
+| xref:AnnexeB-UseCases/ucw5.adoc#uc-w5[UC-W5: Manage Curator Access]
+| White-level: Admin controls curator access provisioning and revocation.
+|===

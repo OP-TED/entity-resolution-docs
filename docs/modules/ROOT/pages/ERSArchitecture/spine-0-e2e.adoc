@@ -1,0 +1,108 @@
+=== 8.1 End-to-end resolution cycle (conceptual overview)
+
+This subsection gives a high-level, end-to-end view of the resolution cycle supported by ERSys under the engine-authoritative clustering model. It describes what is observable at the boundary and who is responsible for what, using the conceptual overview diagram as the anchor. It does not introduce internal choreography, scoring logic, or storage design, and it does not add new guarantees beyond what is defined in xref:AnnexeB-UseCases/index.adoc[Annexe B (Use Cases)] and constrained by the ADRs.
+
+The diagram is conceptual and non-executable. It expresses responsibility hand-offs, not a timetable. It must not be read as a mandatory ordering of asynchronous activities, and it must not be used to infer timing semantics beyond the bounded behaviour at the client-facing API. The first identifier returned to a client is not frozen: under this baseline, late engine outcomes and reprocessing are normal, and clients reconcile changes through the supported delta mechanism.
+
+[mermaid, align=center]
+----
+---
+config:
+  look: neo
+  theme: redux-color
+  mirrorActors: false
+  sequence:
+    bottomMarginAdj: 0.1
+---
+sequenceDiagram
+%% Maps to EA diagram: UML Sequence (conceptual E2E overview)
+%% Aligned with UC-B1.1 (intake), UC-B1.2 (result processing), UC-B1.3 (bulk lookup)
+%% ERSys collapsed to single ERS lifeline
+
+participant Originator as "Originator"
+participant ERS as "Entity Resolution Service (ERS)"
+participant MessagingMiddleware as "Messaging Middleware"
+participant ERE as "Entity Resolution Engine (ERE)"
+
+%% Phase 1 - Resolve request (UC-B1.1)
+Originator ->> ERS: Resolve Entity Mention<br/>(request identifiers + EntityMention)
+ERS ->> ERS: Validate and register request<br/>(idempotency + Request Registry)
+
+ERS ->> MessagingMiddleware: Publish resolution request<br/>(request identifiers + EntityMention)
+MessagingMiddleware ->> ERE: Deliver request (async)
+
+alt ERE returns within ERS to ERE execution window
+    ERE ->> ERE: Resolve mention to cluster
+    ERE ->> MessagingMiddleware: Publish resolution result<br/>(canonical cluster_id + top alternative cluster_id values)
+    MessagingMiddleware ->> ERS: Deliver resolution result (async)
+    ERS ->> ERS: Process resolution result<br/>(persist Resolution Decision and current assignment)
+    ERS -->> Originator: Canonical cluster_id
+else ERE does not return within ERS to ERE execution window
+    ERS ->> ERS: Create provisional singleton and persist decision
+    ERS ->> MessagingMiddleware: Publish placement instruction<br/>(assign mention to singleton cluster_id)
+    MessagingMiddleware ->> ERE: Deliver placement instruction (async)
+    ERS -->> Originator: Provisional cluster_id
+else Validation failure or internal error
+    ERS -->> Originator: Error
+end
+
+%% Phase 2 - Late or duplicate resolution results (UC-B1.2)
+ERE ->> MessagingMiddleware: Publish resolution result<br/>(canonical cluster_id + alternatives)
+MessagingMiddleware ->> ERS: Deliver resolution result (async)
+ERS ->> ERS: Process resolution result<br/>(persist Resolution Decision and current assignment)
+
+%% Phase 3 - Bulk lookup by source (UC-B1.3)
+Originator ->> ERS: Bulk lookup by source_id<br/>(since last_seen_timestamp)
+ERS ->> ERS: Return unseen updates and mark exposed<br/>(by source_id + Originator)
+ERS -->> Originator: Resolution update set<br/>(cluster_id assignments + metadata)
+
+----
+
+The resolution cycle is organised into three conceptual phases, each corresponding to a stable interaction pattern visible in the diagram.
+
+==== Phase 1: Bounded intake (client-facing, synchronous)
+
+The Originator submits an Entity Mention together with the correlation triad _(source_id, request_id, entity_type)_ to ERS via its public API. ERS validates the request, registers it under idempotent semantics, and initiates a resolution interaction with the ERE through asynchronous messaging.
+
+Two time budgets apply, and they are kept separate because they answer two different questions: how long the client is willing to wait, and how long ERS is willing to wait for the engine during that same call.
+
+* *Client–ERS timeout budget*: the maximum time ERS may take to respond to the client.
+* *ERS–ERE execution window* (shorter): the time ERS is willing to wait for an engine outcome during the synchronous request.
+
+If an authoritative outcome is received from the ERE within the ERS–ERE execution window, ERS records the latest decision for the mention and returns the *`cluster_id` (canonical identifier)* produced by the ERE.
+
+If no engine outcome is received within the ERS–ERE execution window, ERS issues a *provisional singleton `cluster_id`* in the same identifier value space, records it as the current placement for the mention, returns it to the client within the client budget, and forwards that recommended placement to the ERE as a standard resolution request variant. Deterministic derivation applies to provisional singleton identifiers only; multi-member cluster identifiers are produced by the ERE.
+
+If validation fails, or ERS encounters an internal error before it can produce a compliant response, ERS returns an explicit error. There is no silent-success behaviour.
+
+==== Phase 2: Authoritative assessment and integration (asynchronous)
+
+ERS publishes resolution requests to the ERE via the asynchronous technical contract. The ERE consumes requests independently, performs its internal clustering and scoring, and publishes *authoritative clustering outcomes* back to ERS (primary cluster assignment plus alternatives, where provided).
+
+Results may arrive within the synchronous execution window or after the client-facing request has already completed. The model tolerates at-least-once delivery, duplicates, and late arrivals, because messaging middleware in real deployments behaves this way. The ERS responsibilities are therefore:
+
+* process outcomes idempotently (correlated by the triad),
+* record only the *latest decision record per mention*,
+* expose as canonical identity the *latest cluster assignment returned by the ERE*.
+
+The canonical identifier associated with a mention may therefore change over time. This is the expected consequence of engine-authoritative clustering when the engine improves its view over time.
+
+This phase also covers outcomes that originate from engine-initiated reprocessing or reclustering. ERS does not expose a rebuild administration service. It integrates whatever authoritative outcomes the engine publishes through the standard channel.
+
+==== Phase 3: Convergence (client synchronisation and observation)
+
+At any later time, clients may observe the latest recorded placement using read-only operations. Two observation styles apply:
+
+* *Lookup* for a specific mention (read-only, does not trigger resolution).
+* *refreshBulk* for a `source_id`, which returns mentions whose placement changed since the last successful exposure for that `source_id`, based on the delta rule `last_notification_date` < `last_update_date`.
+
+Convergence is an integration pattern rather than a hidden internal guarantee: the system keeps recording authoritative outcomes, and clients periodically pull deltas to reconcile their downstream state.
+
+*What this overview makes explicit*
+
+* *Triad correlation and idempotency.* Every interaction is tied to _(source_id, request_id, entity_type)_ so retries and duplicates can be handled deterministically.
+* *Two time budgets and provisional issuance.* ERS responds within the client budget, but it waits only up to the shorter ERS–ERE execution window before issuing a provisional singleton `cluster_id`.
+* *At-least-once outcome handling.* Engine outcomes may arrive late or duplicated, including unsolicited reclustering outcomes, and ERS integrates them idempotently as the latest decision per mention.
+* *Client reconciliation via refreshBulk.* Because the latest authoritative assignment can evolve over time, clients synchronise placement changes through the supported bulk delta mechanism.
+
+The remainder of Section 8 refines this overview through focused behavioural spines (A–D), each illustrating a stable interaction pattern and its authoritative state effects, with detailed variants provided as associated Mermaid artefacts.

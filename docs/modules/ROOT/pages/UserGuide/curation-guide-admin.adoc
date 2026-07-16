@@ -1,0 +1,141 @@
+= User Management
+:description: How to create and manage user accounts in the Curation Web Application admin panel.
+
+The *Admin* page is a central view of all registered accounts that lets you control who can access the curation application and with what level of privilege.
+
+IMPORTANT: Every task in this section requires a superuser account. The Admin page and all the actions below are available to superusers only.
+
+image::curation/admin-user-list.png[User management page showing the user table]
+
+== Active vs. Verified
+
+Two independent settings control whether and how a user can use the application. They are easy to confuse, so compare them before changing either:
+
+[cols="1,3",options="header"]
+|===
+| Setting | What it controls
+
+| *Active*
+| Whether the account can sign in at all. An inactive user cannot log in. Turning *Active* off is how you suspend or "deactivate" an account without deleting it.
+
+| *Verified*
+| Whether a signed-in user may use the curation features. An unverified user can sign in but is blocked from browsing decisions or history. Turning *Verified* off suspends curation access while still allowing the user to sign in.
+|===
+
+In short: *Active* is the door to the application; *Verified* is the door to curation work inside it.
+
+NOTE: Neither an inactive nor an unverified user can use the application.
+
+
+== The User Table
+
+Each row in the table represents one user account and shows:
+
+[cols="1,3",options="header"]
+|===
+| Column | Meaning
+
+| *Email*
+| The user's login address.
+
+| *Active*
+| Whether the account is enabled.
+Inactive users cannot sign in.
+
+| *Superuser*
+| Whether the user has administrator privileges, including access to this admin panel.
+
+| *Verified*
+| Whether the user is allowed to access the Curation application.
+Unverified users can sign in but are blocked from browsing decisions or history.
+
+| *Created*
+| Date the account was registered.
+|===
+
+The list is paginated. Use the pagination controls at the bottom to move between pages and adjust how many rows are shown.
+
+== Searching Users
+
+IMPORTANT: This task requires a superuser account.
+
+Type in the *Search by email* field to filter the list to accounts whose email address matches the text you enter.
+The list updates in real time as you type.
+Clear the field to return to the full list.
+
+== Adding a User
+
+IMPORTANT: This task requires a superuser account.
+
+. Click *Add User* in the top-right corner.
+. Fill in the form that appears:
+  * *Email* — the user's unique email address (required).
+  * *Password* — a password of at least 8 characters (required).
+  * *Active* — whether the account is immediately enabled (on by default).
+  * *Superuser* — whether the user has admin privileges (off by default).
+  * *Verified* — whether the user can access the curation application (on by default).
+. Click *OK* to create the account.
+
+If an account with the same email already exists, the form will show an error and no account will be created.
+
+image::curation/admin-add-user.png[Add User modal with email, password, and toggle fields]
+
+== Editing a User
+
+IMPORTANT: This task requires a superuser account.
+
+Click the *edit* icon on any row to open the edit form for that user.
+You can adjust the three status toggles:
+
+[cols="1,3",options="header"]
+|===
+| Toggle | Effect when changed
+
+| *Active*
+| Turning this off deactivates the account — the user will not be able to sign in until it is turned back on.
+Turning it on reactivates a previously deactivated account.
+
+| *Superuser*
+| Grants or revokes administrator privileges and access to this admin panel.
+
+| *Verified*
+| Grants or revokes access to the Curation application.
+Use this to onboard a new user or to temporarily suspend their curation access without fully deactivating the account.
+|===
+
+Click *OK* to save your changes.
+
+image::curation/admin-edit-user.png[Edit User modal showing the Active, Superuser, and Verified toggles]
+
+== Changing a User's Password
+
+IMPORTANT: This task requires a superuser account.
+
+If a user forgets their password and cannot sign in, an administrator can set a new password on their behalf.
+
+. Click the *edit* icon on the user's row to open the edit form.
+. Enter a new password in the *Password* field (at least 8 characters).
+. Confirm the new password if the form asks you to re-enter it. If the two entries do not match, or the password does not meet the minimum length, the form reports an error and the password is not changed — correct the entry and try again.
+. Click *OK* to apply the change.
+
+The user can sign in immediately with the new password.
+No notification is sent automatically — inform the user of their new credentials separately.
+
+image::curation/admin-edit-user-password.png[Edit User modal with the New Password field,70%]
+
+[WARNING]
+====
+The system prevents removing the last active administrator. If you attempt to deactivate the only remaining active superuser, or to remove its superuser status, the action is rejected with an error and the change is not applied.
+====
+
+== Deactivating a User
+
+IMPORTANT: This task requires a superuser account.
+
+Click the *deactivate* icon on any active user row.
+A confirmation dialog will ask you to confirm before proceeding.
+
+image::curation/admin-deactivate-confirm.png[Deactivation confirmation dialog,80%]
+
+Deactivation sets the account to inactive — the user is immediately blocked from signing in.
+The account and all its history are preserved and can be reactivated at any time via the edit form.

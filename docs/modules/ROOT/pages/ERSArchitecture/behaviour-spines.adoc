@@ -1,0 +1,20 @@
+== 8. Behavioural spine flows
+
+This section defines the normative behavioural spines of the ERSys. Behavioural spines illustrate how the guarantees defined by the White-level Use Cases are realised through interaction between actors and application components, while respecting the architectural boundaries, authority allocation, and invariants established in earlier sections.
+
+The spines are expressed using UML Sequence notation and use only application components and roles defined in the ArchiMate L1 and L2 views. They are not implementation specifications and do not prescribe internal algorithms, processing steps, data structures, or deployment choices. Instead, each spine captures a stable interaction pattern that is architecturally significant because it demonstrates responsibility transfer, authority enforcement, and the preservation of system guarantees.
+
+For each spine, this section includes a simplified sequence diagram sufficient to explain the architectural intent. More detailed sequence diagrams are maintained as separate Mermaid artefacts and provided in annexes. These detailed diagrams elaborate the same behaviour and do not introduce additional guarantees or obligations beyond those stated in the White Use Cases.
+
+include::spine-0-e2e.adoc[]
+include::spine-a.adoc[]
+include::spine-b.adoc[]
+include::spine-c.adoc[]
+include::spine-d.adoc[]
+
+=== 8.6 Behavioural closure
+
+The behavioural spines in this section capture the stable, architecturally significant interaction patterns of ERSys. Their purpose is to make contract boundaries, responsibility transfer, and the practical handling of asynchrony explicit, so implementations do not drift into hidden coupling. +
+Behavioural guarantees remain defined by *Annexe B (Use Cases)* and constrained by the ADRs. The spines operationalise those guarantees without prescribing internal algorithms or store choreography. Across all spines, the authority model is consistent: the *ERE is authoritative* for clustering outcomes and canonical identity materialisation, while the *ERS orchestrates, correlates, records, and exposes* the latest authoritative outcome per mention. Curation inputs are handled as *recommendations* (logged for traceability and forwarded for re-evaluation), and lookup and refreshBulk remain *read-only* mechanisms for observation and synchronisation. +
+Later sections may refine deployment, operations, and non-functional characteristics, but they must not alter the responsibility split, authority boundaries, or externally observable guarantees established by the Use Cases and ADRs. No new behavioural guarantees should be introduced by diagrams, description, or implementation artefacts beyond what is explicitly stated there.
+

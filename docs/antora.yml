@@ -1,0 +1,16 @@
+name: entity-resolution-docs
+title: Entity Resolution System Documentation
+version: '~'
+start_page: ROOT:index.adoc
+asciidoc:
+  attributes:
+    imagesdir: images
+    xrefstyle: short@
+    example-caption: Rule@
+    example-refsig: Rulota
+    listing-caption: Listing@
+    listing-refsig: Listing
+    table-refsig: Tabella
+    counter: rule-cnt@
+nav:
+  - modules/ROOT/nav.adoc

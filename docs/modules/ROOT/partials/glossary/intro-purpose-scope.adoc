@@ -1,0 +1,29 @@
+== Purpose and scope
+
+This glossary defines the authoritative meaning of terms used throughout the Entity Resolution System (ERSys) architecture, use cases, contracts, and decision records. It stabilises interpretation, prevents semantic drift, and ensures that all stakeholders reason about identity, resolution, and governance using a shared and precise vocabulary.
+
+The glossary is normative: terms defined here constrain the interpretation of architectural views, use cases, APIs, and implementation artefacts, and take precedence over any colloquial or external interpretation where data-integration, master-data-management, or knowledge-graph terminology is reused with a narrower meaning.
+
+The glossary distinguishes rigorously between:
+
+* *Real-world entities*, which exist independently of the system,
+* *Information artefacts*, which describe or refer to those entities,
+* *Identity constructs*, which ERSys exposes and whose semantics are determined by the ERE,
+* *System roles and components*, which perform actions and hold responsibility.
+
+These distinctions are foundational. Many commonly used terms such as _entity_, _record_, _identifier_, or _cluster_ are overloaded in practice. In ERSys, each term has a precise and constrained meaning that must be respected consistently across all documentation and implementations.
+
+=== Conceptual framing
+
+ERSys separates real-world entities, information artefacts, and system-managed identifiers, with identity realised through ERE-managed clusters and exposed by ERS. The full conceptual model — the entity/representation/cluster separation, the engine-authoritative identity stance, and the bounded-exposure model for provisional identifiers — is defined in xref:ERSArchitecture/conceptual-model.adoc[]. Glossary definitions that follow must be interpreted under that engine-authoritative identity model.
+
+=== Structure of the glossary
+
+The glossary is divided into two sections:
+
+* *Information-oriented concepts*, which define domain concepts, identity constructs, and information artefacts independent of runtime behaviour or system decomposition.
+* *System-oriented concepts*, which define actors, components, operations, and interaction patterns that realise those concepts at runtime.
+
+Glossary terms are used consistently and normatively across all ERSys documentation. Any deviation from a glossary definition must be explicitly stated and is limited to the stated context.
+
+The glossary defines _meaning_, _authority_, and _scope of responsibility_; it does not define implementation details, algorithms, persistence models, or user-interface behaviour. Any change to the meaning of a glossary term constitutes a semantic change to the system and must be reflected explicitly in the architectural baseline and, where relevant, in the Architecture Decision Records.

@@ -1,0 +1,103 @@
+=== 8.3 Spine B: Asynchronous engine interaction and outcome integration (ERS–ERE)
+
+*Intent.* Spine B defines the asynchronous interaction between ERS and the Entity Resolution Engine (ERE) for resolution requests and clustering outcomes. This spine is the architectural shock absorber of ERSys: it makes explicit that messaging is at-least-once, outcomes can be late or duplicated, and the engine may publish outcomes even when ERS did not just send a request (for example, due to engine-initiated reclustering). The ERE is authoritative for clustering outcomes, and ERS is responsible for correlating, recording, and exposing the latest outcome per mention.
+
+*Simplified sequence diagram (Spine B)*
+
+[mermaid, align=center]
+----
+---
+config:
+  look: neo
+  theme: redux-color
+  mirrorActors: false
+  sequence:
+    bottomMarginAdj: 0.1
+---
+sequenceDiagram
+%% Maps to EA diagram: UML Sequence (Spine B)
+%% Purpose: async resolution outcome integration and UC12 processing
+%% Covers: solicited outcomes (Spine A, Spine D) and unsolicited outcomes (engine initiated reclustering)
+%% Focus: triad correlation, optional constraints, at least once delivery tolerance
+%% Excludes: client REST flows, detailed store choreography, scoring internals, curation UI
+
+%%box "Entity Resolution System (ERSys)"
+    participant ERS as "Entity Resolution Service (ERS)"
+%%end
+
+participant MessagingMiddleware as "Messaging Middleware"
+
+%%box "Entity Resolution Engine (ERE)"
+    participant ERE as "Entity Resolution Engine (ERE)"
+%%end
+
+opt ERS publishes a resolution request
+    ERS ->> MessagingMiddleware: Publish resolution request (async)<br/>(source_id, request_id, entity_type, EntityMention,<br/>optional excluded_cluster_ids, optional proposed_cluster_ids)
+    MessagingMiddleware ->> ERE: Deliver resolution request (async)
+end
+
+%% Resolution outcome
+ERE ->> MessagingMiddleware: Publish resolution result (async)<br/>(source_id, request_id, entity_type,<br/>canonical cluster_id, top alternative cluster_id values)
+MessagingMiddleware ->> ERS: Deliver resolution result (async)
+
+%% UC-B1.2 processing
+alt Contract violation (missing triad or invalid schema)
+    ERS ->> ERS: Record contract violation and ignore
+else Acceptable delivery (including duplicates or late arrivals)
+    ERS ->> ERS: Correlate by triad and persist latest assignment<br/>(update Resolution Decision and lookup projection)
+end
+
+Note right of ERS: Optional excluded_cluster_ids express negative evidence.<br/>Optional proposed_cluster_ids express a recommended cluster assignment.<br/>Outcomes may arrive without a preceding request due to engine-initiated<br/>reclustering. Messaging is at-least-once and results may be late or<br/>duplicated. Completed client responses are not retroactively changed.
+
+----
+
+*Narrative aligned to the simplified diagram*
+
+*Publish a resolution request (asynchronous).* ERS may publish a resolution request to the messaging middleware. This is typically triggered by Spine A (intake) or Spine D (curation recommendation), and it always carries the correlation triad _(source_id, request_id, entity_type)_ plus the Entity Mention. Optionally, ERS may include the optional ERS→ERE fields defined in the xref:ERS-ERE-Contract/interface.adoc[ERS–ERE contract]:
+
+* `excluded_cluster_ids` (negative evidence), and/or
+* `proposed_cluster_ids` (preferred placement), including provisional singleton placement.
+
+These fields are not governance overrides; they are inputs to engine evaluation.
+
+*Deliver to the engine under at-least-once semantics.* The messaging middleware delivers the request to the ERE asynchronously. Duplicates can occur, and delivery ordering is not guaranteed.
+
+*Produce and publish an authoritative outcome.* The ERE performs its internal resolution logic and publishes a resolution result that includes:
+
+* the correlation triad _(source_id, request_id, entity_type)_,
+* the primary *`cluster_id` (canonical identifier)*,
+* top alternative `cluster_id` values,
+* for each cluster, the related scoring metadata: `confidence_score` and `similarity_score`.
+
+Outcomes may be *solicited* (in response to an ERS request) or *unsolicited* (for example, engine-initiated reclustering). Both are handled using the same integration pattern.
+
+*Validate, correlate, and record.* ERS validates the message envelope and schema against the ERS–ERE Technical Contract.
+
+* If the delivery violates the contract (for example, missing triad, invalid schema), ERS records the violation for traceability and ignores the payload for decision state.
+* If the delivery is acceptable (including duplicates or late arrivals), ERS correlates by the triad and updates its *latest decision record per mention*. This includes recording the current `cluster_id`, top alternatives (as provided), `context_id` for correlation, and timestamps.
+
+*Expose latest-assignment-wins.* Completed client responses are not retroactively rewritten. However, subsequent lookups and refreshBulk delta exposure reflect the latest authoritative assignment recorded by ERS: the HTTP response is fixed, but the canonical identity exposed by the system may evolve as the engine publishes improved outcomes.
+
+*Ordering and deduplication rule (normative).* ERS shall treat ERE outcomes as _idempotent but not ordered_. For a given triad, ERS shall accept an outcome only if it is not stale with respect to the currently recorded decision. Staleness shall be determined using a contract-defined monotonic outcome marker (for example, `engine_outcome_timestamp` or `engine_outcome_sequence`) produced by the engine. If the marker indicates the outcome is older than the stored one, ERS shall ignore it for decision state (but may record it for operational traceability).
+
+*Key behavioural commitments shown*
+
+* ERS–ERE communication is *exclusively asynchronous* and governed by the ERS–ERE Technical Contract.
+* ERE outcomes are *authoritative clustering outcomes*, not advisory proposals.
+* Correlation and idempotent absorption are performed using the triad _(source_id, request_id, entity_type)_, and the integration is tolerant to duplicates and late arrivals.
+* Optional `excluded_cluster_ids` and `proposed_cluster_ids` are treated as input evidence. The ERE remains binding for the resulting cluster assignment.
+* ERS records and exposes only what it needs: the *latest decision record per mention* (current `cluster_id`, alternatives, `context_id`, timestamps). There is no Canonical Entity Registry or canonical lineage store inside ERS.
+
+*Authoritative state touched*
+
+* *Decision Store* (latest decision per mention): updated on acceptable outcome deliveries (including late or duplicate deliveries) to reflect the latest recorded assignment.
+* *Contract violation log / operational trace*: updated when invalid deliveries are received (for investigation and robustness), without mutating decision state.
+* *Request Registry*: not mutated by Spine B; used implicitly for correlation and idempotency handling.
+
+*Traceability*
+
+* *White Use Case(s):* xref:AnnexeB-UseCases/ucw1.adoc#uc-w1[UC-W1] (asynchronous completion and late outcomes), xref:AnnexeB-UseCases/ucw2.adoc#uc-w2[UC-W2] (recommendations triggering re-evaluation).
+* *Blue Use Case(s):* xref:AnnexeB-UseCases/ucb12.adoc#uc-b1-2[UC-B1.2].
+* *ADRs:* ADR-A1N, ADR-A2N, ADR-C1N, ADR-C2N, ADR-C3N (engine authority, provisional lifecycle, idempotency, at-least-once tolerance, and integration semantics).
+* *Contracts:* ERS–ERE Technical Contract (asynchronous, normative).
+* *Detailed diagram artefact:* spine-B-async-integration.mmd (associated Mermaid artefact).

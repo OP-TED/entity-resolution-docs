@@ -1,0 +1,78 @@
+[#adr-d2n]
+= ADR-D2N — refreshBulk Delta Tracking and Client Synchronisation
+
+[NOTE]
+====
+Status: Accepted
+====
+
+== Context and Problem Statement
+
+Under the authoritative ERE model, cluster assignments for a mention may change over time due to:
+
+* provisional replacement
+* user recommendation processing
+* reclustering
+
+Because canonical identifiers are equivalent to cluster_id values and assignment is mutable, clients require a deterministic mechanism to detect changes after an initial resolution call has completed.
+
+Without an explicit delta exposure contract, clients cannot reliably maintain consistency with evolving cluster state.
+
+== Decision
+
+// TODO: action-type vocabulary differs across ADRs — reconcile against ERS–ERE contract
+. *Delta-Based Synchronisation Mechanism*
+.. ERS exposes a refreshBulk operation for client synchronisation.
+.. The operation returns mentions whose cluster assignment has changed since the client's last successful notification point.
+. *Delta Computation Rule*
+.. A mention is included in the response when last_notification_date < last_update_date, where:
+... last_update_date reflects the most recent cluster assignment received from ERE.
+... last_notification_date reflects the most recent refreshBulk interaction for the given source_id.
+. *Returned Data*
+.. Each delta entry contains:
+... request_id
+... canonical_identifier (cluster_id)
+... context_id
+.. The returned cluster_id always reflects the latest projection stored in ERS.
+. *Sources of Change*
+.. Changes reflected in deltas may originate from:
+... resolve
+... reResolveConsideringRecommendation
+... reResolveWithExclusions
+... recluster
+... Provisional replacement by ERE
+. *No Historical Lineage Exposure*
+.. refreshBulk exposes only the current cluster assignment.
+.. It does not expose previous cluster_id values, merge graphs, split history, or version chains.
+. *No Push Semantics*
+.. ERS does not push updates to clients.
+.. Synchronisation is client-driven via refreshBulk.
+
+== Scope and Applicability
+
+This decision applies to client synchronisation after resolution or re-resolution operations.
+
+It governs how mutable canonical assignment becomes externally observable.
+
+It does not redefine identity semantics, messaging guarantees, or authority boundaries.
+
+== Considered Options
+
+* No explicit delta mechanism; rely on re-resolution calls.
+* Push-based notification model.
+* Pull-based delta tracking via refreshBulk. _(Selected)_
+
+== Rationale
+
+A pull-based delta mechanism keeps the external contract simple and avoids coupling clients to engine execution timing.
+
+Explicit delta computation rules provide deterministic reconciliation semantics under mutable cluster assignment.
+
+Separating synchronisation from resolution submission avoids hidden eventual-consistency behaviour.
+
+== Consequences
+
+* Clients must call refreshBulk to observe cluster reassignment.
+* Canonical identifiers previously returned may be replaced in subsequent delta responses.
+* No guarantees are made about frequency of change, only about exposure of the latest assignment.
+* Introducing push-based or event-stream semantics would require a new architectural decision.

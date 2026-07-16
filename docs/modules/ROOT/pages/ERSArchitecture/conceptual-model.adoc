@@ -1,0 +1,245 @@
+= Conceptual Information Architecture
+
+This section defines the conceptual information architecture of the ERSys. It specifies the information objects that exist within the system, the identity rules that apply to them, and the authority boundaries that govern how they may be created, evolved, and consumed. The intent is to provide a precise semantic baseline that supports and constrains the behavioural guarantees defined in the behavioural spines.
+
+The scope of this section is limited to conceptual information structures and their roles. It does not define persistence schemas, physical storage models, API endpoint specifications, or message transport mechanisms. Where message or payload structures are referenced, they are described strictly as representations of conceptual objects, not as independent information authorities.
+
+== Information domains and authority boundaries
+
+ERSys manages information across a small, fixed set of conceptual information domains. Each domain corresponds directly to named concepts in the conceptual models presented in this section and is associated with a clear authority, lifecycle, and usage scope. These domains are intentionally separated to ensure that ERE-based canonical representation remains authoritative, traceable in ERS, and independent of presentation or user-specific concerns.
+
+The following information domains are recognised:
+
+. *Entity Mentions and request records (System of Request Records)*
+*What it is:* the immutable record of what an originator submitted: EntityMention plus its correlation triad EntityMentionIdentifier _(source_id, request_id, entity_type)_, and optional correlation metadata (for example, context).
++
+*Lifecycle:* append-only. Mentions are not updated or merged. Derived views (for example, parsed representations) may exist, but they do not redefine the submitted artefact.
++
+*Authority:* *ERS* is authoritative for the acceptance and preservation of these records.
+
+. *Latest recorded outcomes per mention (Decision Store)*
+*What it is:* the ERS projection of the latest clustering outcome recorded for each mention. A Decision links one mention identifier to:
++
+--
+* the current placement (current: ClusterReference),
+* the top-N alternative candidates (candidates: ClusterReference[*]),
+* timestamps and correlation fields needed for synchronisation.
+--
++
+Although the class name is "Decision", this is a *recorded outcome*, not a separate identity authority. Outcome authority remains with the engine.
++
+*Lifecycle:* overwritten on update. ERS maintains only the latest record per mention; it does not maintain canonical lineage or historical cluster graphs.
++
+*Authority:* *ERE* is authoritative for the clustering outcome itself; *ERS* is authoritative for recording and exposing the _latest recorded_ outcome per mention.
+
+. *User action trace (User Action Log)*
+*What it is:* an append-only trace of curator recommendations, linked to a mention identifier and, optionally, the candidate context that was visible at the time of the action.
++
+*Lifecycle:* append-only. These records support traceability and training use cases. They do not directly modify identity.
++
+*Authority:* *ERS* is authoritative for storing the user action trace; *ERE* remains authoritative for any resulting placement change.
+
+. *Delta exposure state (refreshBulk / lookup tracking)*
+*What it is:* per-origin exposure tracking used to realise the UC-W3 refreshBulk / lookup behavioural contract, so ERS can answer what changed since the client last checked.
++
+*Lifecycle:* mutable operational metadata, advanced only when a bulk refresh response is successfully produced.
++
+*Authority:* *ERS* is authoritative for this tracking state. Physically this state may be stored alongside intake records for operational convenience. Conceptually, however, it remains exposure tracking metadata and does not participate in identity or clustering semantics.
+
+. *Interaction messages (contracts at the boundary)*
+*What it is:* request and response structures used to exchange information across boundaries:
++
+--
+* ERS REST messages (client-facing), and
+* ERS–ERE asynchronous messages (engine-facing).
+--
++
+Messages are transient. They carry conceptual objects (mentions, identifiers, outcomes) but are not themselves authoritative stores.
++
+*Authority:* authority belongs to the producing component under the relevant contract:
++
+--
+* ERS is authoritative for what it exposes via its REST APIs,
+* ERE is authoritative for clustering outcomes it publishes on the async channel.
+--
+
+. *Link Curation read and reporting views (previews and statistics)*
+*What it is:* derived representations used for inspection and user interaction, such as previews of a mention's current placement, candidate lists, and aggregated statistics.
++
+*Lifecycle:* derived and disposable.
++
+*Authority:* these views are informational. They do not create or redefine identity.
+
+=== Authority and ownership summary
+
+* *Canonical identity equals cluster identity in the ERE.* The `cluster_id` produced by the ERE is the canonical identifier used across the system. No component within ERS derives, transforms, or reassigns canonical identifiers independently. Any change in canonical identity originates exclusively from a new clustering outcome emitted by ERE.
+* *ERE is authoritative* for clustering logic, scoring, and the resulting placement outcomes.
+* *ERS is authoritative* for intake records, idempotent correlation, recording the latest outcome per mention, user action trace, and delta exposure tracking.
+* Stores related to clustering outcomes within ERS are projections. They support exposure and synchronisation, but they do not redefine clustering semantics.
+* *User actions are recommendations.* They are recorded by ERS and forwarded to ERE for re-evaluation; they do not bypass the engine.
+* *External clients can submit and observe, not govern.* Clients submit mentions and retrieve the latest recorded `cluster_id`, but they do not mutate mentions, manipulate engine state, or persist canonical assignments as authoritative facts.
+
+Any implementation that allows non-authoritative components to persist canonical assignments as authoritative facts, bypass the ERS–ERE contract boundary, or treat descriptive payloads as identity constructs constitutes an architectural violation.
+
+== Entity mentions and request identity
+
+This subsection describes the *System of Request Records* model shown in the conceptual class diagram, and explains how its classes support two boundary concerns that must remain cleanly separated, even if they live in the same conceptual domain:
+
+* *immutable intake facts* (what was submitted), and
+* *delta exposure tracking* (what has already been exposed back to a client when using bulk synchronisation).
+
+image::system of records.png[Conceptual class diagram of the System of Request Records: Entity Mention, Entity Mention Identifier, and exposure tracking]
+// TODO: rename asset to hyphenated slug (current file: "system of records.png")
+
+An *Entity Mention* is a single, immutable intake artefact representing how an external source refers to a real-world entity within a specific submission context. It captures a fact of submission, not a fact about the world. Once accepted by ERSys, an Entity Mention is append-only: it is never modified, merged, versioned, or deleted. Immutability at this boundary is a strict architectural invariant and underpins replay, idempotency, auditability, and deterministic rebuild behaviour.
+
+Each Entity Mention is identified by exactly one *Entity Mention Identifier*, defined as the correlation triad:
+
+* `source_id`, identifying the originating system or data source,
+* `request_id`, identifying the submission within that source,
+* `entity_type`, identifying the semantic category of the entity.
+
+This triad constitutes the sole correlation key and uniqueness constraint for Entity Mentions within ERSys. Reuse of an existing triad with different payload content is rejected as an idempotency conflict. No surrogate or alternative identifier replaces this triad for correlation, governance, replay, or audit purposes.
+
+The triad is reused consistently across all system interactions, including synchronous resolution requests, asynchronous exchanges with ERE, resolution decision recording, lookup and refresh operations, user curation actions, and rebuild and replay processing.
+
+An Entity Mention carries a source-provided payload describing the entity. The payload may be structured or unstructured and is treated as authoritative input content. ERSys may derive auxiliary representations, for example parsed, normalised, or format-converted forms, to support internal processing (in this case JSONRepresentation). Such derived artefacts are optional, non-authoritative, and strictly subordinate to the original payload. They do not alter the identity, immutability, or correlation semantics of the Entity Mention.
+
+The model also includes a *LookupState* record for each `source_id`, keeping the `last_notification_date`. Conceptually, LookupState expresses the delta exposure watermark used by bulk synchronisation: for a given `source_id` scope, the last point in time for which ERSys has successfully exposed resolution updates. This keeps bulk refresh bounded and repeatable without forcing clients to maintain shadow registries. The `source_id` plays the role of the caller scope for exposure tracking, and `last_notification_date` plays the role of the exposure watermark; these names match the ERS–ERE contract vocabulary used elsewhere in this baseline.
+
+Every Resolution Decision managed by ERSys is defined for exactly one registered Entity Mention identified by the correlation triad. Resolution Decisions do not exist independently of Entity Mentions, and every accepted Entity Mention has exactly one current Decision projection maintained by ERS.
+
+== Resolution decisions as projection records
+
+A *Resolution Decision* is the projection record through which *ERS* reflects the latest clustering outcome returned by *ERE* for a specific Entity Mention. A *Resolution Decision* does not create, own, or redefine identity. Canonical identity remains strictly equivalent to the cluster managed by *ERE*. ERS records what *ERE* has determined and exposes it in a controlled and predictable way.
+
+In semantic-systems terms, *ERE* is the identity authority, the component that performs the reasoning and materialises clusters. *ERS* acts as a façade and projection layer. It mirrors the current state of clustering so that external systems can interact with it safely, within bounded time and clear contractual guarantees. The *DecisionStore* is a projection repository, not a registry of canonical entities.
+
+image::decision store.png[Conceptual class diagram of the Decision Store: Decision bound to one Entity Mention Identifier with current and candidate Cluster References]
+// TODO: rename asset to hyphenated slug (current file: "decision store.png")
+
+Within the DecisionStore, for each EntityMentionIdentifier, there exists exactly one current Decision projection. This is an invariant. When *ERE* produces a new outcome, whether in response to a resolve, a re-resolve with exclusions, a resolve considering a recommendation, a recluster, or an unsolicited engine-initiated update, the existing *Decision* is atomically replaced. There is no historical chain of Decisions stored in *ERS*, no lineage of cluster evolution, and no attempt to reconstruct past states. Historical clustering state remains entirely within *ERE*. This keeps responsibilities clean and prevents accidental duplication of authority.
+
+Each *Decision* is bound to exactly one *EntityMentionIdentifier* and expresses the current placement of that mention through a single current *ClusterReference*. The *ClusterReference* contains the `cluster_id`, which functions as the canonical identifier, together with the `similarity_score` and `confidence_score` produced by *ERE*. These scores are stored exactly as received. *ERS* does not reinterpret them, does not enrich them with additional governance layers, and does not second-guess the engine. They are signals from the clustering logic, preserved for transparency and traceability.
+
+In addition to the current *ClusterReference*, a *Decision* retains the candidate *ClusterReference* instances returned by *ERE* within the same outcome. The current reference is always one of these candidates, so the candidate set contains at least the current placement. It is a snapshot of the engine's view at a specific moment in time. When a newer outcome arrives, the entire set is replaced. Candidates are not accumulated across time, and they do not form a negotiation state. They reflect what the engine considered plausible in that specific resolution event.
+
+Provisional identifiers fit uniformly into this model. When *ERS* issues a provisional singleton cluster under time-budget constraints, that placement is stored as a normal *ClusterReference* inside the current *Decision*. It is not marked as special or treated as second-class. It is a valid canonical placement until *ERE* confirms or replaces it. Once a subsequent authoritative outcome is received from *ERE*, the *Decision* is replaced in the same manner as any other update.
+
+The `updated_at` attribute of a *Decision* records the moment at which the latest authoritative outcome from *ERE* was integrated into *ERS*. This timestamp anchors delta computation. When `updated_at` advances, the corresponding Entity Mention becomes eligible for exposure through refreshBulk for clients whose notification watermark precedes this value. Projection replacement therefore directly drives synchronisation semantics. The identity may change over time, but exposure remains disciplined and traceable.
+
+At any given moment, exactly one current *Decision* determines the placement of a given Entity Mention within *ERS*. There is no internal lifecycle state, no curator lock dominance, and no governance override layer. User actions are transmitted to *ERE* as recommendations. They may influence the next clustering outcome, but they do not become authoritative by themselves. Only the outcome returned by *ERE* is recorded as the new current *Decision*.
+
+The *DecisionStore* therefore fulfils two bounded responsibilities: it mirrors the latest authoritative cluster assignment per mention, and it enables controlled exposure through delta tracking. It does not constitute a canonical entity registry, does not redefine identity semantics, and does not shift authority away from *ERE*. Identity remains engine-authoritative. *ERS* remains projection-centric and exposure-disciplined. This separation is deliberate and keeps the architecture coherent and evolvable.
+
+== Interaction and message models
+
+This section explains how *ERSys* communicates across its two fundamental boundaries: the synchronous client boundary and the asynchronous engine boundary. These are not merely transport choices. They express different authority models, different time expectations, and different trust assumptions. Because identity is cluster-authoritative and exposure is bounded, the interaction model reflects that discipline explicitly.
+
+At a conceptual level, *ERSys* operates with two distinct message families, each with its own envelope and semantics:
+
+* a client-facing REST family built around *RESTMessage*, and
+* an engine-facing asynchronous family built around *EREMessage*.
+
+Keeping these envelopes separate is intentional. Intake operates on payload; lookup operates on identity only. One concerns descriptive artefacts, the other canonical projection. The separation prevents accidental leakage of engine semantics into the public API, and avoids coupling client observability concerns to engine correlation mechanics.
+
+=== Client-facing REST message model
+
+image::ERS messages.png[Conceptual class diagram of the client-facing REST message model: RESTMessage, ERSResponse, ResolutionResult, ErrorResponse]
+// TODO: rename asset to hyphenated slug (current file: "ERS messages.png")
+
+REST responses specialise *ERSResponse*. Successful resolution responses return a *ResolutionResult* containing the `cluster_id` together with the `entity_mention_context`. The canonical identifier expresses identity. The `entity_mention_context` echoes the submission context associated with the mention so that clients can correlate the resolution outcome with their own processing state without re-exposing internal clustering details. Candidate clusters, `confidence_score`, and `similarity_score` are not exposed at this boundary. The public API is intentionally thin: it exposes canonical identity, not engine rationale.
+
+Error conditions are expressed through structured *ErrorResponse* messages. Failures are first-class outcomes, not transport accidents.
+
+The bulk lookup response model is *BulkLookupResponse*, which may include a `continuation_cursor`. The presence of this cursor signals that more results exist beyond the current page defined by `limit`. The cursor is an opaque continuation handle derived from stable ordering semantics, typically anchored in `updated_at` and internal tie-breaking rules. It does not expose internal ordering keys. Reusing the cursor in a subsequent request resumes synchronisation deterministically from the previous exposure point. This mechanism allows bounded responses while preserving complete delta coverage.
+
+The REST model is strictly synchronous and bounded. It never waits for asynchronous engine processing, reclustering, or rebuild activity. It returns either the current canonical projection or an explicit error. This boundedness is a contractual guarantee.
+
+=== Engine-facing asynchronous message model
+
+image::ere messages.png[Conceptual class diagram of the engine-facing asynchronous message model: EREMessage, ERERequest, EREResponse, ClusterReference]
+// TODO: rename asset to hyphenated slug (current file: "ere messages.png")
+
+The ERS–ERE interface is defined normatively in a dedicated technical contract document. That contract specifies, in precise and implementation-level detail, the structure of engine requests and responses, correlation rules based on the triad, canonical identifier derivation semantics, idempotency expectations, and delivery guarantees under at-least-once messaging. This section provides the conceptual overview and architectural rationale. The contract remains the authoritative specification for interoperability and conformance between ERS and any ERE implementation.
+
+The engine boundary is modelled using *EREMessage*, which carries `type`, `ere_request_id`, and `timestamp`. This envelope is distinct from *RESTMessage* and serves a different purpose: it supports asynchronous processing, duplicate delivery tolerance, and correlation within engine workflows.
+
+Engine requests specialise *ERERequest*. The primary request type is *EntityMentionResolutionRequest*, which carries exactly one *EntityMention*. It may include the optional fields `proposed_cluster_ids` and `excluded_cluster_ids` defined in the xref:ERS-ERE-Contract/interface.adoc[ERS–ERE contract]. These fields express recommendations and negative evidence; they guide resolution but do not override engine authority, and *ERE* remains free to accept or reject them.
+
+There is no explicit rebuild request in the normative asynchronous model. Reclustering is an internal concern of *ERE*. When clustering outcomes change, whether due to new evidence, maintenance, or algorithm updates, *ERE* publishes standard *EntityMentionResolutionResponse* messages. No additional control surface is introduced for rebuild invocation.
+
+Engine responses specialise *EREResponse*. A successful *EntityMentionResolutionResponse* returns one or more *ClusterReference* candidates for a single *EntityMentionIdentifier*. Each *ClusterReference* contains a `cluster_id`, `confidence_score`, and `similarity_score`. The `cluster_id` constitutes the canonical identifier. Clustering authority resides in *ERE*.
+
+Asynchronous delivery follows at-least-once semantics. Messages may be duplicated and may arrive out of order. Both ERS and ERE must implement idempotent processing based on the correlation triad so that repeated or reordered messages do not alter final clustering state. The `ere_request_id` supports disambiguation of concurrent or repeated requests and enables safe handling of engine-initiated notifications.
+
+The separation between REST and engine messaging enforces architectural clarity:
+
+* The REST boundary guarantees bounded, deterministic interaction semantics for clients.
+* The engine boundary tolerates asynchronous execution, duplicate messages, and internal reclustering.
+* Canonical identity is materialised by *ERE* and projected by *ERS*.
+* Transport envelopes are aligned with their respective trust and authority domains.
+
+This dual model keeps concerns clean. Clients see stable canonical identifiers and explicit errors. Engines exchange rich clustering signals and recommendations without leaking internal mechanics to the public API. Identity authority remains singular, and projection remains disciplined.
+
+== Link Curation message models
+
+This subsection describes the interaction structures exchanged between the Link Curation Application and *ERSys* when human operators inspect resolution outcomes and provide corrective guidance. Curation does not introduce a parallel authority model. It operates within the existing projection and engine-authoritative clustering discipline described in previous sections.
+
+All messages in this subsection work strictly with existing *EntityMentionIdentifier*, *Decision*, and *ClusterReference* structures. They neither redefine canonical identity nor bypass the asynchronous integration model between *ERS* and *ERE*.
+
+=== Curation command messages
+
+image::submit decision messages.png[Conceptual class diagram of curation command messages: SubmitDecisionRequest, UserActionType, SubmitDecisionResponse]
+// TODO: rename asset to hyphenated slug (current file: "submit decision messages.png")
+
+The central command message is *SubmitDecisionRequest*, a specialisation of *ERSRequest*, and therefore wrapped in *RESTMessage* metadata such as `request_id` and `timestamp`. As with other REST interactions, this metadata supports traceability only and does not participate in identity correlation.
+
+Each *SubmitDecisionRequest* references exactly one *EntityMentionIdentifier* via the correlation triad (`source_id`, `request_id`, `entity_type`). It also carries a mandatory `user_action` of type *UserActionType*, whose enumeration includes: acceptTop, acceptAlternative, rejectAll.
+
+When acceptAlternative is selected, the request may include an optional `target_cluster` represented as a *ClusterReference*. This reference echoes the cluster and scoring context previously returned by *ERE*. It is not a new cluster definition; it is a recommendation anchored in an existing candidate.
+
+The authority boundary is strict. A curation command does not directly mutate a *Decision*, nor does it redefine the `cluster_id` that constitutes canonical identity. Instead, the command expresses structured human guidance. *ERS* forwards this guidance to *ERE* using the asynchronous engine interface. *ERE* remains responsible for producing the next authoritative clustering outcome.
+
+The corresponding *SubmitDecisionResponse* confirms only that the request has been syntactically validated and accepted for processing. It does not guarantee that canonical placement has changed. Any actual change in clustering occurs only once *ERE* emits a subsequent *EntityMentionResolutionResponse*, which then replaces the current *Decision* projection in *ERS*.
+
+Error conditions are represented using *ErrorResponse* and are limited to validation errors, inconsistent references, or malformed requests. There is no internal governance state transition at this boundary.
+
+=== Preview and inspection messages
+
+image::preview messages.png[Conceptual class diagram of preview and inspection messages: GetDecisionsRequest, EntityMentionPreviewRequest, CanonicalEntityPreviewRequest]
+// TODO: rename asset to hyphenated slug (current file: "preview messages.png")
+
+Preview interactions are strictly read-only. They provide visibility into current projection state without triggering resolution, reclustering, or governance side effects.
+
+*GetDecisionsRequest* allows retrieval of one or more *Decision* instances, optionally constrained by *FilteringMetadata* and *PaginationMetadata*. Filtering criteria such as `min_confidence`, `max_confidence`, and `fulltext_search_query` operate on projection data only. Pagination metadata such as `current_page` and `page_size` governs result slicing but does not alter underlying state.
+
+Each returned *Decision* includes:
+
+* `updated_at`
+* exactly one current *ClusterReference*
+* one or more candidate *ClusterReference* instances
+
+There is no decision lifecycle status, no pending or reviewed flag, and no curator dominance indicator. What is exposed is the latest authoritative projection received from *ERE*.
+
+For contextual inspection, *EntityMentionPreviewRequest* and *CanonicalEntityPreviewRequest* allow retrieval of structured previews. *EntityMentionPreviewResponse* may include the original descriptive content of *EntityMention* and, where available, its optional parsed *JSONRepresentation*. This parsed representation supports inspection.
+
+*CanonicalEntityPreviewResponse* returns a *CanonicalEntityPreview*, which references a canonical identifier and may include a bounded set of top contributing *EntityMention* instances. These previews are read models derived from projection state. They do not constitute independent canonical entity authorities.
+
+=== Curation statistics messages
+
+image::statistics messages.png[Conceptual class diagram of curation statistics messages: GetStatisticsRequest, Statistics, RegistryStatistics, CurationStatistics]
+// TODO: rename asset to hyphenated slug (current file: "statistics messages.png")
+
+The statistics model provides operational visibility rather than governance control. *GetStatisticsRequest* retrieves a *Statistics* structure for a specified timeframe defined by `timeframe_start` and `timeframe_end`.
+
+The returned *Statistics* aggregates two groups of derived indicators:
+
+* *RegistryStatistics*, including counts such as `canonical_entities` and `entity_mentions`
+* *CurationStatistics*, including counters such as `selected_top`, `selected_alternative`, and `rejected_all`
+
+These values are computed from authoritative projection stores but are themselves observational metrics. They do not represent independent governance records and do not affect clustering behaviour.
+
+Across all Link Curation interactions, the authority model remains consistent. *ERE* is authoritative for clustering and canonical identifiers. *ERS* is authoritative for integrating, projecting, and exposing the latest clustering outcome under bounded REST semantics. The Link Curation Application is a consumer of projection state and a producer of structured recommendations.
+
+No message defined in this subsection permits direct manipulation of canonical equivalence. This ensures that human guidance is incorporated without fragmenting the single source of truth for clustering logic. Any implementation that permits direct mutation of `cluster_id` values within ERS without a corresponding engine-issued resolution response violates the architectural contract defined in this section.

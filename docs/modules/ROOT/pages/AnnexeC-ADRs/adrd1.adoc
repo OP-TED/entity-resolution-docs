@@ -1,0 +1,78 @@
+[#adr-d1n]
+= ADR-D1N — Authoritative Stores and State Separation
+
+[NOTE]
+====
+Status: Accepted
+====
+
+== Context and Problem Statement
+
+The system maintains multiple kinds of state with distinct authority models, lifecycles, and access patterns.
+
+Clustering state is authoritative in the ERE. Client-facing access, correlation, and projection state are maintained in the ERS.
+
+If authoritative clustering state and serving projections are conflated, ambiguity arises regarding which component defines canonical identity, how updates propagate, and whether multiple sources of truth exist.
+
+The architecture must therefore establish explicit authority boundaries between ERE and ERS, while keeping internal storage mechanisms flexible.
+
+== Decision
+
+Authoritative state is separated as follows.
+
+. *ERE Authoritative Cluster Store*
+.. The ERE cluster store is the single source of truth for clusters and cluster membership.
+.. Cluster identifiers are canonical identifiers.
+.. The ERE is authoritative for cluster creation, merge, split, and reassignment semantics.
+. *ERS System of Record*
+.. ERS maintains an immutable, append-only System of Record for submitted entity mentions and request metadata.
+.. This store preserves provenance, correlation identifiers, and payload representations.
+.. It does not define canonical identity.
+. *ERS Decision Projection Store*
+.. ERS maintains a projection of the latest known placement per mention (to a cluster_id).
+.. ERS stores the top-N alternatives returned in the latest ERE response as bounded context for curation activity.
+.. This store reflects the latest outcome returned by ERE and is overwritten when a new ERE outcome is received.
+.. It is not an independent source of truth for clustering semantics.
+. *User Action Log*
+.. ERS maintains a separate log of user-submitted placement recommendations and exclusions.
+.. This log is read-only with respect to canonical state.
+.. It may be used for traceability and training purposes in the future.
+. *No Canonical Entity Registry in ERS*
+.. ERS does not maintain an authoritative Canonical Entity Registry.
+.. ERS does not materialise canonical entities as independently governed objects.
+.. Canonical identity exists solely as cluster state in ERE.
+. *Latest-State-Only Exposure*
+.. Client-facing APIs expose only the latest cluster assignment per mention.
+.. No canonical lineage graph, merge history, or split history is exposed.
+.. Internal history, snapshots, or audit trails may exist but are not part of the external contract.
+.. Event sourcing is not required. Internal persistence technologies and schemas remain implementation-specific, provided that authority boundaries are preserved.
+
+== Scope and Applicability
+
+This decision applies to all persistence layers and stateful components within ERS and to the authority relationship between ERS and ERE.
+
+It governs data ownership, update rights, and projection semantics.
+
+Physical storage technologies, database schemas, indexing strategies, and performance optimisations are out of scope.
+
+== Considered Options
+
+* Single unified store for all intake, clustering, and serving state.
+* Event sourcing as a universal persistence model.
+* Separation of authoritative cluster state in ERE and projection state in ERS. _(Selected)_
+
+== Rationale
+
+Separating authoritative clustering state from serving projections removes ambiguity about identity ownership and prevents accidental divergence between engine state and API state.
+
+Maintaining an immutable System of Record in ERS preserves auditability without imposing a global event-sourcing model.
+
+Keeping only latest-placement projections in ERS simplifies lookup, refresh, and client reconciliation semantics while avoiding long-term commitments to lineage exposure.
+
+== Consequences
+
+* ERS must treat its placement store as a projection that mirrors ERE outcomes, not as an independent identity registry.
+* Canonical identity cannot exist independently of ERE cluster state.
+* Clients cannot reconstruct historical cluster evolution from ERS APIs.
+* Introducing lineage, versioned canonical entities, or an ERS-owned canonical registry would require a new architectural decision.
+* Storage technologies may evolve independently as long as authority semantics remain unchanged.

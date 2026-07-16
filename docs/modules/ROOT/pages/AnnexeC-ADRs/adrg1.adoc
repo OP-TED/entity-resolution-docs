@@ -1,0 +1,89 @@
+[#adr-g1n]
+= ADR-G1N — Observability and Telemetry
+
+[NOTE]
+====
+Status: Accepted
+====
+
+== Context and Problem Statement
+
+ERS operates in a distributed, asynchronous environment where:
+
+* Resolution requests are forwarded to ERE.
+* Provisional identifiers may be issued.
+* Cluster assignments may later change.
+* Delta updates are exposed via refreshBulk.
+
+Operational insight is required to understand request flow, timing behaviour, reassignment events, and integration outcomes.
+
+However, observability must not:
+
+* Influence clustering semantics.
+* Delay or block resolution flows.
+* Introduce a secondary source of authority over identity state.
+
+A clear separation is therefore required between functional behaviour and telemetry behaviour.
+
+== Decision
+
+. *Best-Effort, Non-Blocking Telemetry*
+.. Telemetry emission is best-effort and non-blocking.
+.. Failure or delay in telemetry infrastructure shall not affect resolution processing, provisional issuance, projection updates, or delta exposure.
+. *Metadata-Only Semantics*
+.. Telemetry records contain metadata only.
+.. They may include (possible metadata):
+... mention identifier tuple (source_id, request_id, entity_type)
+... cluster_id (where applicable)
+... action_type
+... Timestamps
+... execution outcomes
+... internal correlation identifiers
+.. Full payload capture is not implied by default.
+. *Authoritative State Is Not Derived from Telemetry*
+.. Telemetry does not constitute authoritative clustering state.
+.. Canonical identity and assignment are determined exclusively by ERE outcomes integrated into ERS projection stores.
+.. Telemetry logs must not be used as a source of truth for cluster state.
+. *Coverage of Identity Lifecycle Events*
+.. Telemetry should capture externally observable identity events, including:
+... Initial resolution
+... Provisional identifier issuance
+... Replacement of provisional identifiers
+... User-triggered re-resolution
+... Reclustering-driven reassignment
+... refreshBulk delta exposure
+.. These events are recorded for traceability, not for governance.
+. *No Implicit Compliance Guarantees*
+.. Telemetry constitutes an operational trace.
+.. It does not imply regulatory-grade auditing, completeness guarantees, durability guarantees, or non-repudiation semantics.
+
+== Scope and Applicability
+
+This decision applies to telemetry emitted by ERS and its integration points with ERE.
+
+It governs trace semantics, correlation rules, and the relationship between observability and functional behaviour.
+
+Data retention policy, regulatory audit compliance, and security monitoring are out of scope.
+
+== Considered Options
+
+* *Blocking Telemetry Model.* Make observability infrastructure mandatory for request processing, failing functional operations if telemetry fails.
+* *Full Payload Logging Model.* Capture complete request and response payloads for forensic reconstruction and debugging.
+* *Metadata-Only, Best-Effort Telemetry Model.* Emit non-blocking metadata sufficient for tracing identity lifecycle events while keeping authoritative state independent. _(Selected)_
+
+== Rationale
+
+Non-blocking telemetry prevents coupling operational infrastructure to identity guarantees.
+
+Metadata-only tracing reduces performance overhead and risk of sensitive data propagation.
+
+Capturing identity lifecycle transitions supports troubleshooting and operational transparency without redefining canonical state semantics.
+
+This model preserves architectural clarity: ERE determines clusters, ERS mirrors outcomes, and telemetry observes behaviour without governing it.
+
+== Consequences
+
+* Telemetry gaps may occur and must be tolerated operationally.
+* Observability tooling can evolve independently of clustering and identity contracts.
+* Telemetry records may support operational review but do not guarantee completeness or legal evidentiary standards.
+* Any introduction of compliance-grade or tamper-proof audit logging would require a new architectural decision.

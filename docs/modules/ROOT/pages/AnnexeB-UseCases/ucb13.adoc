@@ -1,0 +1,93 @@
+[#uc-b1-3]
+= UC-B1.3: Cluster Assignment Lookup
+
+*Use Case Level:* Blue (User-goal) +
+*Primary Actor:* Originator (e.g. TED-SWS, Link Curation Backend, or any submitting system) +
+*Supporting Actors:* Decision Store (latest Cluster Assignment per mention); Delta Tracking Mechanism (`last_notification_date` per `source_id`) +
+*Scope:* Entity Resolution System (ERSys) — Public Lookup Interface
+
+This Blue use case refines xref:AnnexeB-UseCases/ucw3.adoc#uc-w3[UC-W3: Synchronise Resolution Updates]. The synchronisation contract — pull-based delta semantics, the per-`source_id` watermark, read-only guarantee, and uniform treatment of placement changes regardless of origin — is stated in UC-W3 and is not restated here. This page states the realisation specifics of the refreshBulk lookup path.
+
+== Stakeholders and Interests
+
+* The Originator requires a deterministic, read-only mechanism to retrieve all Cluster Assignment changes since the last synchronisation point recorded for that `source_id`.
+* ERS operators require bounded execution, stable delta semantics, and independence from synchronous ERE interaction.
+* Downstream consumers depend on a reliable reconciliation mechanism to observe canonical identity changes caused by resolution, provisional identifier replacement, user recommendation flows, or internal ERE reclustering.
+
+== Brief Description
+
+This use case describes the bulk retrieval of Cluster Assignment updates for a given `source_id`.
+
+The Originator invokes the refreshBulk operation for its `source_id`. ERS returns all mentions for that `source_id` whose Cluster Assignment has changed since the `last_notification_date` recorded for that `source_id`.
+
+Canonical identity is defined as the latest Cluster Assignment stored in the Decision Store. ERE is authoritative for clustering outcomes. refreshBulk is strictly read-only and does not trigger resolution, re-resolution, recommendation handling, or reclustering.
+
+Delta computation follows the rule: `last_notification_date < last_update_date`
+
+Where:
+
+* `last_update_date` is updated whenever the Decision Store records a new Cluster Assignment for a mention,
+* `last_notification_date` represents the timestamp of the last successfully completed refreshBulk response for that `source_id`.
+
+Cluster Assignment changes may originate from:
+
+. Direct resolution responses from ERE.
+. Replacement of a Provisional Identifier by an authoritative ERE outcome.
+. User recommendation or exclusion flows resulting in a new authoritative ERE outcome.
+. Internal ERE reclustering.
+
+== Preconditions
+
+* The `source_id` exists and has previously submitted resolution requests.
+* ERS maintains delta tracking state for the `source_id`.
+
+== Trigger
+
+The Originator invokes refreshBulk for its `source_id`.
+
+== Success Guarantee (Postconditions)
+
+For a successful refreshBulk invocation:
+
+. ERS retrieves all mentions for the `source_id` where `last_update_date` is later than `last_notification_date`.
+. ERS returns a collection of entries containing:
+.. `request_id`
+.. `entity_type`
+.. `cluster_id` (the cluster identifier)
+.. `context_id` (if present)
+. After successful response emission, ERS updates `last_notification_date` for the `source_id`.
+. No state other than delta tracking metadata is modified.
+
+== Minimal Guarantees (On Failure)
+
+* If the `source_id` is unknown, ERS returns a NOT_FOUND outcome.
+* If an internal inconsistency prevents retrieval of Decision Store records, ERS returns an explicit service error and does not update `last_notification_date`.
+* refreshBulk does not depend on synchronous ERE interaction and shall not block on engine availability.
+
+== Main Success Scenario
+
+. The Originator invokes refreshBulk.
+. ERS validates the `source_id`.
+. ERS queries the Decision Store for Cluster Assignment updates since `last_notification_date`.
+. ERS returns the list of updated mentions with their current cluster identifier and `context_id`.
+. After successful response emission, ERS updates `last_notification_date`.
+
+== Extensions
+
+1a. No updates available — ERS returns an empty collection and updates `last_notification_date`. +
+2a. Partial data inconsistency detected — ERS returns a service error and does not update `last_notification_date`.
+
+== Special Requirements
+
+* Read-only semantics: refreshBulk does not create, update, or trigger any clustering activity.
+* Delta accuracy: all Cluster Assignment changes must update `last_update_date` at write time.
+* Cluster identifiers returned reflect the latest authoritative outcome from ERE.
+* refreshBulk is independent of client timeout budgets defined for resolve operations.
+
+== Technology and Data Variations
+
+The lookup interface may be exposed through different transport mechanisms depending on deployment. Pagination may be applied if the update set is large, without altering delta semantics.
+
+== Frequency of Occurrence
+
+Medium to high; expected to be invoked periodically by Originators performing reconciliation and downstream publication updates.

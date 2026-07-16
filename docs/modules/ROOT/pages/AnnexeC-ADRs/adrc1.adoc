@@ -1,0 +1,76 @@
+[#adr-c1n]
+= ADR-C1N — Client Resolution Semantics
+
+[NOTE]
+====
+Status: Accepted
+====
+
+== Context and Problem Statement
+
+Resolution computation in ERE is asynchronous and may complete at variable times depending on data characteristics and system load.
+
+Clients, however, require a single, bounded interaction model that returns a usable canonical identifier within a predictable time frame.
+
+Under the authoritative ERE model and the provisional identifier mechanism, the client-facing contract must:
+
+* Remain synchronous and bounded.
+* Always return a canonical identifier for accepted requests within the client-facing timeout budget.
+* Allow subsequent correction of cluster assignment without retroactively mutating completed API responses.
+
+The architecture must therefore reconcile synchronous client expectations with asynchronous engine behaviour, without introducing polling contracts or exposing internal timing variability.
+
+== Decision
+
+. *Synchronous Client API*
+.. Client-facing resolution APIs in ERS are synchronous and blocking within a defined client-facing timeout budget.
+. *Forwarding to ERE*
+.. For each valid resolution request, ERS forwards the request to ERE using the asynchronous interaction model defined in xref:AnnexeC-ADRs/adrc2.adoc#adr-c2n[ADR-C2N].
+. *Dual Time-Budget Model*
+.. ERS waits for an ERE response within the ERS–ERE execution window.
+... If ERE responds within this window, ERS returns the cluster_id provided by ERE.
+... If ERE does not respond within this window, and the client-facing timeout budget has not expired, ERS issues and returns a provisional singleton cluster_id.
+. *Post-Response Engine Outcomes*
+.. ERE responses received after the synchronous client request has completed are processed normally by ERS.
+.. If such a response replaces a previously returned provisional cluster_id, ERS updates its projection store accordingly.
+.. No retroactive modification of completed client responses occurs.
+. *No Polling or Pending States*
+.. ERS does not expose pending states, asynchronous job handles, or polling mechanisms for resolution.
+.. Eventual correction of cluster assignment is observable through lookup or refreshBulk mechanisms, not through deferred completion of the original request.
+. *Error Semantics*
+.. ERS returns an explicit error only if:
+... The client-facing timeout budget is exceeded, or
+... The request is invalid.
+.. Engine delay alone does not result in an error if a provisional identifier can be issued within the client-facing timeout budget.
+
+== Scope and Applicability
+
+This decision applies to all ERS client-facing resolution submission and lookup APIs.
+
+It governs client-visible timing behaviour, response guarantees, and interaction semantics.
+
+It does not define internal ERE algorithms, scoring models, or infrastructure-level retry policies.
+
+== Considered Options
+
+* Fully asynchronous client interaction with deferred lookup.
+* Hybrid synchronous/asynchronous APIs with optional polling.
+* Synchronous, bounded interaction with provisional identifier issuance and eventual correction. _(Selected)_
+
+== Rationale
+
+A bounded synchronous API provides clients with a simple and deterministic integration contract.
+
+Introducing provisional identifiers ensures identity availability without exposing engine latency variability.
+
+Separating synchronous response semantics from asynchronous correction maintains clarity: the API call completes once, while cluster assignment may evolve over time under ERE authority.
+
+Avoiding polling or job-based APIs keeps the external contract minimal and prevents coupling clients to engine execution timelines.
+
+== Consequences
+
+* Clients always receive a canonical identifier for accepted requests within the client-facing timeout budget.
+* Canonical identifiers returned in a response may later be replaced by a different cluster_id as determined by ERE.
+* Late ERE responses affect future lookups and refreshBulk results, not the already completed synchronous response.
+* High request volumes may impact the likelihood of ERE responding within the execution window, but do not alter identifier semantics.
+* Clients must use refreshBulk or lookup operations to observe changes in cluster assignment over time.

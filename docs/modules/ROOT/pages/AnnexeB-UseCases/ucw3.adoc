@@ -1,0 +1,84 @@
+[#uc-w3]
+= UC-W3: Synchronise Resolution Updates
+
+*Use Case Level:* White (Summary) +
+*Primary Actor:* API Client (Downstream Consumer / Originator) +
+*Scope:* Entity Resolution System (ERSys)
+
+// Realigned per Decision 2 (2026-05-15): UC-W3 is the synchronise/refreshBulk reconciliation capability (source of truth: ERSArchitecture core-capabilities §7.3 and Spine C). The earlier "Integrate ERE Reclustering Results" framing was outdated; engine reclustering is one source of placement change reflected through this mechanism. Detailed flow is the Blue realisation xref:AnnexeB-UseCases/ucb13.adoc#uc-b1-3[UC-B1.3].
+
+== Stakeholders and Interests
+
+* Originators and downstream consumers require a predictable, pull-based mechanism to retrieve Cluster Assignment changes since their last synchronisation point, so canonical identity changes can be reconciled in downstream pipelines.
+* Curators require that large-scale clustering recalculations do not introduce hidden override semantics and that resulting Cluster Assignment changes remain observable through this normal refresh mechanism.
+* ERS operators require bounded execution, stable delta semantics, and independence from synchronous ERE availability at call time.
+
+== Brief Description
+
+This use case describes how an API Client synchronises Cluster Assignment changes in bulk through the refreshBulk operation, which is the system's reconciliation mechanism under mutable assignment.
+
+Canonical identity is defined as a cluster managed by the Entity Resolution Engine (ERE). Cluster identifiers are canonical identifiers. ERE is authoritative for clustering outcomes and its decisions are binding. ERSys exposes and tracks the latest Cluster Assignment per Entity Mention.
+
+Cluster Assignment for a mention may change over time. The client invokes refreshBulk for its `source_id` to retrieve the set of mentions whose recorded placement changed since the last successful synchronisation point for that `source_id`. refreshBulk is strictly read-only and does not trigger resolution, re-resolution, recommendation handling, or reclustering. It is served from ERS state and does not synchronously depend on ERE availability.
+
+Recorded placement changes are treated uniformly regardless of origin and may come from:
+
+* direct resolution responses from ERE,
+* replacement of a Provisional Identifier by an authoritative ERE outcome,
+* user recommendation or exclusion flows resulting in a new authoritative ERE outcome,
+* engine-initiated reclustering (large-scale recalculation performed internally by ERE for a defined scope, for example an entity type).
+
+Reclustering uses the same asynchronous integration rules as standard resolution responses. No special governance path or override mechanism exists; its outcomes become observable through this same delta mechanism as any other assignment change.
+
+Delta computation follows the timestamp rule: `last_notification_date < last_update_date`.
+
+== Preconditions
+
+* The `source_id` exists and has previously submitted resolution requests.
+* ERS maintains delta tracking state for the `source_id`.
+
+== Trigger
+
+The client calls the ERS refreshBulk operation for a given `source_id` to retrieve placement changes not previously exposed to that `source_id`.
+
+== Success Guarantee (Postconditions)
+
+For a successful refreshBulk invocation:
+
+. ERS returns the set of mentions for the `source_id` whose recorded Cluster Assignment changed since the last successful synchronisation point, with the correlation and resolution fields needed for downstream reconciliation.
+. The returned cluster identifier for each mention reflects the latest authoritative Cluster Assignment recorded by ERS.
+. After successful response emission, ERS advances the synchronisation watermark (`last_notification_date`) for that `source_id`.
+. No state other than delta tracking metadata is modified.
+
+ERS continues to operate in normal incremental mode during and after engine reclustering.
+
+== Minimal Guarantees (On Failure)
+
+* If refreshBulk cannot be served (authorisation failure, invalid `source_id`, temporary unavailability), ERS returns an explicit error.
+* The synchronisation watermark is not advanced unless a response is successfully produced according to the API contract.
+* Previously recorded Cluster Assignments remain in place until replaced by authoritative outcomes from ERE; no partial or inconsistent Cluster Assignment is exposed for any individual mention.
+
+== Main Success Scenario
+
+. The client invokes refreshBulk for its `source_id`.
+. ERS validates the `source_id`.
+. ERS returns the list of mentions whose recorded Cluster Assignment changed since the last successful synchronisation point, with their current cluster identifier, and then advances the synchronisation watermark.
+
+The detailed flow, extensions, and edge cases (including empty result sets and large responses) are specified in the Blue realisation xref:AnnexeB-UseCases/ucb13.adoc#uc-b1-3[UC-B1.3: Cluster Assignment Lookup].
+
+== Out of Scope
+
+* Single-mention re-evaluation through public APIs.
+* Manual override of clustering results.
+* Historical lineage reconstruction within ERS.
+* Push notifications or callbacks; refreshBulk is the supported synchronisation mechanism.
+
+== Special Requirements
+
+* Read-only by construction: this use case must not mutate decision state, placements, or trigger clustering activity.
+* Latest outcome wins: the current cluster identifier exposed for a mention is the latest authoritative assignment recorded by ERS.
+* Scope is per `source_id`: exposure history is tracked per client `source_id`; different consumers observe deltas independently.
+
+== Frequency of Occurrence
+
+Medium to high; invoked periodically by clients performing reconciliation and downstream publication updates.

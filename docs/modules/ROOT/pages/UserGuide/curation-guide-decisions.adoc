@@ -1,0 +1,378 @@
+= Decisions Queue
+:description: How to review, accept, reject, and select alternative clusters for resolution decisions in the Curation Web Application.
+
+The *Decisions* page is the primary workspace.
+It lists resolution decisions that require manual review and lets you record your feedback on each proposed match.
+
+image::curation/full-decisions-page.png[Full Decisions page]
+
+== User Interface Overview
+
+The page is divided into three main sections:
+
+* *Left* — the Decision List, showing all pending decisions matching the active filters.
+* *Center* — the Decision Area, showing the entity mention being resolved and the top candidate cluster proposed by the engine.
+* *Top* — a bar for filtering and ordering the Decision List.
+
+=== Decision List
+
+The left panel lists all decisions matching the active filters.
+Each item shows the entity name, its confidence and similarity scores (colour-coded), and when the decision was created.
+
+Select any item to load its detail in the right panel.
+
+image::curation/decision-list.png[Decision list with score badges,50%]
+
+Scores are colour-coded so you can judge them at a glance:
+
+[cols="1,1,2",options="header"]
+|===
+| Range | Colour | Reading
+
+| 0.00 – 0.39 (Low)
+| Red
+| The engine is least certain — review carefully.
+
+| 0.40 – 0.69 (Medium)
+| Orange/yellow
+| Moderate certainty.
+
+| 0.70 – 1.00 (High)
+| Green
+| The engine is most certain.
+|===
+
+Each entry may also display a visual indicator of its review status:
+
+* *Reviewed* — the decision has already been reviewed by a curator.
+* *Needs re-review* — the decision was previously reviewed but has been returned to the queue for re-evaluation after a backend update.
+
+
+=== Filtering and Ordering Bar
+
+The filter bar lets you narrow down the decision list by score range, full-text search, and sort order.
+All filters can be combined and take effect instantly.
+
+image::curation/filter-bar.png[Filter bar with Confidence and Similarity dropdowns]
+
+[cols="1,3"]
+|===
+| Filter | Description
+
+| *Entity Type*
+| Restrict the list to decisions for a specific entity type.
+Select one or more types from the dropdown, or leave it empty to show decisions for all entity types.
+
+| *Confidence*
+| Restrict by confidence score range.
+Select a predefined band (Low / Medium / High) or set custom min/max values.
+By default the list shows all pending decisions; use this filter to focus on the score range most in need of review.
+
+| *Similarity*
+| Restrict by similarity score range.
+Select a predefined band or set custom min/max values.
+
+| *Review status*
+| Filter decisions by their review state.
+Options: _Never reviewed_ (decisions that have not yet been curated), _Reviewed_ (decisions that have already been curated), _Needs re-review_ (decisions that were previously reviewed but have been returned to the queue after a backend update).
+Leave the filter set to _All Statuses_ to see all decisions regardless of review state.
+
+| *Sort by*
+| Order the decision list.
+Options: _Created At (Newest/Oldest)_, _Updated At (Newest/Oldest)_, _Confidence (Low to High / High to Low)_, _Cluster size (Smallest)_, _Cluster size (Largest)_.
+
+| *Search*
+| Full-text search across entity mention field data (name, identifiers, and other parsed attributes).
+
+|===
+
+=== Confirmation Preferences
+
+The user pop-up provides toggles that suppress the confirmation dialog for individual actions — one each for *Accept*, *Reject*, and *Assign* — plus a single toggle that disables all confirmations at once.
+When a toggle is on, clicking the action button (or pressing its keyboard shortcut) applies the action immediately, without a confirmation step.
+
+image::curation/skip-confirmation-toggles.png[Skip-confirmation toggles,90%]
+
+You can also set a preference during an action by checking the *Don't show again* box in the confirmation dialog.
+
+image::curation/confirmation-dialog.png[Skip-confirmation in confirmation dialog,80%]
+
+These preferences are only active during the current session.
+
+[WARNING]
+====
+Curatorial actions are final and cannot be undone. Confirmation is enabled by default to provide a safety check before feedback is recorded. Turn it off only if you are confident, and use the option with caution.
+====
+
+
+=== Decision Area
+
+The Decision Area displays the full details of a selected decision: the entity mention, the proposed cluster match with visual comparison aids, and a list of alternative candidates.
+It is also where the curator records their feedback.
+
+image::curation/decision-area.png[Decision area with comparison panel and alternative clusters]
+
+A *Why review needed* banner at the top of the Decision Area explains why this specific decision was flagged for manual curation.
+The message is tailored to the decision and may describe factors such as: high similarity combined with low confidence, the presence of alternative candidate clusters, a singleton cluster (a cluster containing only a single entity), or differences in specific entity property values.
+The banner also shows the cluster size and when the decision was last updated.
+
+Each entity card in the comparison view — both the current entity mention and each member of the proposed cluster — has an *ⓘ* button in the top-right corner.
+Clicking it opens a metadata panel with the provenance details for that entity, including its *Source ID*, *Request ID*, and *Entity Type*.
+
+image::curation/metadata.png[Entity mention metadata panel showing Source ID, Request ID, and Entity Type,60%]
+
+[#alternative-clusters]
+=== Alternative Clusters
+
+Below the comparison cards, the page lists the other candidate clusters that the engine considered — ranked from best to worst after the top proposal.
+
+Expand any cluster to compare its entities against the current entity mention, the same way as the proposed match.
+
+image::curation/alternative-clusters.png[Alternative clusters section with expanded panel]
+
+
+== Actions
+
+This section explains the curation actions and how to perform each one in the interface.
+
+[WARNING]
+====
+Curatorial actions are final and cannot be undone.
+Past actions remain visible in the xref:UserGuide/curation-guide-history.adoc[Action History].
+====
+
+NOTE: Your feedback is recorded as a recommendation and forwarded to the engine for re-evaluation. The engine remains the authority for the resulting cluster assignment, which may be updated asynchronously after the recommendation is processed. This applies to every action below.
+
+=== Reviewing a Decision
+
+Reviewing the proposed match is the first step before you accept, reject, or select an alternative.
+
+To review a decision:
+
+. Select a decision from the Decision List. The comparison view opens in the Decision Area.
+. Read the two cards shown side by side:
++
+* *Left* — the entity mention being resolved, with its field values.
+* *Right* — an entity of the proposed cluster, with the fields that differ from the entity mention highlighted.
+. Use the *Previous* / *Next* controls on the right card to browse the other entities in the proposed cluster.
+. Check the confidence (*C:*) and similarity (*S:*) scores shown in the header area.
+. Decide whether the entity mention and the proposed cluster are the same real-world entity.
+
+image::curation/comparison-panel.png[Comparison panel with entity cards and diff highlighting]
+The highlight colours show *where each field value appears* — they do not represent edits or a before/after history. There are three cases:
+
+[cols="1,1,2",options="header"]
+|===
+| Highlight | Meaning | Reading
+
+| Green
+| Only in the cluster
+| The field value is present in the cluster entity but not in the entity mention.
+
+| Red
+| Only in the mention
+| The field value is present in the entity mention but not in the cluster entity.
+
+| Yellow
+| Different in each
+| The field is present in both, but the values differ.
+|===
+
+==== Previously Reviewed Decisions
+
+The Decisions Queue may include decisions that were already reviewed or that have been returned for a second look.
+When a decision falls into one of these states, the Decision Area displays a notification banner:
+
+* *Reviewed* — the decision has already been recorded by a curator.
+  The banner reads: _"This decision has already been reviewed by a curator."_
+* *Needs re-review* — the decision was previously reviewed but has been returned to the queue after a backend update.
+  The banner reads: _"A curator reviewed this decision previously, but it was returned for curation after a backend update and needs a re-review."_
+
+image::curation/needs-rereview-notification.png[Needs re-review notification banner]
+
+These notifications are informational — you can still inspect the decision and record updated feedback if needed.
+
+
+
+=== Accepting a Decision
+
+Accepting a decision registers your feedback that the proposed cluster is a correct match for this entity mention.
+
+. Select the decision in the list.
+. Click the green check (*Accept*) button, *or* press kbd:[A].
+. Confirm the action in the dialog that appears.
+. The decision is removed from the queue and your feedback is recorded in the action history.
+
+=== Rejecting a Decision
+
+Rejecting a decision registers your feedback that none of the proposed candidates is an acceptable match.
+
+. Select the decision in the list.
+. Click the red cross (*Reject*) button, *or* press kbd:[R].
+. Confirm the action in the dialog that appears.
+. The decision is removed from the queue and your feedback is recorded in the action history.
+
+NOTE: The decision is not immediately rejected in the system — your feedback is stored and used by the engine when re-evaluating future decisions.
+
+=== Bulk Actions
+
+Bulk actions let you record the same type of feedback for several pending decisions at once.
+Use them when you have reviewed multiple decisions in the Decision List and want to accept or reject them in a single operation or want to submit your decision based on similarity and confidence scores.
+
+image::curation/bulk-selection-list.png[Decision list with multiple selected decisions]
+
+To select decisions for a bulk action:
+
+. In the Decision List, tick the checkbox next to each decision you want to include.
+. Review the selected decisions and their score badges.
+. Use the action bar at the bottom of the list to continue:
+* Click *Accept* to accept the selected proposed matches.
+* Click *Reject* to reject the selected proposed matches.
+. To clear the current selection, click *Clear*.
+
+The action bar shows how many decisions are currently selected.
+
+If many decisions are loaded in the list, you can click *Select all loaded* to select all currently loaded decisions.
+This selects only the decisions already loaded in the list, not necessarily all decisions matching the active filters.
+
+The selection is preserved when you switch between entity types.
+For example, you can select one organisation decision, switch to the procedure entity type, select one procedure decision, and then apply one bulk action to all selected decisions.
+The selected count in the action bar includes decisions selected across entity types.
+
+[NOTE]
+====
+Bulk actions apply only to the selected decisions.
+Filtering, sorting, switching entity types, or loading additional results may change which decisions are visible, but it does not automatically add new decisions to the current selection.
+====
+
+==== Bulk Accept
+
+Bulk accept registers feedback that the proposed cluster is the correct match for each selected entity mention.
+
+image::curation/bulk-action-accept.png[Bulk accept confirmation dialog]
+
+To accept several decisions:
+
+. Select the decisions in the Decision List.
+. Click *Accept* in the bulk action bar.
+. Review the confirmation dialog.
+. Optionally, remove any decision that should not be accepted.
+. Click *Accept* to confirm.
+
+After confirmation, the selected decisions are removed from the queue and your feedback is recorded.
+
+==== Bulk Reject
+
+Bulk reject registers feedback that the proposed cluster is not an acceptable match for each selected entity mention.
+
+image::curation/bulk-action-reject.png[Bulk reject confirmation dialog]
+
+To reject several decisions:
+
+. Select the decisions in the Decision List.
+. Click *Reject* in the bulk action bar.
+. Review the confirmation dialog.
+. Optionally, remove any decision that should not be rejected.
+. Click *Reject* to confirm.
+
+Rejecting decisions creates new clusters for the affected entity mentions and records your feedback for future engine evaluations.
+
+==== Bulk Action Confirmation Dialog
+
+The confirmation dialog is shown before a bulk accept or bulk reject action is applied.
+It lets you review the selected decisions and remove individual decisions from the bulk action before confirming.
+
+image::curation/bulk-action-accept.png[Bulk accept confirmation dialog]
+
+Each row in the dialog represents one selected decision and contains:
+
+[cols="1,3"]
+|===
+| Element | Description
+
+| Remove button
+| The *X* button on the left side of the row removes the decision from the current bulk action selection.
+
+| Entity label
+| The label of the entity mention to be matched.
+It is displayed on the left side of the arrow.
+The entity label is based on the preferred entity type property designated as the entity label in the ERS configuration.
+
+| Proposed cluster label
+| The label of the proposed cluster.
+It is displayed on the right side of the arrow.
+The cluster label is either the label of one of the cluster members or an internal cluster identifier.
+
+| Confidence score
+| The confidence score is displayed as the *C:* badge.
+It indicates the system confidence in the proposed decision.
+
+| Similarity score
+| The similarity score is displayed as the *S:* badge.
+It indicates the similarity between the entity mention and the proposed cluster.
+|===
+
+Every value displayed in a row supports a tooltip.
+Move the mouse pointer over the value to display the full value.
+This is useful when an entity label, cluster label, score, or internal cluster identifier is shortened in the dialog.
+
+image::curation/bulk-action-confirmation-row-details.png[Bulk action confirmation dialog with tooltip details]
+
+[WARNING]
+====
+Curatorial actions are final and cannot be undone.
+Review all entries in the confirmation dialog before confirming a bulk action.
+====
+
+==== Bulk Action Results
+
+After a bulk action is processed, a result dialog shows the outcome.
+
+image::curation/bulk-reject-success.png[Bulk reject success dialog]
+
+For a successful bulk action, the dialog lists the decisions that were processed successfully.
+
+In some cases, the result may contain mixed outcomes.
+
+image::curation/bulk-reject-mixed-results.png[Bulk action mixed results dialog]
+
+A mixed result can occur when some selected decisions were already curated before the bulk action completed, for example by another curator or in another browser session.
+
+The result dialog groups the affected decisions by status:
+
+[cols="1,3"]
+|===
+| Status | Meaning
+
+| *Success*
+| The decision was processed and your feedback was recorded.
+
+| *Already curated*
+| The decision had already been curated before this bulk action was applied. No additional action was taken for that decision.
+|===
+
+Click *Close* to dismiss the result dialog and return to the Decisions Queue.
+
+=== Selecting an Alternative Cluster
+
+Access the alternative clusters in the lower portion of the Decision Area as described in <<alternative-clusters,Alternative Clusters>>.
+
+If one of the alternatives is a better match than the top proposal:
+
+. Expand the cluster and inspect its entities.
+. Click *Use this cluster instead*.
+. Confirm the action in the dialog that appears.
+. The decision is removed from the queue and your feedback is recorded in the action history.
+
+Click *Load More* to fetch additional alternative clusters beyond those initially shown.
+
+== Routine States
+
+The following are normal situations, not errors. They are described generically because the exact on-screen wording is not covered here.
+
+* *Empty queue* — if no decisions match the active filters, the Decision List is empty. Clear or widen the filters; if it is still empty, there is nothing pending to review right now.
+* *An action does not take effect* — if recording feedback does not succeed, the decision may no longer be pending (for example, another curator reviewed the same decision first). Refresh the list and move on to the next decision.
+* *Concurrent edits* — more than one curator can browse the queue at the same time. A decision already reviewed by someone else will not stay available for you to act on. Work from the current list and skip any decision that is no longer pending.
+
+See also xref:UserGuide/curation-guide-overview.adoc#troubleshooting[Troubleshooting] in the overview.
+

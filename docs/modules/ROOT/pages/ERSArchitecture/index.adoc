@@ -1,0 +1,44 @@
+= Entity Resolution System (ERSys) Baseline Architecture
+
+This section establishes the baseline architecture of the Entity Resolution System, defining its boundaries, actors, capabilities, and the structural and behavioural patterns that govern it. It records what ERSys guarantees, how it is built, and the authority model that drives all implementation decisions.
+
+[cols="2,4",options="header"]
+|===
+| Section | Purpose
+
+| xref:ERSArchitecture/introduction.adoc[Introduction]
+| Purpose, authority scope, and how to read this architecture.
+
+| xref:ERSArchitecture/scope.adoc[Scope]
+| Normative boundary conditions: what is inside and outside the ERSys boundary.
+
+| xref:ERSArchitecture/actors.adoc[Actors]
+| External actors, roles, and their responsibility boundaries.
+
+| xref:ERSArchitecture/decisions.adoc[Decisions]
+| Binding architectural principles and invariants that constrain all implementations.
+
+| xref:ERSArchitecture/business-context.adoc[Business Context]
+| External objectives, strategic assumptions, and non-functional expectations that shaped the architecture.
+
+| xref:ERSArchitecture/system-context.adoc[System Context]
+| ArchiMate structural views: system boundary, exposed services, internal components, and integration contracts.
+
+| xref:ERSArchitecture/core-capabilities.adoc[Core Capabilities]
+| Architectural digest of White Use Cases and ERSys guarantees to each actor.
+
+| xref:ERSArchitecture/behaviour-spines.adoc[Behaviour Spines]
+| Behavioural spine flows A–D: message patterns, timing budgets, and lifecycle semantics.
+
+| xref:ERSArchitecture/conceptual-model.adoc[Conceptual Model]
+| Conceptual information objects: mentions, clusters, identifiers, and authority boundaries.
+
+| xref:ERSArchitecture/dependency-inventory.adoc[Dependency Inventory]
+| Interface traceability: all externally visible operations mapped to triggers, dependencies, and data exchanges.
+
+| xref:ERSArchitecture/deployment-architecture.adoc[Deployment Architecture]
+| Reference container-based deployment: components, interface exposure, and persistence.
+
+| xref:AnnexeC-ADRs/index.adoc[Architecture Decision Records (Annexe C)]
+| Detailed ADRs that further specify the architectural principles and invariants.
+|===
